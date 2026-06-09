@@ -30,6 +30,13 @@ const applyColor = (color) => {
   root.style.setProperty('--primary-light', lighten(color, 40));
 };
 
+const applySecondaryColor = (color) => {
+  if (!color || !/^#[0-9A-Fa-f]{6}$/.test(color)) return;
+  const root = document.documentElement;
+  root.style.setProperty('--secondary', color);
+  root.style.setProperty('--secondary-dark', darken(color, 20));
+};
+
 export const SiteSettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({});
 
@@ -37,6 +44,7 @@ export const SiteSettingsProvider = ({ children }) => {
     api.get('/settings').then(r => {
       setSettings(r.data);
       if (r.data.primary_color) applyColor(r.data.primary_color);
+      if (r.data.secondary_color) applySecondaryColor(r.data.secondary_color);
     }).catch(() => {});
   };
 

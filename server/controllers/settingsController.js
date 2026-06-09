@@ -4,7 +4,7 @@ const ALLOWED_KEYS = [
   'site_name', 'site_tagline', 'logo_url', 'favicon_url',
   'contact_email', 'contact_phone', 'contact_address',
   'facebook_url', 'instagram_url', 'twitter_url', 'youtube_url',
-  'footer_text', 'primary_color',
+  'footer_text', 'primary_color', 'secondary_color',
 ];
 
 exports.getAll = async (req, res) => {
