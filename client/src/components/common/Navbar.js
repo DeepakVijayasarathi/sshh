@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const settings = useSiteSettings();
 
   const handleLogout = () => {
     logout();
@@ -28,15 +30,30 @@ const Navbar = () => {
     { to: '/contact', label: 'Contact' },
   ];
 
+  const siteName = settings.site_name || 'Sourashtra';
+  const siteSub  = settings.site_tagline || 'Community Portal';
+
   return (
     <nav className="navbar">
       <div className="container navbar-inner">
         <Link to="/" className="navbar-brand">
-          <div className="brand-logo">SC</div>
-          <div className="brand-text">
-            <span className="brand-name">Sourashtra</span>
-            <span className="brand-sub">Community Portal</span>
-          </div>
+          {settings.logo_url ? (
+            <img
+              src={settings.logo_url}
+              alt={siteName}
+              style={{ height: 40, maxWidth: 120, objectFit: 'contain' }}
+            />
+          ) : (
+            <>
+              <div className="brand-logo">
+                {siteName.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="brand-text">
+                <span className="brand-name">{siteName}</span>
+                <span className="brand-sub">{siteSub}</span>
+              </div>
+            </>
+          )}
         </Link>
 
         <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">

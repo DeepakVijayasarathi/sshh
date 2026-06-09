@@ -2,6 +2,30 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
 
+const hexToRgb = (hex) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return { r, g, b };
+};
+const darken = (hex, amount = 30) => {
+  const { r, g, b } = hexToRgb(hex);
+  const d = (c) => Math.max(0, c - amount).toString(16).padStart(2, '0');
+  return `#${d(r)}${d(g)}${d(b)}`;
+};
+const lighten = (hex, amount = 40) => {
+  const { r, g, b } = hexToRgb(hex);
+  const l = (c) => Math.min(255, c + amount).toString(16).padStart(2, '0');
+  return `#${l(r)}${l(g)}${l(b)}`;
+};
+const applyColor = (color) => {
+  if (!color || !/^#[0-9A-Fa-f]{6}$/.test(color)) return;
+  const root = document.documentElement;
+  root.style.setProperty('--primary', color);
+  root.style.setProperty('--primary-dark', darken(color, 32));
+  root.style.setProperty('--primary-light', lighten(color, 40));
+};
+
 export default function AdminSettings() {
   const [settings, setSettings] = useState({
     site_name: '', site_tagline: '', logo_url: '',
@@ -14,10 +38,16 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  const handleColorChange = (color) => {
+    setSettings(s => ({ ...s, primary_color: color }));
+    applyColor(color);
+  };
+
   useEffect(() => {
     api.get('/settings').then(r => {
       setSettings(s => ({ ...s, ...r.data }));
       if (r.data.logo_url) setLogoPreview(r.data.logo_url);
+      if (r.data.primary_color) applyColor(r.data.primary_color);
     }).catch(() => toast.error('Failed to load settings'));
   }, []);
 
@@ -116,7 +146,33 @@ export default function AdminSettings() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             {field('site_name', 'Site Name', 'text', 'Sourashtra Community Portal')}
             {field('site_tagline', 'Tagline', 'text', 'Connecting our community')}
-            {field('primary_color', 'Primary Color', 'color')}
+            <div className="form-group">
+              <label className="form-label">Primary Color</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <input
+                  type="color"
+                  className="form-control"
+                  style={{ width: 56, height: 40, padding: '2px 4px', cursor: 'pointer' }}
+                  value={settings.primary_color || '#8B0000'}
+                  onChange={e => handleColorChange(e.target.value)}
+                />
+                <input
+                  type="text"
+                  className="form-control"
+                  style={{ flex: 1, fontFamily: 'monospace' }}
+                  value={settings.primary_color || '#8B0000'}
+                  maxLength={7}
+                  onChange={e => handleColorChange(e.target.value)}
+                  placeholder="#8B0000"
+                />
+                <div style={{
+                  width: 40, height: 40, borderRadius: 6, flexShrink: 0,
+                  background: settings.primary_color || '#8B0000',
+                  border: '1px solid #ddd',
+                }} />
+              </div>
+              <span style={{ fontSize: '0.72rem', color: '#888' }}>Changes preview instantly site-wide</span>
+            </div>
             {field('footer_text', 'Footer Text', 'text')}
           </div>
         </div>
