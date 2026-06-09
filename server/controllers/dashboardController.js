@@ -61,9 +61,9 @@ exports.getMembersByDistrict = async (req, res) => {
 exports.getMembersByType = async (req, res) => {
   try {
     const result = await query(
-      `SELECT mt.name, COUNT(m.id) as count
+      `SELECT mt.id, mt.name, COUNT(m.id) as count
        FROM membership_types mt LEFT JOIN members m ON m.membership_type_id = mt.id AND m.status = 'Active'
-       GROUP BY mt.name ORDER BY mt.id`
+       GROUP BY mt.id, mt.name ORDER BY mt.id`
     );
     res.json(result.rows);
   } catch (err) {
