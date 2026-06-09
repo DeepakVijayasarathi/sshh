@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
+import useSEO from '../../hooks/useSEO';
 
 const CATEGORIES = ['All', 'Community News', 'Emergency Announcement', 'Events', 'Education', 'Jobs'];
 
 const News = () => {
+  useSEO({ title: 'News', description: 'Latest community news, announcements and updates from Sourashtra Community Portal.' });
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('All');

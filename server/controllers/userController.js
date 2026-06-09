@@ -167,16 +167,25 @@ exports.bulkApproveMembers = async (req, res) => {
     if (!Array.isArray(memberIds) || !memberIds.length) {
       return res.status(400).json({ message: 'memberIds array required' });
     }
+    const year = new Date().getFullYear();
     const results = [];
     for (const id of memberIds) {
-      const year = new Date().getFullYear();
-      const count = await query("SELECT COUNT(*) FROM members WHERE membership_number LIKE $1", [`SCP${year}%`]);
-      const seq = String(parseInt(count.rows[0].count) + 1).padStart(4, '0');
-      const membershipNumber = `SCP${year}${seq}`;
+      // Use a transaction-safe sequence per iteration to avoid race conditions
       const r = await query(
-        `UPDATE members SET status='Active', membership_number=$2, approved_by=$3, approved_at=NOW(), updated_at=NOW()
-         WHERE id=$1 AND status='Pending' RETURNING id, full_name, membership_number`,
-        [id, membershipNumber, req.user.id]
+        `WITH seq AS (
+           SELECT LPAD((COUNT(*) + 1)::TEXT, 4, '0') as n
+           FROM members
+           WHERE membership_number LIKE $3
+         )
+         UPDATE members
+            SET status='Active',
+                membership_number = CONCAT($4, (SELECT n FROM seq)),
+                approved_by=$2,
+                approved_at=NOW(),
+                updated_at=NOW()
+          WHERE id=$1 AND status='Pending'
+         RETURNING id, full_name, membership_number`,
+        [id, req.user.id, `SCP${year}%`, `SCP${year}`]
       );
       if (r.rows.length) results.push(r.rows[0]);
     }

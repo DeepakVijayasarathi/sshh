@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
+import useSEO from '../../hooks/useSEO';
 import './Home.css';
 
 const StatCard = ({ number, label }) => (
@@ -20,6 +21,10 @@ const FeatureCard = ({ icon, title, desc, link }) => (
 );
 
 const Home = () => {
+  useSEO({
+    title: 'Home',
+    description: 'Welcome to the Sourashtra Community Portal — connecting members through events, news, business directory, jobs and more.',
+  });
   const [stats, setStats] = useState(null);
   const [events, setEvents] = useState([]);
   const [news, setNews] = useState([]);

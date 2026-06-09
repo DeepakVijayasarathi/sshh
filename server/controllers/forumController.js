@@ -64,11 +64,19 @@ exports.createIssue = async (req, res) => {
 exports.updateIssueStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const resolvedAt = status === 'Resolved' ? 'NOW()' : 'NULL';
+    const VALID_STATUSES = ['Pending', 'Under Review', 'Resolved', 'Closed'];
+    if (!VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
     const result = await query(
-      `UPDATE community_issues SET status=$2, resolved_at=${resolvedAt}, updated_at=NOW() WHERE id=$1 RETURNING *`,
+      `UPDATE community_issues
+         SET status = $2,
+             resolved_at = CASE WHEN $2 = 'Resolved' THEN NOW() ELSE NULL END,
+             updated_at = NOW()
+       WHERE id = $1 RETURNING *`,
       [req.params.id, status]
     );
+    if (!result.rows.length) return res.status(404).json({ message: 'Issue not found' });
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ message: err.message });

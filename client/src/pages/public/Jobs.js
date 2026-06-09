@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
+import useSEO from '../../hooks/useSEO';
 
 const Jobs = () => {
+  useSEO({ title: 'Jobs', description: 'Browse job openings posted by Sourashtra community employers.' });
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

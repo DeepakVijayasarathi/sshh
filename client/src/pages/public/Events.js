@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
+import useSEO from '../../hooks/useSEO';
 
 const Events = () => {
+  useSEO({ title: 'Events', description: 'Upcoming and past events of the Sourashtra community.' });
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('upcoming');

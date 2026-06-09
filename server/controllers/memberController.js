@@ -97,6 +97,13 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
+    const isAdmin = ['SuperAdmin', 'Admin'].includes(req.user.role);
+    const existing = await query('SELECT user_id FROM members WHERE id=$1', [req.params.id]);
+    if (!existing.rows.length) return res.status(404).json({ message: 'Member not found' });
+    if (!isAdmin && existing.rows[0].user_id !== req.user.id) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
     const {
       fullName, gender, dateOfBirth, mobileNumber, email,
       address, district, city, pincode, occupation, education, membershipTypeId
@@ -117,7 +124,6 @@ exports.update = async (req, res) => {
       `UPDATE members SET ${sets.join(',')} WHERE id=$1 RETURNING *`,
       values
     );
-    if (!result.rows.length) return res.status(404).json({ message: 'Member not found' });
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ message: err.message });

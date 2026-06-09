@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 import NotificationBell from './NotificationBell';
 import './AdminLayout.css';
 
@@ -18,12 +19,14 @@ const MENU = [
   { to: '/admin/notifications', label: 'Notifications', icon: '🔔' },
   { to: '/admin/reports', label: 'Reports', icon: '📈' },
   { to: '/admin/activity-log', label: 'Activity Log', icon: '📋' },
+  { to: '/admin/settings', label: 'Settings', icon: '⚙️' },
 ];
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const siteSettings = useSiteSettings();
 
   const handleLogout = () => { logout(); navigate('/'); };
 
@@ -31,8 +34,15 @@ const AdminLayout = () => {
     <div className={`admin-layout ${sidebarOpen ? '' : 'sidebar-collapsed'}`}>
       <aside className="admin-sidebar">
         <div className="sidebar-header">
-          <div className="sidebar-logo">SC</div>
-          {sidebarOpen && <span className="sidebar-brand">Admin Panel</span>}
+          <div className="sidebar-logo">
+            {siteSettings.logo_url
+              ? <img src={siteSettings.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 4 }} />
+              : 'SC'
+            }
+          </div>
+          {sidebarOpen && (
+            <span className="sidebar-brand">{siteSettings.site_name || 'Admin Panel'}</span>
+          )}
           <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? '◀' : '▶'}
           </button>

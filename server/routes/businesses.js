@@ -8,7 +8,7 @@ const upload = uploadImage('businesses');
 router.get('/categories', ctrl.getCategories);
 router.get('/', ctrl.getAll);
 router.get('/:id', ctrl.getById);
-router.post('/', upload.single('logo'), ctrl.create);
+router.post('/', authenticate, upload.single('logo'), ctrl.create);
 router.put('/:id', authenticate, upload.single('logo'), ctrl.update);
 router.post('/:id/approve', authenticate, authorize('SuperAdmin', 'Admin'), ctrl.approve);
 router.delete('/:id', authenticate, authorize('SuperAdmin', 'Admin'), ctrl.remove);
