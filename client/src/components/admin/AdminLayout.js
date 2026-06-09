@@ -31,7 +31,7 @@ const AdminLayout = () => {
   const handleLogout = () => { logout(); navigate('/'); };
 
   return (
-    <div className={`admin-layout ${sidebarOpen ? '' : 'sidebar-collapsed'}`}>
+    <div className={`admin-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
       <aside className="admin-sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">

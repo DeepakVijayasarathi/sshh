@@ -133,7 +133,7 @@
   color: var(--text-medium);
 }
 
-.topbar-right { margin-left: auto; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
 
 .topbar-user {
   display: flex;

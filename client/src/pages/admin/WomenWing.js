@@ -44,7 +44,7 @@ const WomenWing = () => {
 
   const openEdit = (m) => {
     setEditTarget(m);
-    setEditForm({ fullName: m.full_name, mobileNumber: m.mobile_number || '', email: m.email || '', district: m.district || '', city: m.city || '', occupation: m.occupation || '', programInterest: m.program_interest || '', isActive: m.is_active });
+    setEditForm({ fullName: m.full_name, mobileNumber: m.mobile_number || '', email: m.email || '', district: m.district || '', city: m.city || '', occupation: m.occupation || '', programInterest: m.program_interest || '', status: m.status || (m.is_active ? 'Active' : 'Inactive') });
   };
 
   const handleEditSave = async () => {
@@ -164,9 +164,9 @@ const WomenWing = () => {
                 <div className="form-group"><label className="form-label">District</label><input className="form-control" value={editForm.district} onChange={setEf('district')} /></div>
                 <div className="form-group"><label className="form-label">City</label><input className="form-control" value={editForm.city} onChange={setEf('city')} /></div>
                 <div className="form-group"><label className="form-label">Status</label>
-                  <select className="form-control" value={editForm.isActive ? 'true' : 'false'} onChange={e => setEditForm(p => ({ ...p, isActive: e.target.value === 'true' }))}>
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
+                  <select className="form-control" value={editForm.status || 'Active'} onChange={e => setEditForm(p => ({ ...p, status: e.target.value }))}>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
                   </select>
                 </div>
               </div>
