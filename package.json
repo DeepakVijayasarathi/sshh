@@ -1,0 +1,12 @@
+{
+  "name": "sourashtra-community-portal",
+  "version": "1.0.0",
+  "description": "Sourashtra Community Portal - Full Stack Web Application",
+  "scripts": {
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm start",
+    "db:migrate": "cd database && node migrate.js",
+    "build:client": "cd client && npm run build"
+  }
+}
