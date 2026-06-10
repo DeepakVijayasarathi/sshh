@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MapPin, DollarSign, Briefcase, Calendar, Users, CheckCircle2, Globe, Phone } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PublicLayout from '../../components/common/PublicLayout';
@@ -49,10 +50,10 @@ const JobDetail = () => {
               <h1 style={{ fontSize: '1.75rem', fontFamily: "'Playfair Display', serif", color: 'var(--primary)', marginBottom: '0.5rem' }}>{job.job_title}</h1>
               <p style={{ fontSize: '1.125rem', fontWeight: 500, marginBottom: '1rem' }}>{job.company_name}</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                {job.location && <span className="badge badge-secondary">📍 {job.location}</span>}
-                {job.salary_range && <span className="badge badge-success">💰 {job.salary_range}</span>}
-                {job.experience_required && <span className="badge badge-info">💼 {job.experience_required}</span>}
-                {job.last_date && <span className="badge badge-warning">⏰ Last date: {new Date(job.last_date).toLocaleDateString('en-IN')}</span>}
+                {job.location && <span className="badge badge-secondary" style={{display:'inline-flex',alignItems:'center',gap:4}}><MapPin size={11}/> {job.location}</span>}
+                {job.salary_range && <span className="badge badge-success" style={{display:'inline-flex',alignItems:'center',gap:4}}><DollarSign size={11}/> {job.salary_range}</span>}
+                {job.experience_required && <span className="badge badge-info" style={{display:'inline-flex',alignItems:'center',gap:4}}><Briefcase size={11}/> {job.experience_required}</span>}
+                {job.last_date && <span className="badge badge-warning" style={{display:'inline-flex',alignItems:'center',gap:4}}><Calendar size={11}/> Last date: {new Date(job.last_date).toLocaleDateString('en-IN')}</span>}
               </div>
               {job.description && (
                 <div style={{ lineHeight: 1.8, color: 'var(--text-medium)', whiteSpace: 'pre-wrap', marginBottom: '2rem' }}>
@@ -62,7 +63,7 @@ const JobDetail = () => {
               )}
               {applied ? (
                 <div className="text-center" style={{ padding: '1rem', background: '#dcfce7', borderRadius: 'var(--radius)', color: '#166534' }}>
-                  ✅ Application submitted successfully!
+                  <CheckCircle2 size={18} style={{marginRight:6,verticalAlign:'middle'}} color="#166534"/> Application submitted successfully!
                 </div>
               ) : (
                 <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>

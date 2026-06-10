@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, Calendar, Newspaper, Image, Building2,
   Briefcase, GraduationCap, Heart, MessageSquare, Bell, BarChart2,
   Activity, Settings, Globe, LogOut, ChevronLeft, ChevronRight,
-  Menu, X, Search, ChevronDown,
+  Menu, X, Search, ChevronDown, UserCog,
 } from 'lucide-react';
 
 const MENU_GROUPS = [
@@ -43,6 +43,7 @@ const MENU_GROUPS = [
       { to: '/admin/notifications', label: 'Notifications', icon: Bell },
       { to: '/admin/reports',       label: 'Reports',       icon: BarChart2 },
       { to: '/admin/activity-log',  label: 'Activity Log',  icon: Activity },
+      { to: '/admin/team',          label: 'Team Members',  icon: UserCog  },
       { to: '/admin/settings',      label: 'Settings',      icon: Settings },
     ],
   },

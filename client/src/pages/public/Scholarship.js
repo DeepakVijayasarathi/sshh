@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import { CheckCircle2 } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
 
@@ -36,7 +37,7 @@ const Scholarship = () => {
       <PublicLayout>
         <section className="section">
           <div className="container text-center" style={{ maxWidth: 500 }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎓</div>
+            <div style={{ width:64,height:64,borderRadius:'50%',background:'rgba(8,145,178,0.1)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 1rem'}}><CheckCircle2 size={32} color="#0891b2" strokeWidth={1.5}/></div>
             <h2 style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Application Submitted!</h2>
             <p className="text-muted mb-3">Your scholarship application has been received. We will review it and contact you soon.</p>
             <button className="btn btn-outline" onClick={() => setSubmitted(false)}>Apply Again</button>

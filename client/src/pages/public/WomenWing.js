@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { Briefcase, Heart, BookOpen, Users, MapPin } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
 import useDebounce from '../../hooks/useDebounce';
+
+const PROGRAM_ICONS = { Briefcase, Heart, BookOpen, Users };
 
 const defaultForm = { fullName: '', mobileNumber: '', email: '', dateOfBirth: '', address: '', district: '', city: '', occupation: '', programInterest: '' };
 
@@ -44,10 +47,10 @@ const WomenWing = () => {
   };
 
   const programs = [
-    { icon: '💼', title: 'Entrepreneurship', desc: 'Business training, mentoring and startup support for women entrepreneurs.' },
-    { icon: '🌸', title: 'Women Welfare', desc: 'Health awareness, counseling and welfare support programs.' },
-    { icon: '📚', title: 'Skill Development', desc: 'Vocational training and professional skill enhancement courses.' },
-    { icon: '🤝', title: 'Networking', desc: 'Connect with successful women professionals from the community.' },
+    { icon: 'Briefcase', title: 'Entrepreneurship', desc: 'Business training, mentoring and startup support for women entrepreneurs.' },
+    { icon: 'Heart',     title: 'Women Welfare',   desc: 'Health awareness, counseling and welfare support programs.' },
+    { icon: 'BookOpen',  title: 'Skill Development', desc: 'Vocational training and professional skill enhancement courses.' },
+    { icon: 'Users',     title: 'Networking',      desc: 'Connect with successful women professionals from the community.' },
   ];
 
   return (
@@ -83,7 +86,7 @@ const WomenWing = () => {
             {programs.map(p => (
               <div key={p.title} className="card" style={{ textAlign: 'center', borderTop: '3px solid #c2185b' }}>
                 <div className="card-body">
-                  <div style={{ fontSize: '2.25rem', marginBottom: '0.75rem' }}>{p.icon}</div>
+                  {(() => { const I = PROGRAM_ICONS[p.icon]; return I ? <div style={{ width:44,height:44,borderRadius:10,background:'rgba(194,24,91,0.08)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 0.75rem'}}><I size={22} color="#c2185b" strokeWidth={1.75}/></div> : null; })()}
                   <h3 style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: '0.9375rem' }}>{p.title}</h3>
                   <p style={{ fontSize: '0.8125rem', color: 'var(--text-light)', lineHeight: 1.5 }}>{p.desc}</p>
                 </div>
@@ -134,7 +137,7 @@ const WomenWing = () => {
                         {m.full_name.charAt(0)}
                       </div>
                       <h3 style={{ fontWeight: 600, fontSize: '0.9375rem', marginBottom: '0.125rem' }}>{m.full_name}</h3>
-                      {m.district && <p className="text-muted" style={{ fontSize: '0.8rem' }}>📍 {m.district}</p>}
+                      {m.district && <p className="text-muted" style={{ fontSize: '0.8rem', display:'flex', alignItems:'center', gap:3 }}><MapPin size={11}/> {m.district}</p>}
                       {m.occupation && <p className="text-muted" style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>{m.occupation}</p>}
                     </div>
                   </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MapPin, DollarSign, Briefcase, Calendar, Users, CheckCircle2, Globe, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
@@ -50,9 +51,9 @@ const Jobs = () => {
                       <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, marginBottom: '0.25rem', color: 'var(--primary)' }}>{job.job_title}</h3>
                       <p style={{ fontWeight: 500, marginBottom: '0.5rem' }}>{job.company_name}</p>
                       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                        {job.location && <span className="text-muted" style={{ fontSize: '0.85rem' }}>📍 {job.location}</span>}
-                        {job.salary_range && <span className="text-muted" style={{ fontSize: '0.85rem' }}>💰 {job.salary_range}</span>}
-                        {job.experience_required && <span className="text-muted" style={{ fontSize: '0.85rem' }}>💼 {job.experience_required}</span>}
+                        {job.location && <span className="text-muted" style={{ fontSize: '0.85rem' }}><MapPin size={11} style={{marginRight:3}}/> {job.location}</span>}
+                        {job.salary_range && <span className="text-muted" style={{ fontSize: '0.85rem' }}><DollarSign size={11} style={{marginRight:3}}/> {job.salary_range}</span>}
+                        {job.experience_required && <span className="text-muted" style={{ fontSize: '0.85rem' }}><Briefcase size={11} style={{marginRight:3}}/> {job.experience_required}</span>}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>

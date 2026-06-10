@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 
@@ -9,10 +10,10 @@ const Contact = () => {
   const [loading, setLoading] = useState(false);
 
   const contactItems = [
-    { icon: '📍', label: 'Address', value: settings.contact_address || 'Sourashtra Community Hall, Chennai, Tamil Nadu 600001' },
-    { icon: '📞', label: 'Phone',   value: settings.contact_phone   || '+91 98765 43210' },
-    { icon: '✉️', label: 'Email',   value: settings.contact_email   || 'info@sourashtra.org' },
-    { icon: '🕐', label: 'Office Hours', value: 'Mon–Sat, 9:00 AM – 5:00 PM' },
+    { Icon: MapPin, color: '#8B0000', label: 'Address',      value: settings.contact_address || 'Sourashtra Community Hall, Chennai, Tamil Nadu 600001' },
+    { Icon: Phone,  color: '#2563eb', label: 'Phone',        value: settings.contact_phone   || '+91 98765 43210' },
+    { Icon: Mail,   color: '#059669', label: 'Email',        value: settings.contact_email   || 'info@sourashtra.org' },
+    { Icon: Clock,  color: '#7c3aed', label: 'Office Hours', value: 'Mon–Sat, 9:00 AM – 5:00 PM' },
   ];
 
   const handleSubmit = async (e) => {
@@ -40,7 +41,9 @@ const Contact = () => {
               <h2 style={{ fontSize: '1.375rem', fontWeight: 600, marginBottom: '1.5rem' }}>Get In Touch</h2>
               {contactItems.map(item => (
                 <div key={item.label} style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
-                  <span style={{ fontSize: '1.5rem', flexShrink: 0 }}>{item.icon}</span>
+                  <div style={{ width: 36, height: 36, borderRadius: 9, background: `rgba(0,0,0,0.05)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <item.Icon size={17} color={item.color} strokeWidth={1.75} />
+                  </div>
                   <div>
                     <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.125rem' }}>{item.label}</p>
                     <p style={{ color: 'var(--text-light)', fontSize: '0.875rem' }}>{item.value}</p>

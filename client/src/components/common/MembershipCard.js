@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { MapPin } from 'lucide-react';
 import './MembershipCard.css';
 
 const MembershipCard = ({ member, onClose }) => {
@@ -67,7 +68,7 @@ const MembershipCard = ({ member, onClose }) => {
                 <div className="mc-name">{member.full_name}</div>
                 <div className="mc-number">{member.membership_number}</div>
                 <div className="mc-type-badge">{member.membership_type}</div>
-                {member.district && <div className="mc-location">📍 {[member.city, member.district].filter(Boolean).join(', ')}</div>}
+                {member.district && <div className="mc-location" style={{display:'flex',alignItems:'center',gap:3}}><MapPin size={11}/> {[member.city, member.district].filter(Boolean).join(', ')}</div>}
               </div>
             </div>
             <div className="mc-footer">
@@ -95,7 +96,7 @@ const MembershipCard = ({ member, onClose }) => {
               This card is the property of Sourashtra Community Portal.<br />
               If found, please return to the nearest community office.
             </div>
-            <div className="mc-back-contact">📞 +91 98765 43210 | ✉️ info@sourashtra.org</div>
+            <div className="mc-back-contact">+91 98765 43210 | info@sourashtra.org</div>
           </div>
         </div>
       </div>

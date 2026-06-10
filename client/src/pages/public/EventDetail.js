@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MapPin, DollarSign, Briefcase, Calendar, Users, CheckCircle2, Globe, Phone } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PublicLayout from '../../components/common/PublicLayout';
@@ -49,9 +50,9 @@ const EventDetail = () => {
             <div>
               <h1 style={{ fontSize: '2rem', fontFamily: "'Playfair Display', serif", marginBottom: '1rem', color: 'var(--primary)' }}>{event.title}</h1>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
-                <span className="badge badge-info">📅 {new Date(event.event_date).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                {event.event_time && <span className="badge badge-secondary">🕐 {event.event_time}</span>}
-                {event.registered_count && <span className="badge badge-success">👥 {event.registered_count} Registered</span>}
+                <span className="badge badge-info" style={{display:'inline-flex',alignItems:'center',gap:4}}><Calendar size={11}/> {new Date(event.event_date).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                {event.event_time && <span className="badge badge-secondary">{event.event_time}</span>}
+                {event.registered_count && <span className="badge badge-success" style={{display:'inline-flex',alignItems:'center',gap:4}}><Users size={11}/> {event.registered_count} Registered</span>}
               </div>
               {event.venue && <p style={{ marginBottom: '0.5rem' }}><strong>Venue:</strong> {event.venue}</p>}
               {event.contact_person && <p style={{ marginBottom: '0.5rem' }}><strong>Contact:</strong> {event.contact_person} {event.contact_number && `(${event.contact_number})`}</p>}
@@ -67,7 +68,7 @@ const EventDetail = () => {
               <div className="card-header">Register for This Event</div>
               {registered ? (
                 <div className="card-body text-center">
-                  <p style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✅</p>
+                  <div style={{display:'flex',justifyContent:'center',marginBottom:'0.5rem'}}><CheckCircle2 size={40} color="#059669" strokeWidth={1.5}/></div>
                   <p className="fw-bold">You're registered!</p>
                   <p className="text-muted">See you at the event.</p>
                 </div>

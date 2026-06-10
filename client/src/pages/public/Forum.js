@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MapPin, DollarSign, Briefcase, Calendar, Users, CheckCircle2, Globe, Phone } from 'lucide-react';
 import { toast } from 'react-toastify';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
@@ -69,8 +70,8 @@ const Forum = () => {
                   </div>
                   <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '1rem', fontSize: '0.875rem', color: 'var(--text-light)' }}>
                     <span>By: <strong>{selected.name}</strong></span>
-                    {selected.location && <span>📍 {selected.location}</span>}
-                    {selected.contact_number && <span>📞 {selected.contact_number}</span>}
+                    {selected.location && <span style={{display:'inline-flex',alignItems:'center',gap:3}}><MapPin size={12}/> {selected.location}</span>}
+                    {selected.contact_number && <span style={{display:'inline-flex',alignItems:'center',gap:3}}><Phone size={12}/> {selected.contact_number}</span>}
                   </div>
                   {selected.picture_url && <img src={selected.picture_url} alt="Issue" style={{ maxWidth: 400, borderRadius: 'var(--radius)', marginBottom: '1rem' }} />}
                   <p style={{ lineHeight: 1.8, color: 'var(--text-medium)' }}>{selected.issue_description}</p>

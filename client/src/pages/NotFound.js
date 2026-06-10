@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { SearchX } from 'lucide-react';
 import PublicLayout from '../components/common/PublicLayout';
 
 const NotFound = () => {
@@ -8,7 +9,7 @@ const NotFound = () => {
     <PublicLayout>
       <div style={{ minHeight: 'calc(100vh - 300px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem 1rem' }}>
         <div style={{ textAlign: 'center', maxWidth: 480 }}>
-          <div style={{ fontSize: '6rem', lineHeight: 1, marginBottom: '1rem' }}>🔍</div>
+          <div style={{ width:96,height:96,borderRadius:'50%',background:'rgba(139,0,0,0.07)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 1rem'}}><SearchX size={48} color="var(--primary,#8B0000)" strokeWidth={1.25}/></div>
           <h1 style={{ fontSize: '4rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '0.5rem' }}>404</h1>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.75rem' }}>Page Not Found</h2>
           <p style={{ color: 'var(--text-light)', marginBottom: '2rem', lineHeight: 1.7 }}>

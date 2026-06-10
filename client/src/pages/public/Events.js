@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MapPin, DollarSign, Briefcase, Calendar, Users, CheckCircle2, Globe, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
@@ -49,7 +50,7 @@ const Events = () => {
                       {ev.event_time && <span className="text-muted" style={{ fontSize: '0.8rem' }}>{ev.event_time}</span>}
                     </div>
                     <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem' }}>{ev.title}</h3>
-                    {ev.venue && <p className="text-muted" style={{ fontSize: '0.85rem' }}>📍 {ev.venue}</p>}
+                    {ev.venue && <p className="text-muted" style={{ fontSize: '0.85rem' }}><MapPin size={12} style={{marginRight:3}}/> {ev.venue}</p>}
                     {ev.contact_person && <p className="text-muted" style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>Contact: {ev.contact_person}</p>}
                     <div style={{ marginTop: '1rem', color: 'var(--primary)', fontSize: '0.875rem', fontWeight: 500 }}>View Details →</div>
                   </div>

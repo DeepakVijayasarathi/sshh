@@ -72,7 +72,7 @@ const Navbar = () => {
           {/* ── Brand ──────────────────────────────────── */}
           <Link to="/" className="navbar-brand" style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexShrink: 0, textDecoration: 'none' }}>
             {settings.logo_url ? (
-              <img src={settings.logo_url} alt={siteName} style={{ height: 40, maxWidth: 120, objectFit: 'contain', display: 'block' }} />
+              <img src={settings.logo_url} alt={siteName} style={{ height: 48, width: 48, objectFit: 'contain', display: 'block', borderRadius: '50%' }} />
             ) : (
               <>
                 <div style={{

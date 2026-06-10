@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MapPin, DollarSign, Briefcase, Calendar, Users, CheckCircle2, Globe, Phone } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
 
@@ -73,9 +74,9 @@ const BusinessDirectory = () => {
                     {b.category_name && <span className="badge badge-secondary mb-2">{b.category_name}</span>}
                     {b.description && <p className="text-muted" style={{ fontSize: '0.875rem', marginBottom: '0.75rem' }}>{b.description.substring(0, 100)}{b.description.length > 100 ? '...' : ''}</p>}
                     <div style={{ fontSize: '0.8125rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                      {b.mobile_number && <span>📞 {b.mobile_number}</span>}
-                      {b.city && <span>📍 {b.city}</span>}
-                      {b.website && <a href={b.website} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)' }}>🌐 Website</a>}
+                      {b.mobile_number && <span style={{display:'inline-flex',alignItems:'center',gap:3}}><Phone size={12}/> {b.mobile_number}</span>}
+                      {b.city && <span style={{display:'inline-flex',alignItems:'center',gap:3}}><MapPin size={12}/> {b.city}</span>}
+                      {b.website && <a href={b.website} target="_blank" rel="noreferrer" style={{color:'var(--primary)',display:'inline-flex',alignItems:'center',gap:3}}><Globe size={12}/> Website</a>}
                     </div>
                   </div>
                 </div>

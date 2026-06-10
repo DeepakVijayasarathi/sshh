@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Mail, CheckCircle2 } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
 import './Auth.css';
@@ -34,7 +35,7 @@ const RequestForm = () => {
       <div className="auth-page">
         <div className="auth-card card">
           <div className="auth-header">
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📧</div>
+            <div style={{ width:56,height:56,borderRadius:'50%',background:'rgba(37,99,235,0.1)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 0.5rem'}}><Mail size={26} color="#2563eb" strokeWidth={1.5}/></div>
             <h2>Check your email</h2>
             <p>If an account exists for <strong>{email}</strong>, we've sent password reset instructions.</p>
           </div>
@@ -97,7 +98,7 @@ const ResetForm = ({ token }) => {
       <div className="auth-page">
         <div className="auth-card card">
           <div className="auth-header">
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>✅</div>
+            <div style={{ width:56,height:56,borderRadius:'50%',background:'rgba(5,150,105,0.1)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 0.5rem'}}><CheckCircle2 size={26} color="#059669" strokeWidth={1.5}/></div>
             <h2>Password Reset!</h2>
             <p>Your password has been reset successfully.</p>
           </div>

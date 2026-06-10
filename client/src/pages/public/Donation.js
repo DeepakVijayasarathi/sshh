@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import { CheckCircle2 } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
 
@@ -30,7 +31,7 @@ const Donation = () => {
           <div className="container" style={{ maxWidth: 500, textAlign: 'center' }}>
             <div className="card">
               <div className="card-body">
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🙏</div>
+                <div style={{ width:64,height:64,borderRadius:'50%',background:'rgba(5,150,105,0.1)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 1rem'}}><CheckCircle2 size={32} color="#059669" strokeWidth={1.5}/></div>
                 <h2 style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Thank You!</h2>
                 <p className="text-muted mb-3">Your donation has been received.</p>
                 <div style={{ background: '#f9fafb', borderRadius: 'var(--radius)', padding: '1.25rem', textAlign: 'left' }}>

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { Target, Users, Zap, Trophy, MapPin } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
 import useDebounce from '../../hooks/useDebounce';
+
+const PROGRAM_ICONS = { Target, Users, Zap, Trophy };
 
 const defaultForm = { fullName: '', mobileNumber: '', email: '', dateOfBirth: '', address: '', district: '', city: '', skills: '', interests: '' };
 
@@ -44,10 +47,10 @@ const YouthWing = () => {
   };
 
   const programs = [
-    { icon: '🎯', title: 'Leadership Programs', desc: 'Develop leadership skills through workshops, seminars and mentoring.' },
-    { icon: '🤝', title: 'Volunteer Activities', desc: 'Participate in community service and social welfare programs.' },
-    { icon: '💡', title: 'Skill Development', desc: 'Technical and soft skill training for career advancement.' },
-    { icon: '🏃', title: 'Sports & Culture', desc: 'Cultural events, sports tournaments and creative competitions.' },
+    { icon: 'Target',  title: 'Leadership Programs', desc: 'Develop leadership skills through workshops, seminars and mentoring.' },
+    { icon: 'Users',   title: 'Volunteer Activities', desc: 'Participate in community service and social welfare programs.' },
+    { icon: 'Zap',     title: 'Skill Development', desc: 'Technical and soft skill training for career advancement.' },
+    { icon: 'Trophy',  title: 'Sports & Culture', desc: 'Cultural events, sports tournaments and creative competitions.' },
   ];
 
   return (
@@ -83,7 +86,7 @@ const YouthWing = () => {
             {programs.map(p => (
               <div key={p.title} className="card" style={{ textAlign: 'center' }}>
                 <div className="card-body">
-                  <div style={{ fontSize: '2.25rem', marginBottom: '0.75rem' }}>{p.icon}</div>
+                  {(() => { const I = PROGRAM_ICONS[p.icon]; return I ? <div style={{ width:44,height:44,borderRadius:10,background:'rgba(139,0,0,0.07)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 0.75rem'}}><I size={22} color="var(--primary,#8B0000)" strokeWidth={1.75}/></div> : null; })()}
                   <h3 style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: '0.9375rem' }}>{p.title}</h3>
                   <p style={{ fontSize: '0.8125rem', color: 'var(--text-light)', lineHeight: 1.5 }}>{p.desc}</p>
                 </div>
@@ -134,7 +137,7 @@ const YouthWing = () => {
                         {m.full_name.charAt(0)}
                       </div>
                       <h3 style={{ fontWeight: 600, fontSize: '0.9375rem', marginBottom: '0.125rem' }}>{m.full_name}</h3>
-                      {m.district && <p className="text-muted" style={{ fontSize: '0.8rem' }}>📍 {m.district}</p>}
+                      {m.district && <p className="text-muted" style={{ fontSize: '0.8rem', display:'flex', alignItems:'center', gap:3 }}><MapPin size={11}/> {m.district}</p>}
                       {m.skills && <p className="text-muted" style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>{m.skills.substring(0, 40)}</p>}
                     </div>
                   </div>

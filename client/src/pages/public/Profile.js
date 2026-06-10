@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify'; // eslint-disable-line no-unused-vars
+import { User, Lock } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import ImageUploadPreview from '../../components/common/ImageUploadPreview';
 import MembershipCard from '../../components/common/MembershipCard';
@@ -136,7 +137,9 @@ const Profile = () => {
             {['profile', 'security'].map(t => (
               <button key={t} onClick={() => setTab(t)}
                 style={{ padding: '0.75rem 1.5rem', background: 'none', border: 'none', fontWeight: 500, fontSize: '0.9375rem', cursor: 'pointer', color: tab === t ? 'var(--primary)' : 'var(--text-light)', borderBottom: `2px solid ${tab === t ? 'var(--primary)' : 'transparent'}`, marginBottom: -2, transition: 'all 0.2s', textTransform: 'capitalize' }}>
-                {t === 'profile' ? '👤 Profile Info' : '🔒 Security'}
+                {t === 'profile'
+                  ? <><User size={14} style={{marginRight:5,verticalAlign:'middle'}}/> Profile Info</>
+                  : <><Lock size={14} style={{marginRight:5,verticalAlign:'middle'}}/> Security</>}
               </button>
             ))}
           </div>

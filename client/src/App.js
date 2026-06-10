@@ -48,6 +48,7 @@ const AdminWomenWing = lazy(() => import('./pages/admin/WomenWing'));
 const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
 const AdminActivityLog = lazy(() => import('./pages/admin/ActivityLog'));
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
+const AdminTeam     = lazy(() => import('./pages/admin/TeamMembers'));
 
 const PageLoader = () => (
   <div className="loading-center"><div className="spinner" /></div>
@@ -126,6 +127,7 @@ const AppRoutes = () => (
         <Route path="notifications" element={<AdminNotifications />} />
         <Route path="activity-log" element={<AdminActivityLog />} />
         <Route path="settings" element={<AdminSettings />} />
+        <Route path="team"     element={<AdminTeam />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
