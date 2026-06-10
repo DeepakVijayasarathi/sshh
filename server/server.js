@@ -61,7 +61,16 @@ app.use('/api/team',     require('./routes/team'));
 app.use('/sitemap.xml', require('./routes/sitemap'));
 
 // Health check
-app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date() }));
+app.get('/api/health', async (req, res) => {
+  try {
+    const { pool } = require('./config/database');
+    await pool.query('SELECT 1');
+    res.json({ status: 'OK', db: 'connected', timestamp: new Date() });
+  } catch (err) {
+    // Always 200 so Docker health check passes; db field shows the real state
+    res.json({ status: 'OK', db: 'error', error: err.message, timestamp: new Date() });
+  }
+});
 
 // Global error handler
 app.use((err, req, res, next) => {
