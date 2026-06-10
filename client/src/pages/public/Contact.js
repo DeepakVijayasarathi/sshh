@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import PublicLayout from '../../components/common/PublicLayout';
+import { useSiteSettings } from '../../context/SiteSettingsContext';
 
 const Contact = () => {
+  const settings = useSiteSettings();
   const [form, setForm] = useState({ name: '', email: '', mobile: '', subject: '', message: '' });
   const [loading, setLoading] = useState(false);
+
+  const contactItems = [
+    { icon: '📍', label: 'Address', value: settings.contact_address || 'Sourashtra Community Hall, Chennai, Tamil Nadu 600001' },
+    { icon: '📞', label: 'Phone',   value: settings.contact_phone   || '+91 98765 43210' },
+    { icon: '✉️', label: 'Email',   value: settings.contact_email   || 'info@sourashtra.org' },
+    { icon: '🕐', label: 'Office Hours', value: 'Mon–Sat, 9:00 AM – 5:00 PM' },
+  ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,12 +38,7 @@ const Contact = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '3rem', alignItems: 'start' }}>
             <div>
               <h2 style={{ fontSize: '1.375rem', fontWeight: 600, marginBottom: '1.5rem' }}>Get In Touch</h2>
-              {[
-                { icon: '📍', label: 'Address', value: 'Sourashtra Community Hall, Chennai, Tamil Nadu 600001' },
-                { icon: '📞', label: 'Phone', value: '+91 98765 43210' },
-                { icon: '✉️', label: 'Email', value: 'info@sourashtra.org' },
-                { icon: '🕐', label: 'Office Hours', value: 'Mon–Sat, 9:00 AM – 5:00 PM' },
-              ].map(item => (
+              {contactItems.map(item => (
                 <div key={item.label} style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
                   <span style={{ fontSize: '1.5rem', flexShrink: 0 }}>{item.icon}</span>
                   <div>

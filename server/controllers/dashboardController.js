@@ -58,6 +58,25 @@ exports.getMembersByDistrict = async (req, res) => {
   }
 };
 
+exports.getPublicStats = async (req, res) => {
+  try {
+    const [members, events, businesses, districts] = await Promise.all([
+      query("SELECT COUNT(*) FROM members WHERE status='Active'"),
+      query("SELECT COUNT(*) FROM events WHERE is_published=true"),
+      query("SELECT COUNT(*) FROM businesses WHERE status='Active'"),
+      query("SELECT COUNT(DISTINCT district) FROM members WHERE status='Active' AND district IS NOT NULL"),
+    ]);
+    res.json({
+      totalMembers:    parseInt(members.rows[0].count),
+      totalEvents:     parseInt(events.rows[0].count),
+      totalBusinesses: parseInt(businesses.rows[0].count),
+      totalDistricts:  parseInt(districts.rows[0].count),
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.getMembersByType = async (req, res) => {
   try {
     const result = await query(
