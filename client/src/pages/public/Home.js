@@ -1,163 +1,70 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import PublicLayout from '../../components/common/PublicLayout';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import api from '../../services/api';
 import useSEO from '../../hooks/useSEO';
 import {
   Users, Calendar, Building2, Briefcase, GraduationCap, MessageSquare,
-  ArrowRight, MapPin, Clock, ChevronRight,
+  Newspaper, Image, MapPin, ArrowRight, ChevronRight, Heart,
 } from 'lucide-react';
+import './Home.css';
 
-/* ─── Feature Card ─────────────────────────────────────── */
-const FeatureCard = ({ icon: Icon, title, desc, link, color, bg }) => (
-  <Link
-    to={link}
-    style={{ textDecoration: 'none', display: 'block' }}
-  >
-    <div
-      style={{
-        background: 'white', border: '1.5px solid #f1f5f9', borderRadius: 16,
-        padding: '1.75rem', transition: 'all 0.25s', cursor: 'pointer',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = 'var(--primary)';
-        e.currentTarget.style.transform = 'translateY(-4px)';
-        e.currentTarget.style.boxShadow = '0 12px 32px -6px rgba(0,0,0,0.12)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = '#f1f5f9';
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none';
-      }}
-    >
-      <div style={{ width: 48, height: 48, borderRadius: 12, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-        <Icon size={22} style={{ color }} />
-      </div>
-      <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#111827', marginBottom: '0.375rem' }}>{title}</h3>
-      <p style={{ fontSize: '0.875rem', color: '#9ca3af', lineHeight: 1.65, marginBottom: '1rem', margin: 0 }}>{desc}</p>
-      <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 4, marginTop: '0.875rem', marginBottom: 0 }}>
-        Explore <ArrowRight size={13} />
-      </p>
-    </div>
-  </Link>
-);
+const NAV = [
+  { to: '/',          label: 'Home',      end: true },
+  { to: '/about',     label: 'About Us'   },
+  { to: '/membership',label: 'Membership' },
+  { to: '/members',   label: 'Directory'  },
+  { to: '/events',    label: 'Events'     },
+  { to: '/gallery',   label: 'Gallery'    },
+  { to: '/business',  label: 'Business'   },
+  { to: '/jobs',      label: 'Jobs'       },
+  { to: '/news',      label: 'News'       },
+  { to: '/forum',     label: 'Forum'      },
+  { to: '/contact',   label: 'Contact'    },
+];
 
-/* ─── Event Card ────────────────────────────────────────── */
-const EventCard = ({ event }) => (
-  <Link to={`/events/${event.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-    <div
-      style={{ background: 'white', borderRadius: 14, overflow: 'hidden', border: '1px solid #f1f5f9', transition: 'all 0.2s' }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px -4px rgba(0,0,0,0.1)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-    >
-      {event.banner_image_url ? (
-        <img src={event.banner_image_url} alt={event.title} style={{ width: '100%', height: 160, objectFit: 'cover' }} />
-      ) : (
-        <div style={{ width: '100%', height: 160, background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Calendar size={40} style={{ color: 'rgba(255,255,255,0.4)' }} />
-        </div>
-      )}
-      <div style={{ padding: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.5rem' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '0.2rem 0.625rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 600, background: 'var(--primary)', color: 'white' }}>
-            <Calendar size={11} /> {new Date(event.event_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-          </span>
-        </div>
-        <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#111827', marginBottom: '0.25rem', lineHeight: 1.4 }}>{event.title}</h3>
-        {event.venue && (
-          <p style={{ fontSize: '0.8125rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, marginBottom: 0 }}>
-            <MapPin size={12} /> {event.venue}
-          </p>
-        )}
-      </div>
-    </div>
-  </Link>
-);
+const FEATURES = [
+  { icon: Users,         emoji: '👥', title: 'Membership',      desc: 'Join the community and connect with members across Tamil Nadu.',    link: '/membership',  color: '#8B0000', bg: 'rgba(139,0,0,0.08)'  },
+  { icon: Calendar,      emoji: '📅', title: 'Events',          desc: 'Cultural, educational and community events throughout the year.',    link: '/events',      color: '#2563eb', bg: 'rgba(37,99,235,0.08)' },
+  { icon: Building2,     emoji: '🏢', title: 'Businesses',      desc: 'Discover Sourashtra-owned businesses in your area.',                link: '/business',    color: '#059669', bg: 'rgba(5,150,105,0.08)' },
+  { icon: Briefcase,     emoji: '💼', title: 'Jobs',            desc: 'Career opportunities and job resources within the community.',       link: '/jobs',        color: '#7c3aed', bg: 'rgba(124,58,237,0.08)'},
+  { icon: GraduationCap, emoji: '🎓', title: 'Scholarships',    desc: 'Educational support and scholarships for deserving students.',      link: '/scholarship', color: '#0891b2', bg: 'rgba(8,145,178,0.08)' },
+  { icon: MessageSquare, emoji: '💬', title: 'Forum',           desc: 'Raise issues, share ideas, engage in community discussions.',       link: '/forum',       color: '#d97706', bg: 'rgba(217,119,6,0.08)'  },
+];
 
-/* ─── News Card ─────────────────────────────────────────── */
-const NewsCard = ({ article }) => (
-  <Link to={`/news/${article.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-    <div
-      style={{ background: 'white', borderRadius: 14, overflow: 'hidden', border: '1px solid #f1f5f9', transition: 'all 0.2s' }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 8px 24px -4px rgba(0,0,0,0.1)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-    >
-      {article.image_url ? (
-        <img src={article.image_url} alt={article.title} style={{ width: '100%', height: 160, objectFit: 'cover' }} />
-      ) : (
-        <div style={{ width: '100%', height: 160, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <MessageSquare size={22} style={{ color: '#9ca3af' }} />
-          </div>
-        </div>
-      )}
-      <div style={{ padding: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-          <span style={{ padding: '0.2rem 0.5rem', borderRadius: 999, fontSize: '0.6875rem', fontWeight: 600, background: '#eff6ff', color: '#3b82f6' }}>
-            {article.category}
-          </span>
-        </div>
-        <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#111827', lineHeight: 1.4, marginBottom: '0.375rem' }}>
-          {article.title.length > 60 ? article.title.slice(0, 60) + '…' : article.title}
-        </h3>
-        <p style={{ fontSize: '0.8125rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, marginBottom: 0 }}>
-          <Clock size={12} /> {new Date(article.publish_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-        </p>
-      </div>
-    </div>
-  </Link>
-);
+const FILLERS = [
+  { icon: '🕌', title: 'Cultural Heritage',   text: 'Preserving Sourashtra customs, traditions, language and arts passed down through generations across Tamil Nadu.' },
+  { icon: '📚', title: 'Literary Archive',    text: 'Documenting and publishing classical Sourashtra literature, folk songs and historical manuscripts.' },
+  { icon: '🤝', title: 'Community Welfare',   text: 'Running welfare schemes, flood relief, health camps, and support programs for community members in need.' },
+  { icon: '🎵', title: 'Arts & Music',        text: 'Promoting traditional Sourashtra music, dance and classical arts through workshops and festivals.' },
+];
 
-/* ─── Section Header ────────────────────────────────────── */
-const SectionHeader = ({ title, subtitle, link, linkLabel = 'View All' }) => (
-  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-    <div>
-      <h2 style={{ fontSize: '1.625rem', fontWeight: 700, fontFamily: '"Playfair Display", serif', color: 'var(--primary)', margin: 0 }}>{title}</h2>
-      {subtitle && <p style={{ fontSize: '0.9375rem', color: '#9ca3af', marginTop: '0.375rem', marginBottom: 0 }}>{subtitle}</p>}
-    </div>
-    {link && (
-      <Link to={link} className="btn btn-sm btn-outline" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
-        {linkLabel} <ChevronRight size={14} />
-      </Link>
-    )}
-  </div>
-);
-
-/* ─── Home ──────────────────────────────────────────────── */
-const Home = () => {
-  const settings = useSiteSettings();
-  const siteName = settings.site_name || 'Sourashtra Community';
+export default function Home() {
+  const settings  = useSiteSettings();
+  const siteName  = settings.site_name    || 'Sourashtra Community Portal';
+  const siteTag   = settings.site_tagline || 'Connecting Our Community, Preserving Our Heritage';
 
   useSEO({
     title: 'Home',
-    description: `Welcome to ${siteName} Portal — connecting members through events, news, business directory, jobs and more.`,
+    description: `Welcome to ${siteName} — connecting members through events, news, business directory, jobs and more.`,
   });
 
-  const [events,     setEvents]     = useState([]);
-  const [news,       setNews]       = useState([]);
-  const [liveStats,  setLiveStats]  = useState(null);
+  const [events,    setEvents]    = useState([]);
+  const [news,      setNews]      = useState([]);
+  const [liveStats, setLiveStats] = useState(null);
 
   useEffect(() => {
-    api.get('/events?upcoming=true&limit=3').then(r => setEvents(r.data.data || [])).catch(() => {});
-    api.get('/news?limit=3&featured=true').then(r => setNews(r.data.data || [])).catch(() => {});
+    api.get('/events?upcoming=true&limit=4').then(r => setEvents(r.data.data || [])).catch(() => {});
+    api.get('/news?limit=4&featured=true').then(r => setNews(r.data.data || [])).catch(() => {});
     api.get('/dashboard/public-stats').then(r => setLiveStats(r.data)).catch(() => {});
   }, []);
 
-  const features = [
-    { icon: Users,         title: 'Membership',         color: '#8B0000', bg: 'rgba(139,0,0,0.08)',  desc: 'Join our growing community of Sourashtra members across Tamil Nadu and beyond.',     link: '/membership' },
-    { icon: Calendar,      title: 'Events',             color: '#2563eb', bg: 'rgba(37,99,235,0.08)', desc: 'Participate in cultural, educational and community events throughout the year.',      link: '/events' },
-    { icon: Building2,     title: 'Business Directory', color: '#059669', bg: 'rgba(5,150,105,0.08)', desc: 'Discover and connect with Sourashtra-owned businesses in your area.',               link: '/business' },
-    { icon: Briefcase,     title: 'Jobs Portal',        color: '#7c3aed', bg: 'rgba(124,58,237,0.08)',desc: 'Find job opportunities and career resources within the community.',                  link: '/jobs' },
-    { icon: GraduationCap, title: 'Scholarships',       color: '#0891b2', bg: 'rgba(8,145,178,0.08)', desc: 'Apply for scholarships and educational support for deserving students.',             link: '/scholarship' },
-    { icon: MessageSquare, title: 'Community Forum',    color: '#d97706', bg: 'rgba(217,119,6,0.08)', desc: 'Raise issues, share ideas, and engage in meaningful community discussions.',         link: '/forum' },
-  ];
-
-  const stats = liveStats ? [
-    { num: liveStats.totalMembers.toLocaleString() + '+',    label: 'Members'    },
-    { num: liveStats.totalEvents.toLocaleString() + '+',     label: 'Events'     },
-    { num: liveStats.totalBusinesses.toLocaleString() + '+', label: 'Businesses' },
-    { num: liveStats.totalDistricts.toString(),              label: 'Districts'  },
+  const STATS = liveStats ? [
+    { num: liveStats.totalMembers    + '+', label: 'Members'    },
+    { num: liveStats.totalEvents     + '+', label: 'Events'     },
+    { num: liveStats.totalBusinesses + '+', label: 'Businesses' },
+    { num: liveStats.totalDistricts,        label: 'Districts'  },
   ] : [
     { num: '—', label: 'Members'    },
     { num: '—', label: 'Events'     },
@@ -167,172 +74,184 @@ const Home = () => {
 
   return (
     <PublicLayout>
+      <div className="bento-page">
+        <div className="bento-grid">
 
-      {/* ── Hero ──────────────────────────────────────── */}
-      <section style={{
-        background: 'linear-gradient(135deg, var(--primary) 0%, #4a0000 100%)',
-        color: 'white',
-        padding: '5rem 1.5rem',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        {/* Background decoration */}
-        <div style={{
-          position: 'absolute', top: -80, right: -80, width: 400, height: 400,
-          borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: -100, left: -60, width: 300, height: 300,
-          borderRadius: '50%', background: 'rgba(255,255,255,0.03)', pointerEvents: 'none',
-        }} />
-
-        <div className="container" style={{ position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4rem', flexWrap: 'wrap' }}>
-
-            {/* Left content */}
-            <div style={{ flex: '1 1 400px', maxWidth: 580 }}>
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: 999, padding: '0.375rem 1rem', fontSize: '0.8125rem',
-                marginBottom: '1.5rem', backdropFilter: 'blur(8px)',
-              }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--secondary)' }} />
-                Welcome to {siteName}
-              </div>
-
-              <h1 style={{
-                fontSize: 'clamp(1.875rem, 4vw, 2.75rem)', fontFamily: '"Playfair Display", serif',
-                fontWeight: 700, lineHeight: 1.2, marginBottom: '1.25rem',
-              }}>
-                Connecting Our Community,{' '}
-                <span style={{ color: 'var(--secondary)' }}>Preserving Our Heritage</span>
-              </h1>
-
-              <p style={{ fontSize: '1.0625rem', opacity: 0.85, lineHeight: 1.75, marginBottom: '2rem', maxWidth: 500 }}>
-                {settings.site_tagline || `A digital platform for ${siteName} to connect, celebrate and collaborate. Manage memberships, events, businesses and more — all in one place.`}
-              </p>
-
-              <div style={{ display: 'flex', gap: '0.875rem', flexWrap: 'wrap' }}>
-                <Link to="/membership" className="btn btn-lg" style={{ background: 'var(--secondary)', color: '#1a1a1a', fontWeight: 700 }}>
-                  Become a Member
-                </Link>
-                <Link to="/about" className="btn btn-lg" style={{ background: 'rgba(255,255,255,0.12)', color: 'white', border: '1.5px solid rgba(255,255,255,0.3)', backdropFilter: 'blur(4px)' }}>
-                  Learn More <ArrowRight size={17} />
-                </Link>
-              </div>
+          {/* ── Logo ─────────────────────────────────────── */}
+          <div className="b-card b-logo" style={{ gridColumn: 1, gridRow: '1/3' }}>
+            <div className="logo-circle">
+              {settings.logo_url
+                ? <img src={settings.logo_url} alt={siteName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                : <span>{siteName.slice(0, 2).toUpperCase()}</span>
+              }
             </div>
+            <div className="logo-name">{siteName}</div>
+            <div className="logo-sub">Est. Since Ancient Times</div>
+          </div>
 
-            {/* Right stats grid */}
-            <div style={{ flex: '0 0 auto' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.875rem' }}>
-                {stats.map(s => (
-                  <div key={s.label} style={{
-                    background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.18)',
-                    borderRadius: 14, padding: '1.25rem 1.5rem', textAlign: 'center',
-                    backdropFilter: 'blur(8px)', minWidth: 110,
-                  }}>
-                    <p style={{ fontSize: '1.625rem', fontWeight: 800, color: 'var(--secondary)', fontFamily: '"Playfair Display", serif', lineHeight: 1, marginBottom: '0.25rem' }}>
-                      {s.num}
-                    </p>
-                    <p style={{ fontSize: '0.8125rem', opacity: 0.8, margin: 0 }}>{s.label}</p>
+          {/* ── Heading ──────────────────────────────────── */}
+          <div className="b-card b-heading" style={{ gridColumn: '2/5', gridRow: 1 }}>
+            <h1>{siteName.toUpperCase()}</h1>
+            <div className="tagline">{siteTag.toUpperCase()}</div>
+          </div>
+
+          {/* ── Live Stats ───────────────────────────────── */}
+          <div className="b-card b-stats" style={{ gridColumn: 5, gridRow: '1/4' }}>
+            {STATS.map(s => (
+              <div key={s.label} className="b-stat-item">
+                <div className="stat-num">{s.num}</div>
+                <div className="stat-label">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Nav ──────────────────────────────────────── */}
+          <div className="b-nav" style={{ gridColumn: '2/5', gridRow: 2 }}>
+            <span className="b-slogan">Bridging Traditions · Building Futures</span>
+            <div className="b-nav-links">
+              {NAV.map(n => (
+                <NavLink key={n.to} to={n.to} end={n.end}
+                  className={({ isActive }) => isActive ? 'active' : ''}>
+                  {n.label}
+                </NavLink>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Hero text ────────────────────────────────── */}
+          <div className="b-card b-hero" style={{ gridColumn: '1/4', gridRow: 3 }}>
+            <p>
+              A digital platform for the Sourashtra community to connect, celebrate and collaborate.
+              Manage memberships, events, businesses and more — all in one place.
+            </p>
+            <div className="b-hero-btns">
+              <Link to="/membership" className="btn btn-sm"
+                style={{ background: 'var(--secondary,#D4AF37)', color: '#1a1a1a', fontWeight: 700 }}>
+                Become a Member
+              </Link>
+              <Link to="/about" className="btn btn-sm"
+                style={{ background: 'rgba(255,255,255,0.12)', color: 'white', border: '1.5px solid rgba(255,255,255,0.3)' }}>
+                Learn More <ArrowRight size={13} />
+              </Link>
+            </div>
+          </div>
+
+          {/* ── Feature tiles ────────────────────────────── */}
+          <div className="b-features" style={{ gridColumn: '1/5', gridRow: 4 }}>
+            {FEATURES.map(f => (
+              <Link key={f.title} to={f.link} className="b-feat">
+                <div className="b-feat-icon" style={{ background: f.bg, color: f.color }}>
+                  {f.emoji}
+                </div>
+                <div className="b-feat-title">{f.title}</div>
+                <p className="b-feat-desc">{f.desc}</p>
+                <span className="b-feat-link">Explore <ChevronRight size={11} /></span>
+              </Link>
+            ))}
+          </div>
+
+          {/* ── News (right tall card, rows 4-5) ─────────── */}
+          <div className="b-card b-news" style={{ gridColumn: '4/6', gridRow: '4/6' }}>
+            <div className="b-section-title">
+              Latest News
+              <Link to="/news">View all →</Link>
+            </div>
+            {news.length === 0
+              ? <p style={{ fontSize: '0.8rem', color: '#9ca3af', padding: '1rem 0' }}>No news yet.</p>
+              : news.map(n => (
+                <Link key={n.id} to={`/news/${n.id}`} className="b-news-item">
+                  <div className="b-news-img">
+                    {n.image_url
+                      ? <img src={n.image_url} alt={n.title} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }} />
+                      : <Newspaper size={20} />
+                    }
                   </div>
-                ))}
-              </div>
+                  <div className="b-news-info">
+                    <div className="cat">{n.category}</div>
+                    <h4>{n.title.length > 65 ? n.title.slice(0, 65) + '…' : n.title}</h4>
+                  </div>
+                </Link>
+              ))
+            }
+          </div>
+
+          {/* ── Upcoming Events ──────────────────────────── */}
+          <div className="b-card b-events" style={{ gridColumn: '1/4', gridRow: 5 }}>
+            <div className="b-section-title">
+              Upcoming Events
+              <Link to="/events">View all →</Link>
             </div>
-
+            {events.length === 0
+              ? <p style={{ fontSize: '0.8rem', color: '#9ca3af', padding: '1rem 0' }}>No upcoming events.</p>
+              : events.map(ev => {
+                const d = new Date(ev.event_date);
+                return (
+                  <Link key={ev.id} to={`/events/${ev.id}`} className="b-event-item">
+                    <div className="b-event-date">
+                      <span className="day">{d.getDate()}</span>
+                      <span>{d.toLocaleString('en-IN', { month: 'short' }).toUpperCase()}</span>
+                    </div>
+                    <div className="b-event-info">
+                      <h4>{ev.title}</h4>
+                      <p>{ev.venue && <><MapPin size={10} style={{ marginRight: 3 }} />{ev.venue}</>}</p>
+                    </div>
+                  </Link>
+                );
+              })
+            }
           </div>
-        </div>
-      </section>
 
-      {/* ── Features ──────────────────────────────────── */}
-      <section style={{ background: 'white', padding: '5rem 1.5rem' }}>
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <p style={{ fontSize: '0.8125rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--primary)', marginBottom: '0.5rem' }}>
-              Our Services
-            </p>
-            <h2 style={{ fontSize: '1.875rem', fontWeight: 700, fontFamily: '"Playfair Display", serif', color: '#111827', margin: '0 0 0.75rem' }}>
-              Everything You Need
-            </h2>
-            <p style={{ fontSize: '1rem', color: '#9ca3af', maxWidth: 520, margin: '0 auto' }}>
-              Stay connected with the Sourashtra community through our comprehensive suite of services
-            </p>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
-            {features.map(f => <FeatureCard key={f.title} {...f} />)}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Upcoming Events ───────────────────────────── */}
-      {events.length > 0 && (
-        <section style={{ background: '#f8fafc', padding: '5rem 1.5rem' }}>
-          <div className="container">
-            <SectionHeader
-              title="Upcoming Events"
-              subtitle="Don't miss out on our community events and programs"
-              link="/events"
-            />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
-              {events.map(ev => <EventCard key={ev.id} event={ev} />)}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── Latest News ───────────────────────────────── */}
-      {news.length > 0 && (
-        <section style={{ background: 'white', padding: '5rem 1.5rem' }}>
-          <div className="container">
-            <SectionHeader
-              title="Latest News"
-              subtitle="Stay updated with news and announcements from the community"
-              link="/news"
-            />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
-              {news.map(n => <NewsCard key={n.id} article={n} />)}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── CTA Section ───────────────────────────────── */}
-      <section style={{
-        background: 'linear-gradient(135deg, var(--primary) 0%, #4a0000 100%)',
-        padding: '5rem 1.5rem',
-        textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          position: 'absolute', top: -60, left: '50%', transform: 'translateX(-50%)',
-          width: 500, height: 500, borderRadius: '50%',
-          background: 'rgba(255,255,255,0.03)', pointerEvents: 'none',
-        }} />
-        <div className="container" style={{ position: 'relative' }}>
-          <p style={{ fontSize: '0.8125rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--secondary)', marginBottom: '0.75rem' }}>
-            Join Us Today
-          </p>
-          <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', fontFamily: '"Playfair Display", serif', fontWeight: 700, color: 'white', marginBottom: '1rem' }}>
-            Become Part of Our Community
-          </h2>
-          <p style={{ fontSize: '1.0625rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.7, maxWidth: 520, margin: '0 auto 2.5rem' }}>
-            Join thousands of Sourashtra community members and enjoy exclusive benefits, networking opportunities, and community support.
-          </p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/register" className="btn btn-lg" style={{ background: 'var(--secondary)', color: '#1a1a1a', fontWeight: 700 }}>
+          {/* ── Join column ──────────────────────────────── */}
+          <div className="b-join" style={{ gridColumn: 5, gridRow: '4/8' }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem' }}>🙏</div>
+            <h3>Join Our Community</h3>
+            <p>Become a member and enjoy exclusive benefits, events & networking.</p>
+            <Link to="/register" className="btn btn-sm"
+              style={{ background: 'var(--secondary,#D4AF37)', color: '#1a1a1a', fontWeight: 700, width: '100%', justifyContent: 'center' }}>
               Register Now
             </Link>
-            <Link to="/donate" className="btn btn-lg" style={{ background: 'rgba(255,255,255,0.12)', color: 'white', border: '1.5px solid rgba(255,255,255,0.3)', backdropFilter: 'blur(4px)' }}>
-              Support Us
+            <Link to="/login" className="btn btn-sm"
+              style={{ background: 'rgba(255,255,255,0.12)', color: 'white', border: '1px solid rgba(255,255,255,0.25)', width: '100%', justifyContent: 'center' }}>
+              Login
             </Link>
+            <div style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: '0.875rem', width: '100%', textAlign: 'center' }}>
+              <Link to="/donate" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.7rem', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                <Heart size={11} /> Support Us
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
 
+          {/* ── Filler cards row ─────────────────────────── */}
+          <div className="b-filler-row" style={{ gridColumn: '1/5', gridRow: 6, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }}>
+            {FILLERS.map(f => (
+              <div key={f.title} className="b-filler">
+                <div className="b-filler-icon">{f.icon}</div>
+                <div className="b-filler-title">{f.title}</div>
+                <p className="b-filler-text">{f.text}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* ── CTA bar ──────────────────────────────────── */}
+          <div className="b-cta" style={{ gridColumn: '1/5', gridRow: 7 }}>
+            <div className="b-cta-text">
+              <h3>Become Part of Our Heritage</h3>
+              <p>Join thousands of Sourashtra members — connect, celebrate and collaborate.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <Link to="/membership" className="btn"
+                style={{ background: 'var(--secondary,#D4AF37)', color: '#1a1a1a', fontWeight: 700 }}>
+                Become a Member
+              </Link>
+              <Link to="/donate" className="btn"
+                style={{ background: 'rgba(255,255,255,0.08)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}>
+                Donate
+              </Link>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </PublicLayout>
   );
-};
-
-export default Home;
+}
