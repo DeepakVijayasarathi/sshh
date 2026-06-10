@@ -94,9 +94,12 @@ pipeline {
             steps {
                 sh """
                     sleep 5
-                    curl -sf http://localhost:${APP_PORT_API}/api/health || \
+                    API_PORT=\$(docker port ${CONTAINER_SERVER} 5000 | cut -d: -f2)
+                    WEB_PORT=\$(docker port ${CONTAINER_CLIENT} 80   | cut -d: -f2)
+                    echo "Server on port \$API_PORT, client on port \$WEB_PORT"
+                    curl -sf http://localhost:\$API_PORT/api/health || \
                         (echo "Server health check failed"; exit 1)
-                    curl -sf http://localhost:${APP_PORT_HTTP}/ || \
+                    curl -sf http://localhost:\$WEB_PORT/ || \
                         (echo "Client health check failed"; exit 1)
                     echo "Smoke tests passed"
                 """
