@@ -224,6 +224,51 @@ async function seed() {
     );
   }
 
+  // ─── TEAM MEMBERS ───────────────────────────────────────────
+  console.log('Seeding team members...');
+
+  // Create table if not exists
+  await q(`
+    CREATE TABLE IF NOT EXISTS team_members (
+      id            SERIAL PRIMARY KEY,
+      name          VARCHAR(150)  NOT NULL,
+      role          VARCHAR(100)  NOT NULL DEFAULT 'Coordinator',
+      designation   VARCHAR(200),
+      division      VARCHAR(150),
+      photo_url     VARCHAR(500),
+      quote         TEXT,
+      display_order INT           NOT NULL DEFAULT 0,
+      is_active     BOOLEAN       NOT NULL DEFAULT true,
+      created_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+      updated_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  const teamMembers = [
+    // Patrons (division = 'Patron')
+    { name: 'Shri Narendra Modi',   role: 'Inspiration Behind SHC TN', designation: 'Honorable Prime Minister of India',          division: 'Patron', order: 1, quote: 'The cultural connection of Saurashtra and Tamil Nadu is a shining example of Ek Bharat Shreshtha Bharat.' },
+    { name: 'Shri Bhupendra Patel', role: 'Chief Patron',              designation: 'Honorable Chief Minister of Gujarat',         division: 'Patron', order: 2, quote: 'Supporting the academic rediscovery of our cultural roots and heritage connections across the Nation.' },
+    { name: 'Shri Utpal Joshi',     role: 'Patron of SHC',             designation: 'Hon. Vice Chancellor, Saurashtra University', division: 'Patron', order: 3, quote: 'It is our privilege to host the Saurashtra Heritage Chair, celebrating our historical roots and unifying bonds.' },
+    // Salem Division
+    { name: 'Rajesh Mudaliar',      role: 'Division President',   designation: 'Salem Sourashtra Sabha',        division: 'Salem Division',    order: 1, quote: '' },
+    { name: 'Priya Kantilal',       role: 'Secretary',            designation: 'Salem Sourashtra Sabha',        division: 'Salem Division',    order: 2, quote: '' },
+    { name: 'Suresh Vora',          role: 'Treasurer',            designation: 'Salem Sourashtra Sabha',        division: 'Salem Division',    order: 3, quote: '' },
+    // Chennai Division
+    { name: 'Kavitha Mehta',        role: 'Division President',   designation: 'Chennai Sourashtra Sabha',      division: 'Chennai Division',  order: 1, quote: '' },
+    { name: 'Arun Parekh',          role: 'Youth Wing Head',      designation: 'Chennai Sourashtra Sabha',      division: 'Chennai Division',  order: 2, quote: '' },
+    // Madurai Division
+    { name: 'Venkatesh Sheth',      role: 'Division President',   designation: 'Madurai Sourashtra Sabha',      division: 'Madurai Division',  order: 1, quote: '' },
+    { name: 'Deepa Ganatra',        role: 'Women Wing Head',      designation: 'Madurai Sourashtra Sabha',      division: 'Madurai Division',  order: 2, quote: '' },
+  ];
+
+  for (const m of teamMembers) {
+    await q(
+      `INSERT INTO team_members (name, role, designation, division, quote, display_order, is_active)
+       VALUES ($1,$2,$3,$4,$5,$6, TRUE) ON CONFLICT DO NOTHING`,
+      [m.name, m.role, m.designation, m.division, m.quote, m.order]
+    );
+  }
+
   console.log('✅ Seed complete!');
   await pool.end();
 }

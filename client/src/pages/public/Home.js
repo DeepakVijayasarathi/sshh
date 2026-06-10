@@ -50,32 +50,7 @@ const GALLERY_SLOTS = [
   { big: false, label: 'Heritage Walk',          Icon: Landmark,      color: '#7c3aed' },
 ];
 
-const PATRONS = [
-  {
-    tag:         'Inspiration Behind SHC TN',
-    tagColor:    '#c2410c',
-    name:        'Shri Narendra Modi',
-    designation: 'Honorable Prime Minister of India',
-    quote:       '"The cultural connection of Saurashtra and Tamil Nadu is a shining example of Ek Bharat Shreshtha Bharat."',
-    photo:       '/uploads/patron-modi.jpg',
-  },
-  {
-    tag:         'Chief Patron',
-    tagColor:    '#1d4ed8',
-    name:        'Shri Bhupendra Patel',
-    designation: 'Honorable Chief Minister of Gujarat',
-    quote:       '"Supporting the academic rediscovery of our cultural roots and heritage connections across the Nation."',
-    photo:       '/uploads/patron-bhupendra.jpg',
-  },
-  {
-    tag:         'Patron of SHC',
-    tagColor:    '#c2410c',
-    name:        'Shri Utpal Joshi',
-    designation: 'Hon. Vice Chancellor, Saurashtra University',
-    quote:       '"It is our privilege to host the Saurashtra Heritage Chair, celebrating our historical roots and unifying bonds."',
-    photo:       '/uploads/patron-utpal.jpg',
-  },
-];
+const TAG_COLORS = ['#c2410c', '#1d4ed8', '#15803d', '#7c3aed', '#b45309'];
 
 const SPONSORS = [
   { Icon: Building2,     name: 'Sourashtra Bank'        },
@@ -99,12 +74,17 @@ export default function Home() {
   const [news,      setNews]      = useState([]);
   const [liveStats, setLiveStats] = useState(null);
   const [team,      setTeam]      = useState([]);
+  const [patrons,   setPatrons]   = useState([]);
 
   useEffect(() => {
     api.get('/events?upcoming=true&limit=4').then(r => setEvents(r.data.data || [])).catch(() => {});
     api.get('/news?limit=6&featured=true').then(r  => setNews(r.data.data || [])).catch(() => {});
     api.get('/dashboard/public-stats').then(r       => setLiveStats(r.data)).catch(() => {});
-    api.get('/team').then(r                         => setTeam(r.data || [])).catch(() => {});
+    api.get('/team').then(r => {
+      const all = r.data || [];
+      setPatrons(all.filter(m => m.division === 'Patron'));
+      setTeam(all.filter(m => m.division !== 'Patron'));
+    }).catch(() => {});
   }, []);
 
   const STATS = liveStats ? [
@@ -331,26 +311,31 @@ export default function Home() {
         </div>
 
         {/* ── Patrons ─── */}
-        <div className="patrons-section">
-          <div className="section-header">
-            <h2>Our Patrons &amp; Inspiration</h2>
-          </div>
-          <div className="patrons-grid">
-            {PATRONS.map(p => (
-              <div key={p.name} className="patron-card">
-                <div className="patron-photo-wrap">
-                  <img src={p.photo} alt={p.name} className="patron-photo" />
+        {patrons.length > 0 && (
+          <div className="patrons-section">
+            <div className="section-header">
+              <h2>Our Patrons &amp; Inspiration</h2>
+            </div>
+            <div className="patrons-grid">
+              {patrons.map((p, i) => (
+                <div key={p.id} className="patron-card">
+                  <div className="patron-photo-wrap">
+                    {p.photo_url
+                      ? <img src={p.photo_url} alt={p.name} className="patron-photo" />
+                      : <div className="patron-photo-initial">{p.name.charAt(0)}</div>
+                    }
+                  </div>
+                  <div className="patron-tag" style={{ color: TAG_COLORS[i % TAG_COLORS.length] }}>
+                    {p.role.toUpperCase()}
+                  </div>
+                  <h3 className="patron-name">{p.name}</h3>
+                  <p className="patron-designation">{p.designation}</p>
+                  {p.quote && <p className="patron-quote">"{p.quote}"</p>}
                 </div>
-                <div className="patron-tag" style={{ color: p.tagColor }}>
-                  {p.tag.toUpperCase()}
-                </div>
-                <h3 className="patron-name">{p.name}</h3>
-                <p className="patron-designation">{p.designation}</p>
-                <p className="patron-quote">{p.quote}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ── Team / Coordinators ─── */}
         {team.length > 0 && (() => {
