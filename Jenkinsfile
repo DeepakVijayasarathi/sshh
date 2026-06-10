@@ -2,12 +2,20 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_SERVER = "sourashtra-server"
-        IMAGE_CLIENT = "sourashtra-client"
+        IMAGE_SERVER     = "sourashtra-server"
+        IMAGE_CLIENT     = "sourashtra-client"
         CONTAINER_SERVER = "sourashtra-server-app"
         CONTAINER_CLIENT = "sourashtra-client-app"
-        APP_PORT_HTTP  = "80"
-        APP_PORT_API   = "5000"
+        APP_PORT_HTTP    = "80"
+        APP_PORT_API     = "5000"
+
+        // Injected from Jenkins credentials (Manage Jenkins → Credentials)
+        DB_HOST     = credentials('DB_HOST')
+        DB_PORT     = credentials('DB_PORT')
+        DB_NAME     = credentials('DB_NAME')
+        DB_USER     = credentials('DB_USER')
+        DB_PASSWORD = credentials('DB_PASSWORD')
+        JWT_SECRET  = credentials('JWT_SECRET')
     }
 
     stages {
@@ -42,40 +50,43 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withCredentials([file(credentialsId: 'sourashtra-env', variable: 'ENV_FILE')]) {
-                    sh """
-                        docker volume create sourashtra-uploads || true
+                sh """
+                    docker volume create sourashtra-uploads || true
 
-                        docker run -d \
-                            --name ${CONTAINER_SERVER} \
-                            --restart unless-stopped \
-                            --env-file \$ENV_FILE \
-                            -e NODE_ENV=production \
-                            -e CLIENT_URL=http://localhost \
-                            -p ${APP_PORT_API}:5000 \
-                            -v sourashtra-uploads:/app/uploads \
-                            --health-cmd 'wget -qO- http://localhost:5000/api/health || exit 1' \
-                            --health-interval 30s \
-                            --health-timeout 10s \
-                            --health-retries 3 \
-                            ${IMAGE_SERVER}:${BUILD_NUMBER}
+                    docker run -d \
+                        --name ${CONTAINER_SERVER} \
+                        --restart unless-stopped \
+                        -e NODE_ENV=production \
+                        -e CLIENT_URL=http://localhost \
+                        -e DB_HOST=${DB_HOST} \
+                        -e DB_PORT=${DB_PORT} \
+                        -e DB_NAME=${DB_NAME} \
+                        -e DB_USER=${DB_USER} \
+                        -e DB_PASSWORD=${DB_PASSWORD} \
+                        -e JWT_SECRET=${JWT_SECRET} \
+                        -p ${APP_PORT_API}:5000 \
+                        -v sourashtra-uploads:/app/uploads \
+                        --health-cmd 'wget -qO- http://localhost:5000/api/health || exit 1' \
+                        --health-interval 30s \
+                        --health-timeout 10s \
+                        --health-retries 3 \
+                        ${IMAGE_SERVER}:${BUILD_NUMBER}
 
-                        echo "Waiting for server to become healthy..."
-                        for i in \$(seq 1 20); do
-                            STATUS=\$(docker inspect --format='{{.State.Health.Status}}' ${CONTAINER_SERVER} 2>/dev/null)
-                            if [ "\$STATUS" = "healthy" ]; then break; fi
-                            echo "  attempt \$i: \$STATUS"
-                            sleep 5
-                        done
+                    echo "Waiting for server to become healthy..."
+                    for i in \$(seq 1 20); do
+                        STATUS=\$(docker inspect --format='{{.State.Health.Status}}' ${CONTAINER_SERVER} 2>/dev/null)
+                        if [ "\$STATUS" = "healthy" ]; then break; fi
+                        echo "  attempt \$i: \$STATUS"
+                        sleep 5
+                    done
 
-                        docker run -d \
-                            --name ${CONTAINER_CLIENT} \
-                            --restart unless-stopped \
-                            --link ${CONTAINER_SERVER}:server \
-                            -p ${APP_PORT_HTTP}:80 \
-                            ${IMAGE_CLIENT}:${BUILD_NUMBER}
-                    """
-                }
+                    docker run -d \
+                        --name ${CONTAINER_CLIENT} \
+                        --restart unless-stopped \
+                        --link ${CONTAINER_SERVER}:server \
+                        -p ${APP_PORT_HTTP}:80 \
+                        ${IMAGE_CLIENT}:${BUILD_NUMBER}
+                """
             }
         }
 
