@@ -120,19 +120,23 @@ pipeline {
 
                 PREV=\$(expr ${BUILD_NUMBER} - 1)
 
-                docker run -d \
-                    --name ${CONTAINER_SERVER} \
-                    --restart unless-stopped \
-                    -p ${APP_PORT_API}:5000 \
-                    -v sourashtra-uploads:/app/uploads \
-                    ${IMAGE_SERVER}:\$PREV 2>/dev/null || echo "No previous server image"
+                if [ "\$PREV" -gt 0 ]; then
+                    docker run -d \
+                        --name ${CONTAINER_SERVER} \
+                        --restart unless-stopped \
+                        -p ${APP_PORT_API}:5000 \
+                        -v sourashtra-uploads:/app/uploads \
+                        ${IMAGE_SERVER}:\$PREV 2>/dev/null || echo "No previous server image to roll back to"
 
-                docker run -d \
-                    --name ${CONTAINER_CLIENT} \
-                    --restart unless-stopped \
-                    --link ${CONTAINER_SERVER}:server \
-                    -p ${APP_PORT_HTTP}:80 \
-                    ${IMAGE_CLIENT}:\$PREV 2>/dev/null || echo "No previous client image"
+                    docker run -d \
+                        --name ${CONTAINER_CLIENT} \
+                        --restart unless-stopped \
+                        --link ${CONTAINER_SERVER}:server \
+                        -p ${APP_PORT_HTTP}:80 \
+                        ${IMAGE_CLIENT}:\$PREV 2>/dev/null || echo "No previous client image to roll back to"
+                else
+                    echo "Build #1 failed — no previous image to roll back to"
+                fi
             """
         }
         always {

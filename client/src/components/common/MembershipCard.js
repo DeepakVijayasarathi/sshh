@@ -41,7 +41,7 @@ const MembershipCard = ({ member, onClose }) => {
         <div className="mc-actions">
           <h3>Digital Membership Card</h3>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="btn btn-primary btn-sm" onClick={handlePrint}>🖨️ Print Card</button>
+            <button className="btn btn-primary btn-sm" onClick={handlePrint}>Print Card</button>
             <button className="btn btn-outline btn-sm" onClick={onClose}>Close</button>
           </div>
         </div>

@@ -11,8 +11,8 @@ const Contact = () => {
 
   const contactItems = [
     { Icon: MapPin, color: '#8B0000', label: 'Address',      value: settings.contact_address || 'Sourashtra Community Hall, Chennai, Tamil Nadu 600001' },
-    { Icon: Phone,  color: '#2563eb', label: 'Phone',        value: settings.contact_phone   || '+91 98765 43210' },
-    { Icon: Mail,   color: '#059669', label: 'Email',        value: settings.contact_email   || 'info@sourashtra.org' },
+    { Icon: Phone,  color: '#2563eb', label: 'Phone',        value: settings.contact_phone   || 'Contact number not set' },
+    { Icon: Mail,   color: '#059669', label: 'Email',        value: settings.contact_email   || 'Email not set' },
     { Icon: Clock,  color: '#7c3aed', label: 'Office Hours', value: 'Mon–Sat, 9:00 AM – 5:00 PM' },
   ];
 

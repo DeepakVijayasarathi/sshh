@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, DollarSign, Briefcase, Calendar, Users, CheckCircle2, Globe, Phone } from 'lucide-react';
+import { MapPin, DollarSign, Briefcase, Calendar, CheckCircle2 } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PublicLayout from '../../components/common/PublicLayout';

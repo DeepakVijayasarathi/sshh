@@ -123,10 +123,10 @@ const Profile = () => {
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {profile?.member_status === 'Active' && (
-                  <button className="btn btn-secondary btn-sm" onClick={fetchCard}>🪪 View ID Card</button>
+                  <button className="btn btn-secondary btn-sm" onClick={fetchCard}>View ID Card</button>
                 )}
                 <button className="btn btn-primary btn-sm" onClick={() => setEditing(!editing)}>
-                  {editing ? 'Cancel' : '✏️ Edit Profile'}
+                  {editing ? 'Cancel' : 'Edit Profile'}
                 </button>
               </div>
             </div>

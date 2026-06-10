@@ -51,7 +51,7 @@ const RequestForm = () => {
     <div className="auth-page">
       <div className="auth-card card">
         <div className="auth-header">
-          <div className="auth-logo">🔑</div>
+          <div style={{width:56,height:56,borderRadius:'50%',background:'rgba(139,0,0,0.08)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 0.5rem'}}><Mail size={26} color="var(--primary,#8B0000)" strokeWidth={1.5}/></div>
           <h2>Forgot Password</h2>
           <p>Enter your email address and we'll send you a reset link.</p>
         </div>
@@ -114,7 +114,7 @@ const ResetForm = ({ token }) => {
     <div className="auth-page">
       <div className="auth-card card">
         <div className="auth-header">
-          <div className="auth-logo">🔒</div>
+          <div style={{width:56,height:56,borderRadius:'50%',background:'rgba(139,0,0,0.08)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 0.5rem'}}><Mail size={26} color="var(--primary,#8B0000)" strokeWidth={1.5}/></div>
           <h2>Set New Password</h2>
           <p>Enter your new password below.</p>
         </div>
