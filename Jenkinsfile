@@ -6,16 +6,21 @@ pipeline {
         IMAGE_CLIENT     = "sourashtra-client"
         CONTAINER_SERVER = "sourashtra-server-app"
         CONTAINER_CLIENT = "sourashtra-client-app"
-        APP_PORT_HTTP    = "80"
-        APP_PORT_API     = "5000"
+        APP_PORT_HTTP    = "8000"
+        APP_PORT_API     = "8001"
+        DB_PORT          = "5432"
+        DB_NAME          = "newsite"
 
-        // Injected from Jenkins credentials (Manage Jenkins → Credentials)
-        DB_HOST     = credentials('DB_HOST')
-        DB_PORT     = credentials('DB_PORT')
-        DB_NAME     = credentials('DB_NAME')
-        DB_USER     = credentials('DB_USER')
-        DB_PASSWORD = credentials('DB_PASSWORD')
-        JWT_SECRET  = credentials('JWT_SECRET')
+        // Secrets pulled from Jenkins Credentials Store — never hardcoded here.
+        // Add these in Jenkins → Manage Jenkins → Credentials → Global:
+        //   ID: sourashtra-db-host      Kind: Secret text   Value: 5.223.64.206
+        //   ID: sourashtra-db-user      Kind: Secret text   Value: admin
+        //   ID: sourashtra-db-password  Kind: Secret text   Value: <db password>
+        //   ID: sourashtra-jwt-secret   Kind: Secret text   Value: <jwt secret>
+        DB_HOST     = credentials('sourashtra-db-host')
+        DB_USER     = credentials('sourashtra-db-user')
+        DB_PASSWORD = credentials('sourashtra-db-password')
+        JWT_SECRET  = credentials('sourashtra-jwt-secret')
     }
 
     stages {
@@ -94,12 +99,12 @@ pipeline {
             steps {
                 sh """
                     sleep 5
-                    API_PORT=\$(docker port ${CONTAINER_SERVER} 5000 | cut -d: -f2)
-                    WEB_PORT=\$(docker port ${CONTAINER_CLIENT} 80   | cut -d: -f2)
-                    echo "Server on port \$API_PORT, client on port \$WEB_PORT"
-                    curl -sf http://localhost:\$API_PORT/api/health || \
+                    API_IP=\$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${CONTAINER_SERVER})
+                    WEB_IP=\$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${CONTAINER_CLIENT})
+                    echo "Server IP: \$API_IP  Client IP: \$WEB_IP"
+                    curl -sf http://\$API_IP:5000/api/health || \
                         (echo "Server health check failed"; exit 1)
-                    curl -sf http://localhost:\$WEB_PORT/ || \
+                    curl -sf http://\$WEB_IP:80/ || \
                         (echo "Client health check failed"; exit 1)
                     echo "Smoke tests passed"
                 """
@@ -138,6 +143,12 @@ pipeline {
                     docker run -d \
                         --name ${CONTAINER_SERVER} \
                         --restart unless-stopped \
+                        -e DB_HOST=${DB_HOST} \
+                        -e DB_PORT=${DB_PORT} \
+                        -e DB_NAME=${DB_NAME} \
+                        -e DB_USER=${DB_USER} \
+                        -e DB_PASSWORD=${DB_PASSWORD} \
+                        -e JWT_SECRET=${JWT_SECRET} \
                         -p ${APP_PORT_API}:5000 \
                         -v sourashtra-uploads:/app/uploads \
                         ${IMAGE_SERVER}:\$PREV 2>/dev/null || echo "No previous server image to roll back to"

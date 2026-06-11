@@ -9,6 +9,10 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
+// Trust the nginx reverse proxy sitting in front of us.
+// Required so express-rate-limit reads the real client IP from X-Forwarded-For.
+app.set('trust proxy', 1);
+
 // Security & utilities
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(compression());
