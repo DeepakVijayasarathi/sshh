@@ -193,8 +193,87 @@ exports.remove = async (req, res) => {
 
 exports.getMembershipTypes = async (req, res) => {
   try {
-    const result = await query('SELECT * FROM membership_types WHERE is_active = TRUE ORDER BY id');
+    const result = await query('SELECT * FROM membership_types WHERE is_active = TRUE ORDER BY display_order ASC, id ASC');
     res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Add extra columns if they don't exist yet (safe to run on every startup)
+const initMembershipTypesTable = async () => {
+  try {
+    await query(`ALTER TABLE membership_types ADD COLUMN IF NOT EXISTS display_order INT DEFAULT 0`);
+    await query(`ALTER TABLE membership_types ADD COLUMN IF NOT EXISTS benefits TEXT`);
+    await query(`ALTER TABLE membership_types ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()`);
+  } catch (_) {}
+};
+initMembershipTypesTable();
+
+// ── Admin: all types including inactive ──────────────────
+exports.getAllMembershipTypes = async (req, res) => {
+  try {
+    const result = await query(`
+      SELECT mt.*,
+             COUNT(m.id) FILTER (WHERE m.status = 'Active') AS active_member_count,
+             COUNT(m.id) AS total_member_count
+        FROM membership_types mt
+        LEFT JOIN members m ON m.membership_type_id = mt.id
+       GROUP BY mt.id
+       ORDER BY mt.display_order ASC, mt.id ASC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.createMembershipType = async (req, res) => {
+  try {
+    const { name, description, fee, duration_months, display_order, is_active, benefits } = req.body;
+    if (!name || fee === undefined) return res.status(400).json({ message: 'Name and fee are required' });
+    const result = await query(
+      `INSERT INTO membership_types (name, description, fee, duration_months, display_order, is_active, benefits)
+       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      [name.trim(), description || '', parseFloat(fee),
+       duration_months ? parseInt(duration_months) : null,
+       parseInt(display_order) || 0, is_active !== false, benefits || null]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.updateMembershipType = async (req, res) => {
+  try {
+    const { name, description, fee, duration_months, display_order, is_active, benefits } = req.body;
+    const result = await query(
+      `UPDATE membership_types
+          SET name=$2, description=$3, fee=$4, duration_months=$5,
+              display_order=$6, is_active=$7, benefits=$8, updated_at=NOW()
+        WHERE id=$1 RETURNING *`,
+      [req.params.id, name.trim(), description || '', parseFloat(fee),
+       duration_months ? parseInt(duration_months) : null,
+       parseInt(display_order) || 0, is_active !== false, benefits || null]
+    );
+    if (!result.rows.length) return res.status(404).json({ message: 'Plan not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.deleteMembershipType = async (req, res) => {
+  try {
+    const inUse = await query('SELECT COUNT(*) FROM members WHERE membership_type_id=$1', [req.params.id]);
+    if (parseInt(inUse.rows[0].count) > 0) {
+      return res.status(409).json({
+        message: `Cannot delete — ${inUse.rows[0].count} member(s) use this plan. Deactivate it instead.`
+      });
+    }
+    await query('DELETE FROM membership_types WHERE id=$1', [req.params.id]);
+    res.json({ message: 'Plan deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

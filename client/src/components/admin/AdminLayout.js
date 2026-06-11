@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, Calendar, Newspaper, Image, Building2,
   Briefcase, GraduationCap, Heart, MessageSquare, Bell, BarChart2,
   Activity, Settings, Globe, LogOut, ChevronLeft, ChevronRight,
-  Menu, X, Search, ChevronDown, UserCog,
+  Menu, X, Search, ChevronDown, UserCog, Crown,
 } from 'lucide-react';
 
 const MENU_GROUPS = [
@@ -21,7 +21,8 @@ const MENU_GROUPS = [
   {
     label: 'Content',
     items: [
-      { to: '/admin/members',       label: 'Members',       icon: Users },
+      { to: '/admin/members',           label: 'Members',          icon: Users  },
+      { to: '/admin/membership-plans', label: 'Membership Plans',  icon: Crown  },
       { to: '/admin/events',        label: 'Events',        icon: Calendar },
       { to: '/admin/news',          label: 'News',          icon: Newspaper },
       { to: '/admin/gallery',       label: 'Gallery',       icon: Image },

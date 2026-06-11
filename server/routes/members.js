@@ -5,7 +5,11 @@ const { uploadImage } = require('../config/multer');
 
 const upload = uploadImage('members');
 
-router.get('/types', ctrl.getMembershipTypes);
+router.get('/types',        ctrl.getMembershipTypes);
+router.get('/types/all',   authenticate, authorize('SuperAdmin', 'Admin'), ctrl.getAllMembershipTypes);
+router.post('/types',      authenticate, authorize('SuperAdmin', 'Admin'), ctrl.createMembershipType);
+router.put('/types/:id',   authenticate, authorize('SuperAdmin', 'Admin'), ctrl.updateMembershipType);
+router.delete('/types/:id',authenticate, authorize('SuperAdmin', 'Admin'), ctrl.deleteMembershipType);
 router.get('/', authenticate, authorize('SuperAdmin', 'Admin'), ctrl.getAll);
 router.get('/:id', authenticate, ctrl.getById);
 router.post('/', upload.single('photo'), ctrl.create);
