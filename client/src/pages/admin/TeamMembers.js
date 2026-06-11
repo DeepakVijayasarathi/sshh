@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import AdminLayout from '../../components/admin/AdminLayout';
 import api from '../../services/api';
 import { Plus, Pencil, Trash2, User, UploadCloud, X } from 'lucide-react';
 
@@ -62,8 +61,7 @@ export default function TeamMembers() {
   const divisions = [...new Set(members.map(m => m.division).filter(Boolean))];
 
   return (
-    <AdminLayout>
-      <div style={{ padding: '1.5rem' }}>
+    <div style={{ padding: '1.5rem' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -224,6 +222,6 @@ export default function TeamMembers() {
           </div>
         </div>
       )}
-    </AdminLayout>
+    </div>
   );
 }
