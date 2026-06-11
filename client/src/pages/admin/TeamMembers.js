@@ -61,8 +61,9 @@ export default function TeamMembers() {
   const divisions = [...new Set(members.map(m => m.division).filter(Boolean))];
 
   return (
-    <div style={{ padding: '1.5rem' }}>
+    <>
 
+      <div style={{ padding: '1.5rem' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
           <div>
@@ -222,6 +223,6 @@ export default function TeamMembers() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
