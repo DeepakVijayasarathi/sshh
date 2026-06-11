@@ -92,7 +92,7 @@ const Navbar = () => {
           </Link>
 
           {/* ── Desktop Nav ─────────────────────────────── */}
-          <ul className="desktop-nav" style={{ display: 'flex', alignItems: 'center', listStyle: 'none', gap: 0, margin: '0 0 0 1rem', padding: 0, flex: 1 }}>
+          <ul className="desktop-nav" style={{ display: 'flex', alignItems: 'center', listStyle: 'none', gap: 2, margin: '0 0 0 1.25rem', padding: 0, flex: 1 }}>
             {NAV_LINKS.map(link => (
               <li key={link.to}>
                 <NavLink
@@ -100,8 +100,8 @@ const Navbar = () => {
                   end={link.end}
                   style={({ isActive }) => ({
                     display: 'block',
-                    padding: '0.375rem 0.5rem',
-                    fontSize: '0.8rem',
+                    padding: '0.4rem 0.7rem',
+                    fontSize: '0.8125rem',
                     fontWeight: isActive ? 600 : 500,
                     color: isActive ? 'var(--primary)' : '#4b5563',
                     borderRadius: 6,

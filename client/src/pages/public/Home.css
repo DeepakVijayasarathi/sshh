@@ -457,9 +457,10 @@
 }
 .patrons-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 340px));
   gap: 24px;
   align-items: start;
+  justify-content: center;
 }
 .patron-card {
   position: relative;
@@ -718,7 +719,7 @@
 @media (max-width: 1024px) {
   .bento-grid { grid-template-columns: 160px 1fr 1fr 1fr 145px; }
   .initiatives-grid { grid-template-columns: 1fr 1fr; }
-  .patrons-grid { grid-template-columns: repeat(3, 1fr); }
+  .patrons-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 320px)); }
   .patrons-section-inner { padding: 3.5rem 1.5rem 4rem; }
 }
 
@@ -742,7 +743,7 @@
   .b-stat-item:last-child { border-right: none; }
   .b-fillers  { grid-template-columns: repeat(2, 1fr); }
   .about-strip { grid-template-columns: 1fr; }
-  .patrons-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+  .patrons-grid { grid-template-columns: minmax(260px, 380px); }
   .patrons-section-inner { padding: 3rem 1.25rem 3.5rem; }
   .patron-card--featured .patron-photo-wrap { width: 120px; height: 120px; }
   .team-grid { grid-template-columns: repeat(2, 1fr); }

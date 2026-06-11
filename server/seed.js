@@ -261,10 +261,29 @@ async function seed() {
     { name: 'Deepa Ganatra',        role: 'Women Wing Head',      designation: 'Madurai Sourashtra Sabha',      division: 'Madurai Division',  order: 2, quote: '' },
   ];
 
+  // Ensure unique constraint exists before upsert
+  await q(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'team_members_name_key' AND conrelid = 'team_members'::regclass
+      ) THEN
+        ALTER TABLE team_members ADD CONSTRAINT team_members_name_key UNIQUE (name);
+      END IF;
+    END $$;
+  `).catch(() => {});
+
   for (const m of teamMembers) {
     await q(
       `INSERT INTO team_members (name, role, designation, division, quote, display_order, is_active)
-       VALUES ($1,$2,$3,$4,$5,$6, TRUE) ON CONFLICT DO NOTHING`,
+       VALUES ($1,$2,$3,$4,$5,$6, TRUE)
+       ON CONFLICT (name) DO UPDATE SET
+         role          = EXCLUDED.role,
+         designation   = EXCLUDED.designation,
+         division      = EXCLUDED.division,
+         quote         = EXCLUDED.quote,
+         display_order = EXCLUDED.display_order,
+         updated_at    = NOW()`,
       [m.name, m.role, m.designation, m.division, m.quote, m.order]
     );
   }
