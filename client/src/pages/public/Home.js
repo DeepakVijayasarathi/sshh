@@ -310,29 +310,43 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ── Patrons ─── */}
+        {/* ── Patrons & Inspiration ─── */}
         {patrons.length > 0 && (
           <div className="patrons-section">
-            <div className="section-header">
-              <h2>Our Patrons &amp; Inspiration</h2>
-            </div>
-            <div className="patrons-grid">
-              {patrons.map((p, i) => (
-                <div key={p.id} className="patron-card">
-                  <div className="patron-photo-wrap">
-                    {p.photo_url
-                      ? <img src={p.photo_url} alt={p.name} className="patron-photo" />
-                      : <div className="patron-photo-initial">{p.name.charAt(0)}</div>
-                    }
+            <div className="patrons-section-inner">
+              <div className="patrons-header">
+                <div className="patrons-header-badge">Honoured Leaders</div>
+                <h2 className="patrons-heading">Our Patrons &amp; Inspiration</h2>
+                <p className="patrons-subheading">
+                  Distinguished personalities whose vision and service inspire the Sourashtra community
+                </p>
+              </div>
+              <div className="patrons-grid">
+                {patrons.map((p, i) => (
+                  <div key={p.id} className={`patron-card ${i === 0 ? 'patron-card--featured' : ''}`}>
+                    <div className="patron-card-bg" />
+                    <div className="patron-photo-wrap">
+                      {p.photo_url
+                        ? <img src={p.photo_url} alt={p.name} className="patron-photo" />
+                        : <div className="patron-photo-initial">{p.name.charAt(0)}</div>
+                      }
+                    </div>
+                    <div className="patron-card-body">
+                      <div className="patron-role-badge">{p.role}</div>
+                      <h3 className="patron-name">{p.name}</h3>
+                      {p.designation && <p className="patron-designation">{p.designation}</p>}
+                      {p.quote && (
+                        <blockquote className="patron-quote">
+                          <span className="patron-quote-mark">"</span>
+                          {p.quote}
+                          <span className="patron-quote-mark">"</span>
+                        </blockquote>
+                      )}
+                    </div>
+                    <div className="patron-card-shine" />
                   </div>
-                  <div className="patron-tag" style={{ color: TAG_COLORS[i % TAG_COLORS.length] }}>
-                    {p.role.toUpperCase()}
-                  </div>
-                  <h3 className="patron-name">{p.name}</h3>
-                  <p className="patron-designation">{p.designation}</p>
-                  {p.quote && <p className="patron-quote">"{p.quote}"</p>}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         )}
