@@ -90,7 +90,7 @@ const ActivityLog = () => {
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-light)' }}>{log.user_email || log.user_id}</div>
                     </td>
                     <td>{actionBadge(log.action)}</td>
-                    <td><span className="badge badge-secondary">{log.entity_type}</span></td>
+                    <td><span className="badge badge-secondary">{log.entity}</span></td>
                     <td style={{ fontSize: '0.75rem', color: 'var(--text-light)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.entity_id || '—'}</td>
                     <td style={{ maxWidth: 280, fontSize: '0.8125rem' }}>
                       {log.details ? (

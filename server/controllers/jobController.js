@@ -52,12 +52,13 @@ exports.getJobById = async (req, res) => {
 
 exports.createJob = async (req, res) => {
   try {
-    const { employerId, jobTitle, companyName, location, salaryRange, experienceRequired, description, lastDate } = req.body;
+    const { employerId, jobTitle, companyName, location, salaryRange, experienceRequired, description, lastDate, isPublished } = req.body;
     const id = uuidv4();
     const result = await query(
-      `INSERT INTO jobs (id, employer_id, job_title, company_name, location, salary_range, experience_required, description, last_date, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-      [id, employerId, jobTitle, companyName, location, salaryRange, experienceRequired, description, lastDate, req.user.id]
+      `INSERT INTO jobs (id, employer_id, job_title, company_name, location, salary_range, experience_required, description, last_date, is_published, created_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+      [id, employerId || null, jobTitle, companyName, location, salaryRange, experienceRequired, description, lastDate,
+       isPublished === true || isPublished === 'true', req.user.id]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -72,7 +73,7 @@ exports.updateJob = async (req, res) => {
       `UPDATE jobs SET job_title=$2, company_name=$3, location=$4, salary_range=$5,
         experience_required=$6, description=$7, last_date=$8, is_published=$9, updated_at=NOW()
        WHERE id=$1 RETURNING *`,
-      [req.params.id, jobTitle, companyName, location, salaryRange, experienceRequired, description, lastDate, isPublished === 'true']
+      [req.params.id, jobTitle, companyName, location, salaryRange, experienceRequired, description, lastDate, isPublished === true || isPublished === 'true']
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -82,7 +83,8 @@ exports.updateJob = async (req, res) => {
 
 exports.deleteJob = async (req, res) => {
   try {
-    await query('DELETE FROM jobs WHERE id=$1', [req.params.id]);
+    const result = await query('DELETE FROM jobs WHERE id=$1 RETURNING id', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ message: 'Job not found' });
     res.json({ message: 'Job deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

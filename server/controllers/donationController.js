@@ -1,13 +1,6 @@
-const { query } = require('../config/database');
+const { query, getClient } = require('../config/database');
 const { paginate, paginatedResponse } = require('../utils/pagination');
 const { v4: uuidv4 } = require('uuid');
-
-const generateReceiptNumber = async () => {
-  const year = new Date().getFullYear();
-  const result = await query("SELECT COUNT(*) FROM donations WHERE receipt_number LIKE $1", [`RCP${year}%`]);
-  const seq = String(parseInt(result.rows[0].count) + 1).padStart(4, '0');
-  return `RCP${year}${seq}`;
-};
 
 exports.getAll = async (req, res) => {
   try {
@@ -21,19 +14,39 @@ exports.getAll = async (req, res) => {
 };
 
 exports.create = async (req, res) => {
+  const client = await getClient();
   try {
     const { donorName, mobileNumber, email, amount, paymentMethod, transactionId, purpose, memberId } = req.body;
-    const receiptNumber = await generateReceiptNumber();
+
+    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+      return res.status(400).json({ message: 'Amount must be a positive number' });
+    }
+
+    await client.query('BEGIN');
+    // Advisory lock prevents concurrent inserts from generating duplicate receipt numbers
+    await client.query("SELECT pg_advisory_xact_lock(hashtext('receipt_number_seq'))");
+
+    const year = new Date().getFullYear();
+    const countResult = await client.query(
+      "SELECT COUNT(*) FROM donations WHERE receipt_number LIKE $1",
+      [`RCP${year}%`]
+    );
+    const receiptNumber = `RCP${year}${String(parseInt(countResult.rows[0].count) + 1).padStart(4, '0')}`;
     const id = uuidv4();
 
-    const result = await query(
+    const result = await client.query(
       `INSERT INTO donations (id, donor_name, mobile_number, email, amount, payment_method, transaction_id, purpose, member_id, receipt_number, status)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'Completed') RETURNING *`,
-      [id, donorName, mobileNumber, email, amount, paymentMethod, transactionId, purpose, memberId || null, receiptNumber]
+      [id, donorName, mobileNumber, email, parseFloat(amount), paymentMethod, transactionId, purpose, memberId || null, receiptNumber]
     );
+
+    await client.query('COMMIT');
     res.status(201).json(result.rows[0]);
   } catch (err) {
+    await client.query('ROLLBACK');
     res.status(500).json({ message: err.message });
+  } finally {
+    client.release();
   }
 };
 

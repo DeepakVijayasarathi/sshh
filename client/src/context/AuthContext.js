@@ -22,20 +22,22 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
-    const { token, user: userData } = res.data;
+    const { token } = res.data;
     localStorage.setItem('token', token);
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    setUser(userData);
-    return userData;
+    const profile = await api.get('/auth/me');
+    setUser(profile.data);
+    return profile.data;
   };
 
   const register = async (data) => {
     const res = await api.post('/auth/register', data);
-    const { token, user: userData } = res.data;
+    const { token } = res.data;
     localStorage.setItem('token', token);
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    setUser(userData);
-    return userData;
+    const profile = await api.get('/auth/me');
+    setUser(profile.data);
+    return profile.data;
   };
 
   const logout = () => {

@@ -42,6 +42,7 @@ exports.update = async (req, res) => {
       'UPDATE women_members SET full_name=$2, mobile_number=$3, email=$4, occupation=$5, program_interest=$6, status=$7 WHERE id=$1 RETURNING *',
       [req.params.id, fullName, mobileNumber, email, occupation, programInterest, status]
     );
+    if (!result.rows.length) return res.status(404).json({ message: 'Women member not found' });
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -50,7 +51,8 @@ exports.update = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
-    await query('DELETE FROM women_members WHERE id=$1', [req.params.id]);
+    const result = await query('DELETE FROM women_members WHERE id=$1 RETURNING id', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ message: 'Women member not found' });
     res.json({ message: 'Women member deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

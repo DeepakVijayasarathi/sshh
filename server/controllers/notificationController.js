@@ -1,4 +1,5 @@
 const { query } = require('../config/database');
+const { paginate, paginatedResponse } = require('../utils/pagination');
 const { v4: uuidv4 } = require('uuid');
 
 exports.getMyNotifications = async (req, res) => {
@@ -58,10 +59,13 @@ exports.markAllRead = async (req, res) => {
 
 exports.getAllNotifications = async (req, res) => {
   try {
+    const { page, limit, offset } = paginate(req);
+    const total = parseInt((await query('SELECT COUNT(*) FROM notifications')).rows[0].count);
     const result = await query(
-      'SELECT * FROM notifications ORDER BY created_at DESC LIMIT 200'
+      'SELECT * FROM notifications ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+      [limit, offset]
     );
-    res.json(result.rows);
+    res.json(paginatedResponse(result.rows, total, page, limit));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -99,7 +103,8 @@ exports.broadcastNotification = async (req, res) => {
 
 exports.deleteNotification = async (req, res) => {
   try {
-    await query('DELETE FROM notifications WHERE id=$1', [req.params.id]);
+    const result = await query('DELETE FROM notifications WHERE id=$1 RETURNING id', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ message: 'Notification not found' });
     res.json({ message: 'Notification deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

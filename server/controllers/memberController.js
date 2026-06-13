@@ -1,14 +1,7 @@
-const { query } = require('../config/database');
+const { query, getClient } = require('../config/database');
 const { paginate, paginatedResponse } = require('../utils/pagination');
 const { sendEmail, emailTemplates } = require('../utils/email');
 const { v4: uuidv4 } = require('uuid');
-
-const generateMembershipNumber = async () => {
-  const year = new Date().getFullYear();
-  const result = await query("SELECT COUNT(*) FROM members WHERE membership_number LIKE $1", [`SCP${year}%`]);
-  const seq = String(parseInt(result.rows[0].count) + 1).padStart(4, '0');
-  return `SCP${year}${seq}`;
-};
 
 exports.getAll = async (req, res) => {
   try {
@@ -131,14 +124,38 @@ exports.update = async (req, res) => {
 };
 
 exports.approve = async (req, res) => {
+  const client = await getClient();
   try {
-    const membershipNumber = await generateMembershipNumber();
-    const result = await query(
+    await client.query('BEGIN');
+    // Advisory lock ensures only one approval runs at a time, preventing duplicate membership numbers
+    await client.query("SELECT pg_advisory_xact_lock(hashtext('membership_number_seq'))");
+
+    const year = new Date().getFullYear();
+    const countResult = await client.query(
+      "SELECT COUNT(*) FROM members WHERE membership_number LIKE $1",
+      [`SCP${year}%`]
+    );
+    const membershipNumber = `SCP${year}${String(parseInt(countResult.rows[0].count) + 1).padStart(4, '0')}`;
+
+    const result = await client.query(
       `UPDATE members SET status='Active', membership_number=$2, approved_by=$3, approved_at=NOW(), updated_at=NOW()
        WHERE id=$1 RETURNING *, (SELECT name FROM membership_types WHERE id = membership_type_id) as type_name`,
       [req.params.id, membershipNumber, req.user.id]
     );
-    if (!result.rows.length) return res.status(404).json({ message: 'Member not found' });
+    if (!result.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Member not found' });
+    }
+
+    const cardId = uuidv4();
+    const validUntil = new Date();
+    validUntil.setFullYear(validUntil.getFullYear() + 1);
+    await client.query(
+      'INSERT INTO member_cards (id, member_id, card_number, valid_until) VALUES ($1,$2,$3,$4)',
+      [cardId, req.params.id, `CARD-${membershipNumber}`, validUntil]
+    );
+
+    await client.query('COMMIT');
 
     const member = result.rows[0];
     if (member.email) {
@@ -146,17 +163,12 @@ exports.approve = async (req, res) => {
       sendEmail({ to: member.email, ...tmpl }).catch(() => {});
     }
 
-    const cardId = uuidv4();
-    const validUntil = new Date();
-    validUntil.setFullYear(validUntil.getFullYear() + 1);
-    await query(
-      'INSERT INTO member_cards (id, member_id, card_number, valid_until) VALUES ($1,$2,$3,$4)',
-      [cardId, req.params.id, `CARD-${membershipNumber}`, validUntil]
-    );
-
-    res.json({ message: 'Member approved', member: result.rows[0] });
+    res.json({ message: 'Member approved', member });
   } catch (err) {
+    await client.query('ROLLBACK');
     res.status(500).json({ message: err.message });
+  } finally {
+    client.release();
   }
 };
 
@@ -184,7 +196,8 @@ exports.reject = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
-    await query('DELETE FROM members WHERE id=$1', [req.params.id]);
+    const result = await query('DELETE FROM members WHERE id=$1 RETURNING id', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ message: 'Member not found' });
     res.json({ message: 'Member deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

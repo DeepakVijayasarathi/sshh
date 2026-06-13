@@ -1,6 +1,6 @@
 const { query } = require('../config/database');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises;
 
 /* ── Create table if not exists (called once on startup) ── */
 const initTable = async () => {
@@ -107,7 +107,7 @@ exports.remove = async (req, res) => {
     const photoUrl = result.rows[0].photo_url;
     if (photoUrl && photoUrl.startsWith('/uploads/team/')) {
       const filePath = path.join(__dirname, '..', photoUrl);
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      fs.unlink(filePath).catch(() => {});
     }
     res.json({ message: 'Deleted' });
   } catch (err) {

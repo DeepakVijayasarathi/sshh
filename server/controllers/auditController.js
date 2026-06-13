@@ -14,8 +14,10 @@ exports.getLogs = async (req, res) => {
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
     const total = parseInt((await query(`SELECT COUNT(*) FROM audit_logs al ${where}`, params)).rows[0].count);
     const data = await query(
-      `SELECT al.*, u.email as user_email
-       FROM audit_logs al LEFT JOIN users u ON u.id = al.user_id
+      `SELECT al.*, u.email as user_email, m.full_name as user_name
+       FROM audit_logs al
+       LEFT JOIN users u ON u.id = al.user_id
+       LEFT JOIN members m ON m.user_id = al.user_id
        ${where} ORDER BY al.created_at DESC LIMIT $${idx} OFFSET $${idx+1}`,
       [...params, limit, offset]
     );

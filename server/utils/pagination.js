@@ -7,6 +7,7 @@ const paginate = (req) => {
 
 const paginatedResponse = (data, total, page, limit) => ({
   data,
+  total,
   pagination: {
     total,
     page,

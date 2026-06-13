@@ -443,7 +443,11 @@ CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(target_user_i
 
 -- ============================================================
 -- DEFAULT SUPER ADMIN USER
--- password: Admin@123 (bcrypt hash)
+-- !! SECURITY WARNING !!
+-- The password hash below corresponds to 'Admin@123'.
+-- This is a KNOWN PUBLIC DEFAULT. You MUST change this password
+-- immediately after the first login in any non-development environment.
+-- Run: UPDATE users SET password_hash = '<new_bcrypt_hash>' WHERE email = 'admin@sourashtra.org';
 -- ============================================================
 INSERT INTO users (email, password_hash, role, is_active, email_verified)
 VALUES (

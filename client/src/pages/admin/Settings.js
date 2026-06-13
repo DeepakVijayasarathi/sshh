@@ -176,7 +176,7 @@ export default function AdminSettings() {
               </button>
             )}
             <p style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.5rem' }}>
-              PNG, JPG or SVG. Recommended: 200×60px.
+              PNG, JPG, GIF or WEBP. Recommended: 200×60px.
             </p>
           </div>
         </div>

@@ -128,7 +128,11 @@ const Notifications = () => {
                       <span title={n.message}>{n.message?.substring(0, 80)}{n.message?.length > 80 ? '...' : ''}</span>
                     </td>
                     <td>{typeBadge(n.type)}</td>
-                    <td style={{ fontSize: '0.8125rem' }}>{n.user_email || n.user_id ? (n.user_email || n.user_id).toString().substring(0, 30) : 'Broadcast'}</td>
+                    <td style={{ fontSize: '0.8125rem' }}>
+                      {n.target_user_id
+                        ? <span title={n.target_user_id}>User (individual)</span>
+                        : n.target_role || 'All Members'}
+                    </td>
                     <td>
                       <span className={`badge ${n.is_read ? 'badge-secondary' : 'badge-info'}`}>
                         {n.is_read ? 'Read' : 'Unread'}

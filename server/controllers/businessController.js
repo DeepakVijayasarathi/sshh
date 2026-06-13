@@ -5,11 +5,13 @@ const { v4: uuidv4 } = require('uuid');
 exports.getAll = async (req, res) => {
   try {
     const { page, limit, offset } = paginate(req);
-    const { search, category, status = 'Active', featured } = req.query;
+    const { search, category, status, featured } = req.query;
 
-    let conditions = [`b.status = $1`];
-    let params = [status];
-    let idx = 2;
+    // 'all' = no status filter (admin view); undefined = default to Active (public view)
+    const effectiveStatus = status === 'all' ? null : (status || 'Active');
+    let conditions = effectiveStatus ? [`b.status = $1`] : [];
+    let params = effectiveStatus ? [effectiveStatus] : [];
+    let idx = effectiveStatus ? 2 : 1;
 
     if (search) { conditions.push(`(b.business_name ILIKE $${idx} OR b.owner_name ILIKE $${idx})`); params.push(`%${search}%`); idx++; }
     if (category) { conditions.push(`bc.name = $${idx}`); params.push(category); idx++; }
@@ -92,7 +94,8 @@ exports.approve = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
-    await query('DELETE FROM businesses WHERE id=$1', [req.params.id]);
+    const result = await query('DELETE FROM businesses WHERE id=$1 RETURNING id', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ message: 'Business not found' });
     res.json({ message: 'Business deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

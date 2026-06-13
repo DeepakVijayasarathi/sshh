@@ -1,5 +1,6 @@
 const { query } = require('../config/database');
 const ExcelJS = require('exceljs');
+const PDFDocument = require('pdfkit');
 
 const exportToExcel = async (res, data, columns, sheetName) => {
   const workbook = new ExcelJS.Workbook();
@@ -11,6 +12,51 @@ const exportToExcel = async (res, data, columns, sheetName) => {
   res.setHeader('Content-Disposition', `attachment; filename=${sheetName}.xlsx`);
   await workbook.xlsx.write(res);
   res.end();
+};
+
+const exportToPDF = (res, data, columns, title) => {
+  const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename=${title}.pdf`);
+  doc.pipe(res);
+
+  const pageWidth = doc.page.width - 80;
+  const colWidth = Math.floor(pageWidth / columns.length);
+
+  doc.fontSize(16).font('Helvetica-Bold').fillColor('#000')
+    .text(title, 40, 40, { align: 'center', width: pageWidth });
+  doc.fontSize(9).font('Helvetica').fillColor('#666')
+    .text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, 40, doc.y + 4, { align: 'center', width: pageWidth });
+
+  let y = doc.y + 16;
+
+  // Header row
+  doc.rect(40, y, pageWidth, 20).fill('#8B0000');
+  doc.fontSize(8).font('Helvetica-Bold').fillColor('white');
+  columns.forEach((col, i) => {
+    doc.text(col.header, 40 + i * colWidth + 3, y + 6, { width: colWidth - 6, lineBreak: false });
+  });
+  y += 20;
+
+  // Data rows
+  doc.font('Helvetica').fontSize(7.5);
+  data.forEach((row, ri) => {
+    if (y > doc.page.height - 60) {
+      doc.addPage();
+      y = 40;
+    }
+    if (ri % 2 === 0) {
+      doc.rect(40, y, pageWidth, 16).fill('#f5f5f5');
+    }
+    doc.fillColor('#333');
+    columns.forEach((col, i) => {
+      const val = row[col.key] != null ? String(row[col.key]) : '—';
+      doc.text(val, 40 + i * colWidth + 3, y + 4, { width: colWidth - 6, lineBreak: false });
+    });
+    y += 16;
+  });
+
+  doc.end();
 };
 
 exports.memberReport = async (req, res) => {
@@ -32,20 +78,21 @@ exports.memberReport = async (req, res) => {
       params
     );
 
-    if (format === 'excel') {
-      return exportToExcel(res, result.rows, [
-        { header: 'Member No', key: 'membership_number', width: 15 },
-        { header: 'Name', key: 'full_name', width: 25 },
-        { header: 'Gender', key: 'gender', width: 10 },
-        { header: 'Mobile', key: 'mobile_number', width: 15 },
-        { header: 'Email', key: 'email', width: 25 },
-        { header: 'District', key: 'district', width: 15 },
-        { header: 'City', key: 'city', width: 15 },
-        { header: 'Occupation', key: 'occupation', width: 20 },
-        { header: 'Type', key: 'membership_type', width: 15 },
-        { header: 'Status', key: 'status', width: 10 },
-      ], 'Members');
-    }
+    const columns = [
+      { header: 'Member No', key: 'membership_number', width: 15 },
+      { header: 'Name', key: 'full_name', width: 25 },
+      { header: 'Gender', key: 'gender', width: 10 },
+      { header: 'Mobile', key: 'mobile_number', width: 15 },
+      { header: 'Email', key: 'email', width: 25 },
+      { header: 'District', key: 'district', width: 15 },
+      { header: 'City', key: 'city', width: 15 },
+      { header: 'Occupation', key: 'occupation', width: 20 },
+      { header: 'Type', key: 'membership_type', width: 15 },
+      { header: 'Status', key: 'status', width: 10 },
+    ];
+
+    if (format === 'excel') return exportToExcel(res, result.rows, columns, 'Members');
+    if (format === 'pdf') return exportToPDF(res, result.rows, columns, 'Member Report');
 
     res.json({ count: result.rows.length, data: result.rows });
   } catch (err) {
@@ -61,15 +108,18 @@ exports.eventReport = async (req, res) => {
        FROM events e LEFT JOIN event_registrations er ON er.event_id = e.id
        GROUP BY e.id ORDER BY e.event_date DESC`
     );
-    if (format === 'excel') {
-      return exportToExcel(res, result.rows, [
-        { header: 'Event', key: 'title', width: 30 },
-        { header: 'Date', key: 'event_date', width: 15 },
-        { header: 'Venue', key: 'venue', width: 25 },
-        { header: 'Limit', key: 'registration_limit', width: 10 },
-        { header: 'Registered', key: 'registered', width: 12 },
-      ], 'Events');
-    }
+
+    const columns = [
+      { header: 'Event', key: 'title', width: 30 },
+      { header: 'Date', key: 'event_date', width: 15 },
+      { header: 'Venue', key: 'venue', width: 25 },
+      { header: 'Limit', key: 'registration_limit', width: 10 },
+      { header: 'Registered', key: 'registered', width: 12 },
+    ];
+
+    if (format === 'excel') return exportToExcel(res, result.rows, columns, 'Events');
+    if (format === 'pdf') return exportToPDF(res, result.rows, columns, 'Event Report');
+
     res.json({ count: result.rows.length, data: result.rows });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -79,22 +129,31 @@ exports.eventReport = async (req, res) => {
 exports.donationReport = async (req, res) => {
   try {
     const { format = 'json' } = req.query;
-    const result = await query(
-      `SELECT receipt_number, donor_name, mobile_number, email, amount, payment_method, purpose, donated_at
-       FROM donations WHERE status='Completed' ORDER BY donated_at DESC`
-    );
-    if (format === 'excel') {
-      return exportToExcel(res, result.rows, [
-        { header: 'Receipt No', key: 'receipt_number', width: 15 },
-        { header: 'Donor', key: 'donor_name', width: 25 },
-        { header: 'Mobile', key: 'mobile_number', width: 15 },
-        { header: 'Amount', key: 'amount', width: 12 },
-        { header: 'Payment Method', key: 'payment_method', width: 15 },
-        { header: 'Purpose', key: 'purpose', width: 20 },
-        { header: 'Date', key: 'donated_at', width: 20 },
-      ], 'Donations');
-    }
-    res.json({ count: result.rows.length, data: result.rows });
+    const [result, summaryResult] = await Promise.all([
+      query(
+        `SELECT receipt_number, donor_name, mobile_number, email, amount, payment_method, purpose, donated_at
+         FROM donations WHERE status='Completed' ORDER BY donated_at DESC`
+      ),
+      query(
+        `SELECT COUNT(*) as count, COALESCE(SUM(amount), 0) as total_amount
+         FROM donations WHERE status='Completed'`
+      ),
+    ]);
+
+    const columns = [
+      { header: 'Receipt No', key: 'receipt_number', width: 15 },
+      { header: 'Donor', key: 'donor_name', width: 25 },
+      { header: 'Mobile', key: 'mobile_number', width: 15 },
+      { header: 'Amount', key: 'amount', width: 12 },
+      { header: 'Payment Method', key: 'payment_method', width: 15 },
+      { header: 'Purpose', key: 'purpose', width: 20 },
+      { header: 'Date', key: 'donated_at', width: 20 },
+    ];
+
+    if (format === 'excel') return exportToExcel(res, result.rows, columns, 'Donations');
+    if (format === 'pdf') return exportToPDF(res, result.rows, columns, 'Donation Report');
+
+    res.json({ count: result.rows.length, data: result.rows, summary: summaryResult.rows[0] });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -102,6 +161,7 @@ exports.donationReport = async (req, res) => {
 
 exports.districtReport = async (req, res) => {
   try {
+    const { format = 'json' } = req.query;
     const result = await query(
       `SELECT district, COUNT(*) as total,
               SUM(CASE WHEN status='Active' THEN 1 ELSE 0 END) as active,
@@ -109,6 +169,17 @@ exports.districtReport = async (req, res) => {
        FROM members WHERE district IS NOT NULL
        GROUP BY district ORDER BY total DESC`
     );
+
+    const columns = [
+      { header: 'District', key: 'district', width: 20 },
+      { header: 'Total', key: 'total', width: 10 },
+      { header: 'Active', key: 'active', width: 10 },
+      { header: 'Pending', key: 'pending', width: 10 },
+    ];
+
+    if (format === 'excel') return exportToExcel(res, result.rows, columns, 'Districts');
+    if (format === 'pdf') return exportToPDF(res, result.rows, columns, 'District Report');
+
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ message: err.message });

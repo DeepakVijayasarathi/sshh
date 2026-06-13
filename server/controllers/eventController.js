@@ -88,7 +88,8 @@ exports.update = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
-    await query('DELETE FROM events WHERE id=$1', [req.params.id]);
+    const result = await query('DELETE FROM events WHERE id=$1 RETURNING id', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ message: 'Event not found' });
     res.json({ message: 'Event deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -109,11 +110,22 @@ exports.register = async (req, res) => {
       }
     }
 
+    // For guest registrations (no memberId), prevent duplicate registration by email
+    if (!memberId && email) {
+      const dup = await query(
+        'SELECT id FROM event_registrations WHERE event_id=$1 AND email=$2 AND member_id IS NULL',
+        [req.params.id, email]
+      );
+      if (dup.rows.length) {
+        return res.status(400).json({ message: 'Already registered with this email' });
+      }
+    }
+
     const id = uuidv4();
     await query(
       `INSERT INTO event_registrations (id, event_id, member_id, name, email, mobile)
        VALUES ($1,$2,$3,$4,$5,$6)`,
-      [id, req.params.id, memberId, name, email, mobile]
+      [id, req.params.id, memberId || null, name, email, mobile]
     );
 
     if (email) {

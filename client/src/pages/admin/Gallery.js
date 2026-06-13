@@ -20,8 +20,10 @@ const Gallery = () => {
 
   const openAlbum = async (album) => {
     setSelected(album);
-    const res = await api.get(`/gallery/albums/${album.id}`);
-    setItems(res.data.items || []);
+    try {
+      const res = await api.get(`/gallery/albums/${album.id}`);
+      setItems(res.data.items || []);
+    } catch { toast.error('Failed to load album photos'); }
   };
 
   useEffect(() => { loadAlbums(); }, []);

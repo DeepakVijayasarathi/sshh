@@ -11,7 +11,7 @@ const Businesses = () => {
 
   const load = () => {
     setLoading(true);
-    const url = status ? `/businesses?status=${status}&limit=50` : '/businesses?limit=50';
+    const url = `/businesses?status=${status || 'all'}&limit=50`;
     api.get(url).then(r => setBusinesses(r.data.data || [])).catch(() => setBusinesses([])).finally(() => setLoading(false));
   };
 

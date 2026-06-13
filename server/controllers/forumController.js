@@ -99,7 +99,8 @@ exports.addComment = async (req, res) => {
 
 exports.deleteIssue = async (req, res) => {
   try {
-    await query('DELETE FROM community_issues WHERE id=$1', [req.params.id]);
+    const result = await query('DELETE FROM community_issues WHERE id=$1 RETURNING id', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ message: 'Issue not found' });
     res.json({ message: 'Issue deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

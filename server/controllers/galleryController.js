@@ -67,6 +67,7 @@ exports.updateAlbum = async (req, res) => {
       'UPDATE gallery_albums SET title=$2, description=$3, is_published=$4, updated_at=NOW() WHERE id=$1 RETURNING *',
       [req.params.id, title, description, isPublished === 'true']
     );
+    if (!result.rows.length) return res.status(404).json({ message: 'Album not found' });
     res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -75,7 +76,8 @@ exports.updateAlbum = async (req, res) => {
 
 exports.deleteAlbum = async (req, res) => {
   try {
-    await query('DELETE FROM gallery_albums WHERE id=$1', [req.params.id]);
+    const result = await query('DELETE FROM gallery_albums WHERE id=$1 RETURNING id', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ message: 'Album not found' });
     res.json({ message: 'Album deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -105,7 +107,8 @@ exports.addItems = async (req, res) => {
 
 exports.deleteItem = async (req, res) => {
   try {
-    await query('DELETE FROM gallery_items WHERE id=$1', [req.params.itemId]);
+    const result = await query('DELETE FROM gallery_items WHERE id=$1 RETURNING id', [req.params.itemId]);
+    if (!result.rows.length) return res.status(404).json({ message: 'Gallery item not found' });
     res.json({ message: 'Item deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

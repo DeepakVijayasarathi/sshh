@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const { query } = require('../config/database');
-const { sendEmail } = require('../utils/email');
+const { query, getClient } = require('../config/database');
+const { sendEmail, emailTemplates } = require('../utils/email');
+const { v4: uuidv4 } = require('uuid');
 
 exports.getProfile = async (req, res) => {
   try {
@@ -135,12 +136,16 @@ exports.resetPassword = async (req, res) => {
 
 exports.getUsersList = async (req, res) => {
   try {
+    const limit = Math.min(200, Math.max(1, parseInt(req.query.limit) || 50));
+    const offset = Math.max(0, parseInt(req.query.offset) || 0);
     const result = await query(
       `SELECT u.id, u.email, u.role, u.is_active, u.last_login, u.created_at,
               m.full_name, m.membership_number
        FROM users u
        LEFT JOIN members m ON m.user_id = u.id
-       ORDER BY u.created_at DESC`
+       ORDER BY u.created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
     );
     res.json(result.rows);
   } catch (err) {
@@ -162,35 +167,65 @@ exports.toggleUserActive = async (req, res) => {
 };
 
 exports.bulkApproveMembers = async (req, res) => {
+  const { memberIds } = req.body;
+  if (!Array.isArray(memberIds) || !memberIds.length) {
+    return res.status(400).json({ message: 'memberIds array required' });
+  }
+
+  const client = await getClient();
   try {
-    const { memberIds } = req.body;
-    if (!Array.isArray(memberIds) || !memberIds.length) {
-      return res.status(400).json({ message: 'memberIds array required' });
-    }
+    await client.query('BEGIN');
+    // Same advisory lock as single approve — prevents duplicate numbers across both code paths
+    await client.query("SELECT pg_advisory_xact_lock(hashtext('membership_number_seq'))");
+
     const year = new Date().getFullYear();
     const results = [];
+
     for (const id of memberIds) {
-      // Use a transaction-safe sequence per iteration to avoid race conditions
-      const r = await query(
-        `WITH seq AS (
-           SELECT LPAD((COUNT(*) + 1)::TEXT, 4, '0') as n
-           FROM members
-           WHERE membership_number LIKE $3
-         )
-         UPDATE members
+      const countResult = await client.query(
+        "SELECT COUNT(*) FROM members WHERE membership_number LIKE $1",
+        [`SCP${year}%`]
+      );
+      const membershipNumber = `SCP${year}${String(parseInt(countResult.rows[0].count) + 1).padStart(4, '0')}`;
+
+      const r = await client.query(
+        `UPDATE members
             SET status='Active',
-                membership_number = CONCAT($4, (SELECT n FROM seq)),
-                approved_by=$2,
+                membership_number=$2,
+                approved_by=$3,
                 approved_at=NOW(),
                 updated_at=NOW()
           WHERE id=$1 AND status='Pending'
-         RETURNING id, full_name, membership_number`,
-        [id, req.user.id, `SCP${year}%`, `SCP${year}`]
+         RETURNING id, full_name, membership_number, email`,
+        [id, membershipNumber, req.user.id]
       );
-      if (r.rows.length) results.push(r.rows[0]);
+      if (r.rows.length) {
+        results.push(r.rows[0]);
+        const cardId = uuidv4();
+        const validUntil = new Date();
+        validUntil.setFullYear(validUntil.getFullYear() + 1);
+        await client.query(
+          'INSERT INTO member_cards (id, member_id, card_number, valid_until) VALUES ($1,$2,$3,$4)',
+          [cardId, id, `CARD-${membershipNumber}`, validUntil]
+        );
+      }
     }
+
+    await client.query('COMMIT');
+
+    // Fire-and-forget approval emails
+    for (const m of results) {
+      if (m.email) {
+        const tmpl = emailTemplates.memberApproval(m.full_name, m.membership_number);
+        sendEmail({ to: m.email, ...tmpl }).catch(() => {});
+      }
+    }
+
     res.json({ approved: results.length, members: results });
   } catch (err) {
+    await client.query('ROLLBACK');
     res.status(500).json({ message: err.message });
+  } finally {
+    client.release();
   }
 };

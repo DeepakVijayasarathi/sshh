@@ -76,6 +76,17 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Multer-specific error handler — must come before the global handler
+app.use((err, req, res, next) => {
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ message: 'File too large. Maximum allowed size is 5 MB.' });
+  }
+  if (err.message === 'Only image files are allowed' || err.message === 'Only PDF, DOC, DOCX and image files are allowed') {
+    return res.status(415).json({ message: err.message });
+  }
+  next(err);
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);

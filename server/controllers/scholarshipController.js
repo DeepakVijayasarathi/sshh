@@ -42,14 +42,26 @@ exports.apply = async (req, res) => {
     const { fullName, mobileNumber, email, schoolCollege, course, yearOfStudy, district, city, academicYear, marksPercentage } = req.body;
     const files = req.files || {};
 
-    const studentId = uuidv4();
     const appId = uuidv4();
 
-    await query(
-      `INSERT INTO students (id, user_id, full_name, mobile_number, email, school_college, course, year_of_study, district, city)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-      [studentId, req.user?.id, fullName, mobileNumber, email, schoolCollege, course, yearOfStudy, district, city]
-    );
+    // Reuse existing student record for the same email/mobile to avoid duplicates
+    let studentResult = await query('SELECT id FROM students WHERE email = $1 OR mobile_number = $2 LIMIT 1', [email, mobileNumber]);
+    let studentId;
+    if (studentResult.rows.length) {
+      studentId = studentResult.rows[0].id;
+      await query(
+        `UPDATE students SET full_name=$2, school_college=$3, course=$4, year_of_study=$5, district=$6, city=$7
+         WHERE id=$1`,
+        [studentId, fullName, schoolCollege, course, yearOfStudy, district, city]
+      );
+    } else {
+      studentId = uuidv4();
+      await query(
+        `INSERT INTO students (id, user_id, full_name, mobile_number, email, school_college, course, year_of_study, district, city)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+        [studentId, req.user?.id, fullName, mobileNumber, email, schoolCollege, course, yearOfStudy, district, city]
+      );
+    }
 
     const incomeCertUrl = files.incomeCertificate?.[0] ? `/uploads/scholarships/${files.incomeCertificate[0].filename}` : null;
     const commCertUrl = files.communityCertificate?.[0] ? `/uploads/scholarships/${files.communityCertificate[0].filename}` : null;

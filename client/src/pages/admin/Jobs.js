@@ -44,8 +44,10 @@ const Jobs = () => {
   };
 
   const loadApps = async (id) => {
-    const res = await api.get(`/jobs/${id}/applications`);
-    setApps(res.data); setViewApps(id);
+    try {
+      const res = await api.get(`/jobs/${id}/applications`);
+      setApps(res.data); setViewApps(id);
+    } catch { toast.error('Failed to load applications'); }
   };
 
   const set = (f) => (e) => setForm({ ...form, [f]: f === 'isPublished' ? e.target.checked : e.target.value });

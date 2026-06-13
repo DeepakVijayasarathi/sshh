@@ -26,6 +26,7 @@ const DonationPage = lazy(() => import('./pages/public/Donation'));
 const ScholarshipPage = lazy(() => import('./pages/public/Scholarship'));
 const ProfilePage = lazy(() => import('./pages/public/Profile'));
 const ForgotPasswordPage = lazy(() => import('./pages/public/ForgotPassword'));
+const VerifyEmailPage = lazy(() => import('./pages/public/VerifyEmail'));
 const YouthWingPage = lazy(() => import('./pages/public/YouthWing'));
 const WomenWingPage = lazy(() => import('./pages/public/WomenWing'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -103,6 +104,7 @@ const AppRoutes = () => (
       <Route path="/scholarship" element={<ScholarshipPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/youth" element={<YouthWingPage />} />
       <Route path="/women" element={<WomenWingPage />} />
 

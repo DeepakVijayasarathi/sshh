@@ -77,7 +77,8 @@ exports.update = async (req, res) => {
 
 exports.remove = async (req, res) => {
   try {
-    await query('DELETE FROM news WHERE id=$1', [req.params.id]);
+    const result = await query('DELETE FROM news WHERE id=$1 RETURNING id', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ message: 'News not found' });
     res.json({ message: 'News deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
