@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 exports.getIssues = async (req, res) => {
   try {
     const { page, limit, offset } = paginate(req);
-    const { status, category } = req.query;
+    const { status, category, search } = req.query;
 
     let conditions = [];
     let params = [];
@@ -13,6 +13,10 @@ exports.getIssues = async (req, res) => {
 
     if (status) { conditions.push(`ci.status = $${idx}`); params.push(status); idx++; }
     if (category) { conditions.push(`ci.category = $${idx}`); params.push(category); idx++; }
+    if (search) {
+      conditions.push(`(ci.issue_title ILIKE $${idx} OR ci.name ILIKE $${idx} OR ci.contact_number ILIKE $${idx} OR ci.location ILIKE $${idx})`);
+      params.push(`%${search}%`); idx++;
+    }
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
     const total = parseInt((await query(`SELECT COUNT(*) FROM community_issues ci ${where}`, params)).rows[0].count);
@@ -38,7 +42,7 @@ exports.getIssueById = async (req, res) => {
        WHERE ic.issue_id=$1 ORDER BY ic.created_at`,
       [req.params.id]
     );
-    res.json({ issue: issue.rows[0], comments: comments.rows });
+    res.json({ ...issue.rows[0], comments: comments.rows });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
