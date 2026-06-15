@@ -33,7 +33,6 @@ const MENU_GROUPS = [
     label: 'Business',
     items: [
       { to: '/admin/businesses',    label: 'Businesses',    icon: Building2 },
-      { to: '/admin/jobs',          label: 'Jobs',          icon: Briefcase },
       { to: '/admin/scholarships',  label: 'Scholarships',  icon: GraduationCap },
       { to: '/admin/donations',     label: 'Donations',     icon: Heart },
     ],

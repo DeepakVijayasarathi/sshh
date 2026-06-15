@@ -47,13 +47,14 @@ const Forum = () => {
         {loading ? <div className="loading-center"><div className="spinner" /></div> : (
           <div className="table-responsive">
             <table>
-              <thead><tr><th>Issue Title</th><th>By</th><th>Category</th><th>Location</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Issue Title</th><th>Contact Person</th><th>Contact No.</th><th>Category</th><th>Location</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
               <tbody>
-                {issues.length === 0 ? <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-light)' }}>No issues</td></tr> :
+                {issues.length === 0 ? <tr><td colSpan={8} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-light)' }}>No issues</td></tr> :
                   issues.map(issue => (
                     <tr key={issue.id}>
                       <td style={{ fontWeight: 500 }}>{issue.issue_title.substring(0, 40)}{issue.issue_title.length > 40 ? '...' : ''}</td>
-                      <td>{issue.name}</td>
+                      <td>{issue.name || '—'}</td>
+                      <td>{issue.contact_number || '—'}</td>
                       <td><span className="badge badge-info" style={{ fontSize: '0.7rem' }}>{issue.category || '—'}</span></td>
                       <td>{issue.location || '—'}</td>
                       <td><span className={`badge ${STATUS_BADGES[issue.status]}`}>{issue.status}</span></td>

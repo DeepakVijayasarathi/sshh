@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Globe, Phone, Star, ChevronRight, Building2 } from 'lucide-react';
+import { MapPin, Globe, Phone, Star, ChevronRight, Building2, Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import PublicLayout from '../../components/common/PublicLayout';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
 const BusinessDirectory = () => {
+  const { user } = useAuth();
   const [businesses, setBusinesses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -86,16 +89,20 @@ const BusinessDirectory = () => {
                   )}
 
                   <div className="biz-meta">
-                    {b.mobile_number && (
-                      <span className="biz-meta-item"><Phone size={12} /> {b.mobile_number}</span>
-                    )}
                     {b.city && (
                       <span className="biz-meta-item"><MapPin size={12} /> {b.city}</span>
+                    )}
+                    {user ? (
+                      b.mobile_number && <span className="biz-meta-item"><Phone size={12} /> {b.mobile_number}</span>
+                    ) : (
+                      <span className="biz-meta-item" style={{ color: '#94a3b8', fontStyle: 'italic' }}>
+                        <Lock size={11} /> <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 500 }}>Sign in</Link> to view contact
+                      </span>
                     )}
                   </div>
 
                   <div className="biz-footer">
-                    {b.website ? (
+                    {user && b.website ? (
                       <a href={b.website} target="_blank" rel="noreferrer" className="biz-website" onClick={e => e.stopPropagation()}>
                         <Globe size={12} /> Visit Website
                       </a>

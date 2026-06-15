@@ -66,21 +66,25 @@ exports.create = async (req, res) => {
   try {
     const {
       userId, fullName, gender, dateOfBirth, mobileNumber, email,
-      address, district, city, pincode, occupation, education,
-      membershipTypeId, aadhaarNumber
+      address, district, city, pincode, state, occupation, education,
+      membershipTypeId, aadhaarNumber,
+      gotra, ghernov, fatherName, motherName, spouseName, childrenCount, referenceBy
     } = req.body;
     const photoUrl = req.file ? `/uploads/members/${req.file.filename}` : null;
     const id = uuidv4();
 
     const result = await query(
       `INSERT INTO members (id, user_id, full_name, gender, date_of_birth, mobile_number, email,
-        address, district, city, pincode, occupation, education, photo_url, membership_type_id,
-        aadhaar_number, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'Pending')
+        address, district, city, pincode, state, occupation, education, photo_url, membership_type_id,
+        aadhaar_number, gotra, ghernov, father_name, mother_name, spouse_name, children_count,
+        reference_by, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,'Pending')
        RETURNING *`,
       [id, userId, fullName, gender, dateOfBirth, mobileNumber, email,
-       address, district, city, pincode, occupation, education, photoUrl,
-       membershipTypeId, aadhaarNumber]
+       address, district, city, pincode, state || null, occupation, education, photoUrl,
+       membershipTypeId, aadhaarNumber || null,
+       gotra || null, ghernov || null, fatherName || null, motherName || null,
+       spouseName || null, childrenCount ? parseInt(childrenCount) : 0, referenceBy || null]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -222,6 +226,22 @@ const initMembershipTypesTable = async () => {
   } catch (_) {}
 };
 initMembershipTypesTable();
+
+// Add community-specific member fields if they don't exist
+const initMemberExtraFields = async () => {
+  const cols = [
+    `ALTER TABLE members ADD COLUMN IF NOT EXISTS gotra VARCHAR(150)`,
+    `ALTER TABLE members ADD COLUMN IF NOT EXISTS ghernov VARCHAR(150)`,
+    `ALTER TABLE members ADD COLUMN IF NOT EXISTS father_name VARCHAR(255)`,
+    `ALTER TABLE members ADD COLUMN IF NOT EXISTS mother_name VARCHAR(255)`,
+    `ALTER TABLE members ADD COLUMN IF NOT EXISTS spouse_name VARCHAR(255)`,
+    `ALTER TABLE members ADD COLUMN IF NOT EXISTS children_count INT DEFAULT 0`,
+    `ALTER TABLE members ADD COLUMN IF NOT EXISTS state VARCHAR(100)`,
+    `ALTER TABLE members ADD COLUMN IF NOT EXISTS reference_by VARCHAR(255)`,
+  ];
+  for (const sql of cols) { try { await query(sql); } catch (_) {} }
+};
+initMemberExtraFields();
 
 // ── Admin: all types including inactive ──────────────────
 exports.getAllMembershipTypes = async (req, res) => {

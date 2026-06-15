@@ -9,11 +9,9 @@ const NAV_LINKS = [
   { to: '/',           label: 'Home',       end: true },
   { to: '/about',      label: 'About' },
   { to: '/membership', label: 'Membership' },
-  { to: '/members',    label: 'Directory' },
   { to: '/events',     label: 'Events' },
   { to: '/gallery',    label: 'Gallery' },
   { to: '/business',   label: 'Business' },
-  { to: '/jobs',       label: 'Jobs' },
   { to: '/news',       label: 'News' },
   { to: '/forum',      label: 'Forum' },
   { to: '/contact',    label: 'Contact' },
@@ -29,7 +27,7 @@ const Navbar = () => {
   const location  = useLocation();
   const settings  = useSiteSettings();
 
-  const siteName = settings.site_name || 'Sourashtra';
+  const siteName = settings.site_name || 'Saurashtra Heritage Chair';
   const siteSub  = settings.site_tagline || 'Community Portal';
 
   // Shadow on scroll
@@ -170,13 +168,13 @@ const Navbar = () => {
                     <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#4b5563', transition: 'background 0.15s' }}
                       onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <User size={14} /> My Profile
+                      <User size={14} /> My Profile & Card
                     </Link>
                     {['SuperAdmin', 'Admin'].includes(user.role) && (
                       <Link to="/admin" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#4b5563', transition: 'background 0.15s' }}
                         onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                        <LayoutDashboard size={14} /> Dashboard
+                        <LayoutDashboard size={14} /> Admin Dashboard
                       </Link>
                     )}
                     <button
@@ -254,7 +252,7 @@ const Navbar = () => {
               <>
                 <Link to="/profile" onClick={() => setMenuOpen(false)}
                   className="btn btn-ghost" style={{ width: '100%', justifyContent: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
-                  <User size={16} /> My Profile
+                  <User size={16} /> My Profile &amp; Card
                 </Link>
                 {['SuperAdmin', 'Admin'].includes(user.role) && (
                   <Link to="/admin" onClick={() => setMenuOpen(false)}

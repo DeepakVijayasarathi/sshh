@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, Download, Share2 } from 'lucide-react';
 import './MembershipCard.css';
 
 const MembershipCard = ({ member, onClose }) => {
@@ -26,6 +26,11 @@ const MembershipCard = ({ member, onClose }) => {
     win.print();
   };
 
+  const handleWhatsApp = () => {
+    const text = `*Saurashtra Heritage Chair*\nDigital Membership Card\n\nName: ${member.full_name}\nMember No: ${member.membership_number}\nType: ${member.membership_type}\nDistrict: ${member.district || '—'}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
   if (!member) return null;
 
   const qrData = encodeURIComponent(JSON.stringify({
@@ -40,8 +45,9 @@ const MembershipCard = ({ member, onClose }) => {
       <div className="mc-container" onClick={(e) => e.stopPropagation()}>
         <div className="mc-actions">
           <h3>Digital Membership Card</h3>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="btn btn-primary btn-sm" onClick={handlePrint}>Print Card</button>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button className="btn btn-primary btn-sm" onClick={handlePrint} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Download size={13} /> Download / Print</button>
+            <button className="btn btn-outline btn-sm" onClick={handleWhatsApp} style={{ display: 'flex', alignItems: 'center', gap: 4, borderColor: '#25D366', color: '#25D366' }}><Share2 size={13} /> Share on WhatsApp</button>
             <button className="btn btn-outline btn-sm" onClick={onClose}>Close</button>
           </div>
         </div>
@@ -52,7 +58,7 @@ const MembershipCard = ({ member, onClose }) => {
             <div className="mc-header">
               <div className="mc-logo">SC</div>
               <div className="mc-org">
-                <div className="mc-org-name">Sourashtra Community Portal</div>
+                <div className="mc-org-name">Saurashtra Heritage Chair</div>
                 <div className="mc-org-sub">Official Membership Card</div>
               </div>
             </div>
@@ -84,7 +90,7 @@ const MembershipCard = ({ member, onClose }) => {
 
           {/* Back of card */}
           <div className="mc-card mc-back">
-            <div className="mc-back-header">Sourashtra Community Portal</div>
+            <div className="mc-back-header">Saurashtra Heritage Chair</div>
             <div className="mc-back-body">
               <div className="mc-back-row"><span>Member No:</span><strong>{member.membership_number}</strong></div>
               <div className="mc-back-row"><span>Member Name:</span><strong>{member.full_name}</strong></div>
@@ -93,7 +99,7 @@ const MembershipCard = ({ member, onClose }) => {
               {member.district && <div className="mc-back-row"><span>District:</span><strong>{member.district}</strong></div>}
             </div>
             <div className="mc-back-note">
-              This card is the property of Sourashtra Community Portal.<br />
+              This card is the property of Saurashtra Heritage Chair.<br />
               If found, please return to the nearest community office.
             </div>
             <div className="mc-back-contact">+91 98765 43210 | info@sourashtra.org</div>

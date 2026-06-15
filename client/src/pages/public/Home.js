@@ -62,7 +62,7 @@ const SPONSORS = [
 
 export default function Home() {
   const settings = useSiteSettings();
-  const siteName = settings.site_name    || 'Sourashtra Community Portal';
+  const siteName = settings.site_name    || 'Saurashtra Heritage Chair';
   const siteTag  = settings.site_tagline || 'Connecting Our Community, Preserving Our Heritage';
 
   useSEO({
@@ -72,6 +72,7 @@ export default function Home() {
 
   const [events,    setEvents]    = useState([]);
   const [news,      setNews]      = useState([]);
+  const [heritage,  setHeritage]  = useState([]);
   const [liveStats, setLiveStats] = useState(null);
   const [team,      setTeam]      = useState([]);
   const [patrons,   setPatrons]   = useState([]);
@@ -79,6 +80,7 @@ export default function Home() {
   useEffect(() => {
     api.get('/events?upcoming=true&limit=4').then(r => setEvents(r.data.data || [])).catch(() => {});
     api.get('/news?limit=6&featured=true').then(r  => setNews(r.data.data || [])).catch(() => {});
+    api.get('/news?limit=4&category=Cultural+Heritage').then(r => setHeritage(r.data.data || [])).catch(() => {});
     api.get('/dashboard/public-stats').then(r       => setLiveStats(r.data)).catch(() => {});
     api.get('/team').then(r => {
       const all = r.data || [];
@@ -427,6 +429,38 @@ export default function Home() {
               </Link>
             ))}
           </div>
+        </div>
+
+        {/* ── Cultural Heritage Posts ─── */}
+        <div className="initiatives-section">
+          <div className="section-header">
+            <h2>Cultural Heritage</h2>
+            <Link to="/news?category=Cultural+Heritage">View all →</Link>
+          </div>
+          {heritage.length > 0 ? (
+            <div className="initiatives-grid">
+              {heritage.map(n => (
+                <Link key={n.id} to={`/news/${n.id}`} className="initiative-card">
+                  <div className="initiative-img" style={{ background: 'rgba(139,0,0,0.10)', overflow: 'hidden' }}>
+                    {n.image_url
+                      ? <img src={n.image_url} alt={n.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <Landmark size={48} color="#8B0000" strokeWidth={1.25} />
+                    }
+                  </div>
+                  <div className="initiative-body">
+                    <div className="initiative-cat">Cultural Heritage</div>
+                    <h4>{n.title}</h4>
+                    <p>{n.content ? n.content.slice(0, 100) + '…' : ''}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div style={{ background: 'white', borderRadius: 12, border: '1.5px dashed #e5e7eb', padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>
+              <Landmark size={36} color="#d1d5db" style={{ margin: '0 auto 0.75rem' }} />
+              <p>Cultural Heritage posts will appear here. Admins can publish posts under the <strong>Cultural Heritage</strong> category in News.</p>
+            </div>
+          )}
         </div>
 
         {/* ── Partners ─── */}

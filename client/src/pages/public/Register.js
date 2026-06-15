@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { User, Phone, Mail, Lock, MapPin, Briefcase, GraduationCap, Camera, ArrowRight, CheckCircle } from 'lucide-react';
+import { User, Phone, Mail, Lock, MapPin, Briefcase, GraduationCap, Camera, ArrowRight, CheckCircle, Users } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import api from '../../services/api';
 
 const STEPS = [
-  { id: 1, title: 'Account',  subtitle: 'Login credentials' },
-  { id: 2, title: 'Personal', subtitle: 'Your information' },
-  { id: 3, title: 'Location', subtitle: 'Where you live' },
+  { id: 1, title: 'Account',    subtitle: 'Login credentials' },
+  { id: 2, title: 'Personal',   subtitle: 'Your information' },
+  { id: 3, title: 'Location',   subtitle: 'Where you live' },
   { id: 4, title: 'Membership', subtitle: 'Choose your plan' },
 ];
 
@@ -20,8 +20,8 @@ const FieldGroup = ({ children }) => (
 );
 
 const StepIndicator = ({ step, current }) => {
-  const done    = step.id < current;
-  const active  = step.id === current;
+  const done   = step.id < current;
+  const active = step.id === current;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
       <div style={{
@@ -41,19 +41,22 @@ const StepIndicator = ({ step, current }) => {
 };
 
 const Register = () => {
-  const [step, setStep]   = useState(1);
-  const [form, setForm]   = useState({
-    email: '', password: '', fullName: '', mobileNumber: '',
-    gender: '', dateOfBirth: '', address: '', district: '',
-    city: '', occupation: '', education: '', membershipTypeId: '',
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({
+    email: '', password: '', mobileNumber: '',
+    fullName: '', gender: '', dateOfBirth: '',
+    gotra: '', ghernov: '', fatherName: '', motherName: '', spouseName: '', childrenCount: '',
+    occupation: '', education: '',
+    address: '', district: '', city: '', pincode: '', state: '', referenceBy: '',
+    membershipTypeId: '',
   });
-  const [photo, setPhoto]     = useState(null);
+  const [photo, setPhoto]         = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [types, setTypes]     = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [types, setTypes]         = useState([]);
+  const [loading, setLoading]     = useState(false);
   const navigate  = useNavigate();
   const settings  = useSiteSettings();
-  const siteName  = settings.site_name || 'Sourashtra';
+  const siteName  = settings.site_name || 'Saurashtra Heritage Chair';
 
   useEffect(() => {
     api.get('/members/types').then(r => setTypes(r.data)).catch(() => {});
@@ -90,10 +93,13 @@ const Register = () => {
   const nextStep = (e) => { e.preventDefault(); setStep(s => Math.min(s + 1, 4)); };
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
+  // Exclude forum-related membership types from step 4
+  const filteredTypes = types.filter(t => !t.name.toLowerCase().includes('forum'));
+
   return (
     <PublicLayout>
       <div style={{ background: '#f8fafc', minHeight: 'calc(100vh - 68px)', padding: '2.5rem 1rem', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ width: '100%', maxWidth: 560 }}>
+        <div style={{ width: '100%', maxWidth: 620 }}>
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -150,6 +156,13 @@ const Register = () => {
                     </div>
                     <p className="form-hint">Use at least 8 characters with a mix of letters and numbers.</p>
                   </div>
+                  <div className="form-group">
+                    <label className="form-label">Contact Number <span style={{ color: '#ef4444' }}>*</span></label>
+                    <div style={{ position: 'relative' }}>
+                      <Phone size={15} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
+                      <input className="form-control" value={form.mobileNumber} onChange={set('mobileNumber')} required placeholder="10-digit mobile number" style={{ paddingLeft: '2.5rem' }} />
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -166,15 +179,8 @@ const Register = () => {
                       </div>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Mobile Number <span style={{ color: '#ef4444' }}>*</span></label>
-                      <div style={{ position: 'relative' }}>
-                        <Phone size={15} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
-                        <input className="form-control" value={form.mobileNumber} onChange={set('mobileNumber')} required placeholder="10-digit number" style={{ paddingLeft: '2.5rem' }} />
-                      </div>
-                    </div>
-                    <div className="form-group">
                       <label className="form-label">Gender</label>
-                      <select className="form-control" value={form.gender} onChange={set('gender')} style={{ appearance: 'none' }}>
+                      <select className="form-control" value={form.gender} onChange={set('gender')}>
                         <option value="">Select gender</option>
                         <option>Male</option><option>Female</option><option>Other</option>
                       </select>
@@ -182,6 +188,33 @@ const Register = () => {
                     <div className="form-group">
                       <label className="form-label">Date of Birth</label>
                       <input type="date" className="form-control" value={form.dateOfBirth} onChange={set('dateOfBirth')} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Gothtra (Gotra / Clan)</label>
+                      <input className="form-control" value={form.gotra} onChange={set('gotra')} placeholder="Your gotra / clan lineage" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Ghernov (Family Group)</label>
+                      <input className="form-control" value={form.ghernov} onChange={set('ghernov')} placeholder="Your family / house group" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Father's Name</label>
+                      <input className="form-control" value={form.fatherName} onChange={set('fatherName')} placeholder="Father's full name" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Mother's Name</label>
+                      <input className="form-control" value={form.motherName} onChange={set('motherName')} placeholder="Mother's full name" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Husband / Wife Name</label>
+                      <div style={{ position: 'relative' }}>
+                        <Users size={15} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
+                        <input className="form-control" value={form.spouseName} onChange={set('spouseName')} placeholder="Spouse's full name" style={{ paddingLeft: '2.5rem' }} />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Number of Children</label>
+                      <input type="number" min="0" className="form-control" value={form.childrenCount} onChange={set('childrenCount')} placeholder="0" />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Occupation</label>
@@ -208,11 +241,10 @@ const Register = () => {
                         overflow: 'hidden', flexShrink: 0, border: '2px dashed #e5e7eb',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
-                        {photoPreview ? (
-                          <img src={photoPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                          <Camera size={22} style={{ color: '#d1d5db' }} />
-                        )}
+                        {photoPreview
+                          ? <img src={photoPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : <Camera size={22} style={{ color: '#d1d5db' }} />
+                        }
                       </div>
                       <div>
                         <label htmlFor="photo-upload" className="btn btn-sm btn-ghost" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
@@ -239,17 +271,29 @@ const Register = () => {
                       </div>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">City</label>
+                      <label className="form-label">City / Town</label>
                       <div style={{ position: 'relative' }}>
                         <MapPin size={15} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
                         <input className="form-control" value={form.city} onChange={set('city')} placeholder="Your city" style={{ paddingLeft: '2.5rem' }} />
                       </div>
                     </div>
+                    <div className="form-group">
+                      <label className="form-label">Pincode</label>
+                      <input className="form-control" value={form.pincode} onChange={set('pincode')} placeholder="6-digit pincode" maxLength={6} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">State</label>
+                      <input className="form-control" value={form.state} onChange={set('state')} placeholder="State name" />
+                    </div>
+                    <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                      <label className="form-label">Full Address</label>
+                      <textarea className="form-control" rows={3} value={form.address} onChange={set('address')} placeholder="House / Street / Area" style={{ resize: 'vertical' }} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Reference By</label>
+                      <input className="form-control" value={form.referenceBy} onChange={set('referenceBy')} placeholder="Name of person who referred you" />
+                    </div>
                   </FieldGroup>
-                  <div className="form-group">
-                    <label className="form-label">Full Address</label>
-                    <textarea className="form-control" rows={3} value={form.address} onChange={set('address')} placeholder="House / Street / Area, City, District — PIN Code" style={{ resize: 'vertical' }} />
-                  </div>
                 </div>
               )}
 
@@ -257,11 +301,11 @@ const Register = () => {
               {step === 4 && (
                 <div>
                   <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#111827', margin: '0 0 1.25rem' }}>Choose Membership</h3>
-                  {types.length === 0 ? (
+                  {filteredTypes.length === 0 ? (
                     <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center', padding: '1rem 0' }}>Loading membership types…</p>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      {types.map(t => (
+                      {filteredTypes.map(t => (
                         <label
                           key={t.id}
                           style={{
@@ -285,7 +329,7 @@ const Register = () => {
                           </div>
                           <div style={{ textAlign: 'right', flexShrink: 0 }}>
                             <p style={{ fontWeight: 700, fontSize: '1.0625rem', color: 'var(--primary)', margin: 0 }}>₹{t.fee}</p>
-                            {t.validity_months && <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>{t.validity_months} months</p>}
+                            {t.duration_months && <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>{t.duration_months} months</p>}
                           </div>
                         </label>
                       ))}

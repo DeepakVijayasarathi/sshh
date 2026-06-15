@@ -17,7 +17,7 @@ exports.getAll = async (req, res) => {
     if (category) { conditions.push(`bc.name = $${idx}`); params.push(category); idx++; }
     if (featured === 'true') { conditions.push(`b.is_featured = TRUE`); }
 
-    const where = `WHERE ${conditions.join(' AND ')}`;
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
     const total = parseInt((await query(`SELECT COUNT(*) FROM businesses b LEFT JOIN business_categories bc ON bc.id=b.category_id ${where}`, params)).rows[0].count);
     const data = await query(
       `SELECT b.*, bc.name as category_name FROM businesses b

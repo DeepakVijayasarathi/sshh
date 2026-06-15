@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import {
   Search, Filter, X, Check, Trash2, CreditCard, Users,
-  ChevronLeft, ChevronRight, UserCheck, UserX, RefreshCw, SlidersHorizontal,
+  ChevronLeft, ChevronRight, UserCheck, UserX, RefreshCw, SlidersHorizontal, Download,
 } from 'lucide-react';
 import api from '../../services/api';
 import useDebounce from '../../hooks/useDebounce';
@@ -134,6 +134,32 @@ const Members = () => {
   const hasFilters = search || filters.status || filters.district;
   const pendingMembers = members.filter(m => m.status === 'Pending');
 
+  const exportCSV = async () => {
+    try {
+      const params = new URLSearchParams({ limit: 10000 });
+      if (debSearch) params.set('search', debSearch);
+      if (filters.status) params.set('status', filters.status);
+      if (filters.district) params.set('district', filters.district);
+      const r = await api.get(`/members?${params}`);
+      const rows = r.data.data || [];
+      const headers = ['Member No', 'Full Name', 'Mobile', 'Email', 'District', 'City', 'State', 'Gotra', 'Ghernov', 'Father Name', 'Mother Name', 'Spouse Name', 'Children Count', 'Membership Type', 'Status', 'Joined Date'];
+      const csvRows = [headers, ...rows.map(m => [
+        m.membership_number || '', m.full_name || '', m.mobile_number || '', m.email || '',
+        m.district || '', m.city || '', m.state || '', m.gotra || '', m.ghernov || '',
+        m.father_name || '', m.mother_name || '', m.spouse_name || '', m.children_count || '',
+        m.membership_type_name || '', m.status || '',
+        new Date(m.created_at).toLocaleDateString('en-IN'),
+      ])].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csvRows], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `members_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Members exported to CSV (opens in Excel)');
+    } catch { toast.error('Export failed'); }
+  };
+
   return (
     <div>
       {/* ── Page Header ─────────────────────────────── */}
@@ -144,6 +170,14 @@ const Members = () => {
             {pagination.total ? `${pagination.total} total members` : 'Manage all community members'}
           </p>
         </div>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <button
+            onClick={exportCSV}
+            className="btn btn-sm btn-outline"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}
+          >
+            <Download size={14} /> Export Excel
+          </button>
         {bulkSelected.length > 0 && (
           <button
             className="btn btn-primary"
@@ -158,6 +192,7 @@ const Members = () => {
             )}
           </button>
         )}
+        </div>
       </div>
 
       {/* ── Search & Filters ─────────────────────────── */}

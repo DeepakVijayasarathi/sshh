@@ -6,16 +6,25 @@ const STATUS_BADGES = { Active: 'badge-success', Pending: 'badge-warning', Rejec
 
 const Businesses = () => {
   const [businesses, setBusinesses] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
+  const [category, setCategory] = useState('');
 
   const load = () => {
     setLoading(true);
-    const url = `/businesses?status=${status || 'all'}&limit=50`;
-    api.get(url).then(r => setBusinesses(r.data.data || [])).catch(() => setBusinesses([])).finally(() => setLoading(false));
+    const params = new URLSearchParams({ limit: 50 });
+    if (status) params.set('status', status);
+    else params.set('status', 'all');
+    if (category) params.set('category', category);
+    api.get(`/businesses?${params}`).then(r => setBusinesses(r.data.data || [])).catch(() => setBusinesses([])).finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [status]);
+  useEffect(() => {
+    api.get('/businesses/categories').then(r => setCategories(r.data || [])).catch(() => {});
+  }, []);
+
+  useEffect(() => { load(); }, [status, category]);
 
   const approve = async (id) => {
     try { await api.post(`/businesses/${id}/approve`); toast.success('Business approved'); load(); }
@@ -30,18 +39,24 @@ const Businesses = () => {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <h1 className="page-title" style={{ marginBottom: 0 }}>Business Directory</h1>
-        <select className="form-control" style={{ width: 180 }} value={status} onChange={e => setStatus(e.target.value)}>
-          <option value="">All Status</option>
-          {['Active','Pending','Rejected','Suspended'].map(s => <option key={s}>{s}</option>)}
-        </select>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <select className="form-control" style={{ width: 180 }} value={status} onChange={e => setStatus(e.target.value)}>
+            <option value="">All Status</option>
+            {['Active','Pending','Rejected','Suspended'].map(s => <option key={s}>{s}</option>)}
+          </select>
+          <select className="form-control" style={{ width: 200 }} value={category} onChange={e => setCategory(e.target.value)}>
+            <option value="">All Business Types</option>
+            {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+          </select>
+        </div>
       </div>
       <div className="admin-card">
         {loading ? <div className="loading-center"><div className="spinner" /></div> : (
           <div className="table-responsive">
             <table>
-              <thead><tr><th>Business</th><th>Owner</th><th>Category</th><th>Mobile</th><th>City</th><th>Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Business</th><th>Owner</th><th>Type / Category</th><th>Mobile</th><th>City</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 {businesses.length === 0 ? <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-light)' }}>No businesses found</td></tr> :
                   businesses.map(b => (
