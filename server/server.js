@@ -62,6 +62,7 @@ app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/team',     require('./routes/team'));
+app.use('/api/cultural', require('./routes/cultural'));
 app.use('/sitemap.xml', require('./routes/sitemap'));
 
 // Health check

@@ -30,6 +30,7 @@ const VerifyEmailPage = lazy(() => import('./pages/public/VerifyEmail'));
 const YouthWingPage = lazy(() => import('./pages/public/YouthWing'));
 const WomenWingPage = lazy(() => import('./pages/public/WomenWing'));
 const TnSourashConnectPage = lazy(() => import('./pages/public/TnSourashConnect'));
+const CulturalHeritagePage = lazy(() => import('./pages/public/CulturalHeritage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Admin Pages — lazy loaded
@@ -51,7 +52,8 @@ const AdminNotifications = lazy(() => import('./pages/admin/Notifications'));
 const AdminActivityLog = lazy(() => import('./pages/admin/ActivityLog'));
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 const AdminTeam             = lazy(() => import('./pages/admin/TeamMembers'));
-const AdminMembershipPlans  = lazy(() => import('./pages/admin/MembershipPlans'));
+const AdminMembershipPlans      = lazy(() => import('./pages/admin/MembershipPlans'));
+const AdminCulturalHeritage     = lazy(() => import('./pages/admin/CulturalHeritage'));
 
 const PageLoader = () => (
   <div className="loading-center"><div className="spinner" /></div>
@@ -109,6 +111,7 @@ const AppRoutes = () => (
       <Route path="/youth" element={<YouthWingPage />} />
       <Route path="/women" element={<WomenWingPage />} />
       <Route path="/tn-sourash-connect" element={<TnSourashConnectPage />} />
+      <Route path="/cultural-heritage" element={<CulturalHeritagePage />} />
 
       {/* Admin */}
       <Route path="/admin" element={
@@ -133,7 +136,8 @@ const AppRoutes = () => (
         <Route path="activity-log" element={<AdminActivityLog />} />
         <Route path="settings" element={<AdminSettings />} />
         <Route path="team"               element={<AdminTeam />} />
-        <Route path="membership-plans"  element={<AdminMembershipPlans />} />
+        <Route path="membership-plans"   element={<AdminMembershipPlans />} />
+        <Route path="cultural-heritage"  element={<AdminCulturalHeritage />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

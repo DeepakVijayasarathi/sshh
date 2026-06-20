@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { to: '/business',            label: 'Business' },
   { to: '/news',                label: 'News' },
   { to: '/forum',               label: 'Forum' },
+  { to: '/cultural-heritage',   label: 'Cultural Heritage' },
   { to: '/tn-sourash-connect',  label: 'TN Connect' },
   { to: '/contact',             label: 'Contact' },
 ];
