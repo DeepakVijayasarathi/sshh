@@ -54,6 +54,9 @@ const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 const AdminTeam             = lazy(() => import('./pages/admin/TeamMembers'));
 const AdminMembershipPlans      = lazy(() => import('./pages/admin/MembershipPlans'));
 const AdminCulturalHeritage     = lazy(() => import('./pages/admin/CulturalHeritage'));
+const AdminRoles                = lazy(() => import('./pages/admin/Roles'));
+const AdminMenus                = lazy(() => import('./pages/admin/Menus'));
+const AdminRoleMenus            = lazy(() => import('./pages/admin/RoleMenus'));
 
 const PageLoader = () => (
   <div className="loading-center"><div className="spinner" /></div>
@@ -138,6 +141,9 @@ const AppRoutes = () => (
         <Route path="team"               element={<AdminTeam />} />
         <Route path="membership-plans"   element={<AdminMembershipPlans />} />
         <Route path="cultural-heritage"  element={<AdminCulturalHeritage />} />
+        <Route path="roles"              element={<AdminRoles />} />
+        <Route path="menus"              element={<AdminMenus />} />
+        <Route path="role-menus"         element={<AdminRoleMenus />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

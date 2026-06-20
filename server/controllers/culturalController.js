@@ -1,5 +1,4 @@
 const { pool, getClient } = require('../config/database');
-const { v4: uuidv4 } = require('uuid');
 const { paginate, paginatedResponse } = require('../utils/pagination');
 
 const initTable = async () => {
@@ -24,7 +23,7 @@ initTable().catch(console.error);
 /* ── Public: list published posts ──────────────────── */
 exports.getAll = async (req, res) => {
   try {
-    const { limit, offset } = paginate(req);
+    const { page, limit, offset } = paginate(req);
     const search   = req.query.search   || '';
     const category = req.query.category || '';
 
@@ -55,7 +54,7 @@ exports.getAll = async (req, res) => {
       [...values, limit, offset]
     );
 
-    res.json(paginatedResponse(rows.rows, +countRes.rows[0].count, req));
+    res.json(paginatedResponse(rows.rows, +countRes.rows[0].count, page, limit));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -81,7 +80,7 @@ exports.getById = async (req, res) => {
 /* ── Admin: list all posts ─────────────────────────── */
 exports.getAdminAll = async (req, res) => {
   try {
-    const { limit, offset } = paginate(req);
+    const { page, limit, offset } = paginate(req);
     const status   = req.query.status   || '';
     const category = req.query.category || '';
     const search   = req.query.search   || '';
@@ -106,7 +105,7 @@ exports.getAdminAll = async (req, res) => {
       [...values, limit, offset]
     );
 
-    res.json(paginatedResponse(rows.rows, +countRes.rows[0].count, req));
+    res.json(paginatedResponse(rows.rows, +countRes.rows[0].count, page, limit));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

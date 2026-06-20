@@ -3,26 +3,37 @@ import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import { Menu, X, ChevronDown, User, LayoutDashboard, LogOut } from 'lucide-react';
+import api from '../../services/api';
 import './Navbar.css';
 
-const NAV_LINKS = [
-  { to: '/',                    label: 'Home',       end: true },
-  { to: '/about',               label: 'About' },
-  { to: '/membership',          label: 'Membership' },
-  { to: '/events',              label: 'Events' },
-  { to: '/gallery',             label: 'Gallery' },
-  { to: '/business',            label: 'Business' },
-  { to: '/news',                label: 'News' },
-  { to: '/forum',               label: 'Forum' },
-  { to: '/cultural-heritage',   label: 'Cultural Heritage' },
-  { to: '/tn-sourash-connect',  label: 'TN Connect' },
-  { to: '/contact',             label: 'Contact' },
+const FALLBACK_LINKS = [
+  { to: '/',                   label: 'Home',             end: true },
+  { to: '/about',              label: 'About' },
+  { to: '/membership',         label: 'Membership' },
+  { to: '/events',             label: 'Events' },
+  { to: '/gallery',            label: 'Gallery' },
+  { to: '/business',           label: 'Business' },
+  { to: '/news',               label: 'News' },
+  { to: '/forum',              label: 'Forum' },
+  { to: '/cultural-heritage',  label: 'Cultural Heritage' },
+  { to: '/tn-sourash-connect', label: 'TN Connect' },
+  { to: '/contact',            label: 'Contact' },
 ];
 
 const Navbar = () => {
-  const [menuOpen, setMenuOpen]       = useState(false);
+  const [menuOpen, setMenuOpen]         = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [scrolled, setScrolled]       = useState(false);
+  const [scrolled, setScrolled]         = useState(false);
+  const [navLinks, setNavLinks]         = useState(FALLBACK_LINKS);
+
+  useEffect(() => {
+    api.get('/menus/public')
+      .then(r => {
+        const links = (r.data || []).map(m => ({ to: m.path, label: m.label, end: m.path === '/' }));
+        if (links.length) setNavLinks(links);
+      })
+      .catch(() => {}); // keep fallback on error
+  }, []);
   const userMenuRef = useRef(null);
   const { user, logout } = useAuth();
   const navigate  = useNavigate();
@@ -93,7 +104,7 @@ const Navbar = () => {
 
           {/* ── Desktop Nav ─────────────────────────────── */}
           <ul className="desktop-nav" style={{ display: 'flex', alignItems: 'center', listStyle: 'none', gap: 2, margin: '0 0 0 1.25rem', padding: 0, flex: 1 }}>
-            {NAV_LINKS.map(link => (
+            {navLinks.map(link => (
               <li key={link.to}>
                 <NavLink
                   to={link.to}
@@ -229,7 +240,7 @@ const Navbar = () => {
           maxHeight: 'calc(100vh - 68px)', overflowY: 'auto',
         }}>
           <div style={{ padding: '0.75rem 1rem' }}>
-            {NAV_LINKS.map(link => (
+            {navLinks.map(link => (
               <NavLink
                 key={link.to}
                 to={link.to}
