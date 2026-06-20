@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, Calendar, Newspaper, Image, Building2,
   Briefcase, GraduationCap, Heart, MessageSquare, Bell, BarChart2,
   Activity, Settings, Globe, LogOut, ChevronLeft, ChevronRight,
-  Menu, X, Search, ChevronDown, UserCog, Crown,
+  Menu, X, Search, ChevronDown, UserCog, Crown, KeyRound, User,
 } from 'lucide-react';
 
 const MENU_GROUPS = [
@@ -52,10 +52,13 @@ const MENU_GROUPS = [
 const ALL_MENU = MENU_GROUPS.flatMap(g => g.items);
 
 const AdminLayout = () => {
-  const [collapsed, setCollapsed]       = useState(false);
-  const [mobileOpen, setMobileOpen]     = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [isDesktop, setIsDesktop]       = useState(() => window.innerWidth >= 1024);
+  const [collapsed, setCollapsed]         = useState(false);
+  const [mobileOpen, setMobileOpen]       = useState(false);
+  const [userMenuOpen, setUserMenuOpen]   = useState(false);
+  const [isDesktop, setIsDesktop]         = useState(() => window.innerWidth >= 1024);
+  const [showPwdModal, setShowPwdModal]   = useState(false);
+  const [pwdForm, setPwdForm]             = useState({ current: '', next: '', confirm: '' });
+  const [pwdLoading, setPwdLoading]       = useState(false);
   const userMenuRef = useRef(null);
   const { user, logout } = useAuth();
   const navigate  = useNavigate();
@@ -84,6 +87,28 @@ const AdminLayout = () => {
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
   const handleLogout = () => { logout(); navigate('/'); };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (pwdForm.next !== pwdForm.confirm) {
+      alert('New passwords do not match'); return;
+    }
+    if (pwdForm.next.length < 8) {
+      alert('New password must be at least 8 characters'); return;
+    }
+    setPwdLoading(true);
+    try {
+      const api = (await import('../../services/api')).default;
+      await api.put('/auth/change-password', { currentPassword: pwdForm.current, newPassword: pwdForm.next });
+      alert('Password changed successfully');
+      setShowPwdModal(false);
+      setPwdForm({ current: '', next: '', confirm: '' });
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to change password');
+    } finally {
+      setPwdLoading(false);
+    }
+  };
 
   // Breadcrumb page name
   const currentPage = ALL_MENU.find(item =>
@@ -331,7 +356,7 @@ const AdminLayout = () => {
                 </div>
                 <div className="hidden sm:block text-left">
                   <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--primary)', lineHeight: 1.2, textTransform: 'capitalize' }}>
-                    {user?.role}
+                    {user?.full_name || user?.role}
                   </p>
                   <p style={{ fontSize: '0.6875rem', color: '#9ca3af', lineHeight: 1.3, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {user?.email}
@@ -344,16 +369,19 @@ const AdminLayout = () => {
                 <div
                   className="absolute right-0 mt-2 rounded-xl overflow-hidden"
                   style={{
-                    width: 200, background: 'white', zIndex: 200,
+                    width: 220, background: 'white', zIndex: 200,
                     boxShadow: '0 8px 24px -4px rgba(0,0,0,0.12), 0 2px 8px -2px rgba(0,0,0,0.08)',
                     border: '1px solid #f1f5f9',
                     animation: 'slideDown 0.15s ease-out',
                   }}
                 >
                   <div style={{ padding: '0.875rem 1rem', borderBottom: '1px solid #f1f5f9' }}>
-                    <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#111827', marginBottom: 2 }}>
-                      {user?.email}
-                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 4 }}>
+                      <User size={14} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+                      <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {user?.full_name || user?.email}
+                      </p>
+                    </div>
                     <span
                       className="badge"
                       style={{ background: 'rgba(var(--primary-rgb),0.1)', color: 'var(--primary)', fontSize: '0.6875rem', textTransform: 'capitalize' }}
@@ -370,6 +398,14 @@ const AdminLayout = () => {
                   >
                     <Globe size={14} /> Public Site
                   </NavLink>
+                  <button
+                    onClick={() => { setUserMenuOpen(false); setShowPwdModal(true); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#4b5563', background: 'none', border: 'none', width: '100%', cursor: 'pointer', transition: 'background 0.15s', textAlign: 'left' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <KeyRound size={14} /> Reset Password
+                  </button>
                   <button
                     onClick={handleLogout}
                     style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#ef4444', background: 'none', border: 'none', width: '100%', cursor: 'pointer', transition: 'background 0.15s' }}
@@ -389,6 +425,41 @@ const AdminLayout = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* ── Reset Password Modal ──────────────────────── */}
+      {showPwdModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem' }}>
+          <div style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 420, boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
+            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <KeyRound size={18} style={{ color: 'var(--primary)' }} />
+                <h3 style={{ fontWeight: 700, fontSize: '1rem', color: '#111827', margin: 0 }}>Reset Password</h3>
+              </div>
+              <button onClick={() => setShowPwdModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: '1.25rem', lineHeight: 1 }}>✕</button>
+            </div>
+            <form onSubmit={handleChangePassword} style={{ padding: '1.5rem' }}>
+              <div className="form-group">
+                <label className="form-label">Current Password</label>
+                <input type="password" className="form-control" value={pwdForm.current} onChange={e => setPwdForm(p => ({ ...p, current: e.target.value }))} required placeholder="Enter current password" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">New Password</label>
+                <input type="password" className="form-control" value={pwdForm.next} onChange={e => setPwdForm(p => ({ ...p, next: e.target.value }))} required minLength={8} placeholder="Min 8 characters" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Confirm New Password</label>
+                <input type="password" className="form-control" value={pwdForm.confirm} onChange={e => setPwdForm(p => ({ ...p, confirm: e.target.value }))} required placeholder="Repeat new password" />
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                <button type="button" className="btn btn-ghost" onClick={() => setShowPwdModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={pwdLoading}>
+                  {pwdLoading ? 'Saving…' : 'Change Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

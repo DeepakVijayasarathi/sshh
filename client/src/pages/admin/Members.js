@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import {
   Search, Filter, X, Check, Trash2, CreditCard, Users,
-  ChevronLeft, ChevronRight, UserCheck, UserX, RefreshCw, SlidersHorizontal, Download,
+  ChevronLeft, ChevronRight, UserCheck, UserX, RefreshCw, SlidersHorizontal, Download, Eye,
 } from 'lucide-react';
 import api from '../../services/api';
 import useDebounce from '../../hooks/useDebounce';
@@ -63,6 +63,8 @@ const Members = () => {
   const [bulkSelected, setBulkSelected] = useState([]);
   const [bulkApproving, setBulkApproving] = useState(false);
   const [cardData, setCardData]         = useState(null);
+  const [detailMember, setDetailMember] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const load = useCallback((pg = page) => {
     setLoading(true);
@@ -128,6 +130,16 @@ const Members = () => {
       const res = await api.get(`/users/${memberId}/membership-card`);
       setCardData(res.data);
     } catch { toast.error('No active membership card found'); }
+  };
+
+  const viewDetail = async (m) => {
+    setDetailMember(m);
+    setDetailLoading(true);
+    try {
+      const res = await api.get(`/members/${m.id}`);
+      setDetailMember(res.data);
+    } catch { /* use row data already set */ }
+    finally { setDetailLoading(false); }
   };
 
   const clearFilters = () => { setSearch(''); setFilters({ status: '', district: '' }); };
@@ -410,6 +422,20 @@ const Members = () => {
                               </button>
                             </>
                           )}
+                          <button
+                            onClick={() => viewDetail(m)}
+                            title="View Personal Info"
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 4,
+                              padding: '0.3125rem 0.625rem', borderRadius: 7,
+                              fontSize: '0.75rem', fontWeight: 600, border: 'none', cursor: 'pointer',
+                              background: '#f0fdf4', color: '#059669', transition: 'all 0.15s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#059669'; e.currentTarget.style.color = 'white'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = '#f0fdf4'; e.currentTarget.style.color = '#059669'; }}
+                          >
+                            <Eye size={13} /> View
+                          </button>
                           {m.status === 'Active' && m.membership_number && (
                             <button
                               onClick={() => viewCard(m.id)}
@@ -540,6 +566,80 @@ const Members = () => {
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />
+
+      {/* ── Personal Info Detail Modal ─────────────── */}
+      {detailMember && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 999, padding: '1.5rem', overflowY: 'auto', backdropFilter: 'blur(3px)' }}>
+          <div style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 720, boxShadow: '0 24px 60px rgba(0,0,0,0.25)', marginTop: '2rem', marginBottom: '2rem' }}>
+            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                {detailMember.photo_url
+                  ? <img src={detailMember.photo_url} alt="" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover' }} />
+                  : <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '1.25rem' }}>{detailMember.full_name?.charAt(0)}</div>
+                }
+                <div>
+                  <h2 style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>{detailMember.full_name}</h2>
+                  <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: 0 }}>{detailMember.membership_number || 'Pending'} · {detailMember.status}</p>
+                </div>
+              </div>
+              <button onClick={() => setDetailMember(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: '1.25rem' }}>✕</button>
+            </div>
+            {detailLoading ? (
+              <div style={{ padding: '3rem', textAlign: 'center' }}><div className="spinner" /></div>
+            ) : (
+              <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                {[
+                  ['Full Name', detailMember.full_name],
+                  ['Gender', detailMember.gender],
+                  ['Date of Birth', detailMember.date_of_birth ? new Date(detailMember.date_of_birth).toLocaleDateString('en-IN') : null],
+                  ['Mobile', detailMember.mobile_number],
+                  ['Email', detailMember.email],
+                  ['Gothtra', detailMember.gotra],
+                  ['Ghernov', detailMember.ghernov],
+                  ["Father's Name", detailMember.father_name],
+                  ["Mother's Name", detailMember.mother_name],
+                  ['Spouse Name', detailMember.spouse_name],
+                  ['Wife Age', detailMember.wife_age],
+                  ['Children Count', detailMember.children_count],
+                  ['Occupation', detailMember.occupation],
+                  ['Education', detailMember.education],
+                  ['Address', detailMember.address],
+                  ['District', detailMember.district],
+                  ['City', detailMember.city],
+                  ['Pincode', detailMember.pincode],
+                  ['State', detailMember.state],
+                  ['Reference By', detailMember.reference_by],
+                  ['Membership Type', detailMember.membership_type_name],
+                  ['Joined Date', new Date(detailMember.created_at).toLocaleDateString('en-IN')],
+                ].filter(([, v]) => v != null && v !== '' && v !== 0).map(([label, value]) => (
+                  <div key={label} style={{ background: '#f8fafc', borderRadius: 10, padding: '0.75rem 1rem' }}>
+                    <p style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>{label}</p>
+                    <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#0f172a', margin: 0, wordBreak: 'break-word' }}>{String(value)}</p>
+                  </div>
+                ))}
+                {detailMember.children_details && (() => {
+                  try {
+                    const kids = typeof detailMember.children_details === 'string' ? JSON.parse(detailMember.children_details) : detailMember.children_details;
+                    if (!Array.isArray(kids) || !kids.length) return null;
+                    return (
+                      <div style={{ gridColumn: '1 / -1', background: '#f8fafc', borderRadius: 10, padding: '0.75rem 1rem' }}>
+                        <p style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Children Details</p>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          {kids.map((k, i) => (
+                            <span key={i} style={{ background: 'white', border: '1px solid #e5e7eb', borderRadius: 8, padding: '0.25rem 0.75rem', fontSize: '0.8125rem', color: '#374151' }}>
+                              {k.name || `Child ${i+1}`}{k.age ? ` (${k.age} yrs)` : ''}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  } catch { return null; }
+                })()}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {cardData && <MembershipCard member={cardData} onClose={() => setCardData(null)} />}
     </div>

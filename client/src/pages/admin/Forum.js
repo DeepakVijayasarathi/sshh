@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { Search, Phone, MessageCircle, X, Send, ChevronLeft, MapPin, User } from 'lucide-react';
+import { Search, Phone, MessageCircle, X, Send, ChevronLeft, MapPin, User, CheckCircle } from 'lucide-react';
 import api from '../../services/api';
 
 const CATEGORIES = [
@@ -10,6 +10,7 @@ const CATEGORIES = [
 
 const STATUS_BADGES = {
   Pending:        'badge-warning',
+  Approved:       'badge-info',
   'Under Review': 'badge-info',
   Resolved:       'badge-success',
   Closed:         'badge-secondary',
@@ -67,6 +68,15 @@ const Forum = () => {
       load();
       if (detail?.id === id) setDetail(prev => ({ ...prev, status: s }));
     } catch { toast.error('Failed to update status'); }
+  };
+
+  const approveIssue = async (id) => {
+    try {
+      await api.put(`/forums/issues/${id}/status`, { status: 'Under Review' });
+      toast.success('Issue approved — now Under Review');
+      load();
+      if (detail?.id === id) setDetail(prev => ({ ...prev, status: 'Under Review' }));
+    } catch { toast.error('Failed to approve'); }
   };
 
   const remove = async (id) => {
@@ -209,15 +219,25 @@ const Forum = () => {
                       {new Date(issue.created_at).toLocaleDateString('en-IN')}
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center' }}>
-                        <select
-                          className="form-control"
-                          style={{ fontSize: '0.8rem', padding: '0.25rem', width: 130 }}
-                          value={issue.status}
-                          onChange={e => updateStatus(issue.id, e.target.value)}
-                        >
-                          {['Pending','Under Review','Resolved','Closed'].map(s => <option key={s}>{s}</option>)}
-                        </select>
+                      <div style={{ display: 'flex', gap: '0.375rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        {issue.status === 'Pending' ? (
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => approveIssue(issue.id)}
+                            style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                          >
+                            <CheckCircle size={12} /> Approve
+                          </button>
+                        ) : (
+                          <select
+                            className="form-control"
+                            style={{ fontSize: '0.8rem', padding: '0.25rem', width: 130 }}
+                            value={issue.status}
+                            onChange={e => updateStatus(issue.id, e.target.value)}
+                          >
+                            {['Under Review','Resolved','Closed'].map(s => <option key={s}>{s}</option>)}
+                          </select>
+                        )}
                         <button
                           className="btn btn-sm btn-outline"
                           onClick={() => openDetail(issue)}

@@ -196,7 +196,7 @@ exports.bulkApproveMembers = async (req, res) => {
                 approved_at=NOW(),
                 updated_at=NOW()
           WHERE id=$1 AND status='Pending'
-         RETURNING id, full_name, membership_number, email`,
+         RETURNING id, user_id, full_name, membership_number, email`,
         [id, membershipNumber, req.user.id]
       );
       if (r.rows.length) {
@@ -208,6 +208,10 @@ exports.bulkApproveMembers = async (req, res) => {
           'INSERT INTO member_cards (id, member_id, card_number, valid_until) VALUES ($1,$2,$3,$4)',
           [cardId, id, `CARD-${membershipNumber}`, validUntil]
         );
+        // Activate user account
+        if (r.rows[0].user_id) {
+          await client.query('UPDATE users SET is_active = TRUE WHERE id = $1', [r.rows[0].user_id]);
+        }
       }
     }
 

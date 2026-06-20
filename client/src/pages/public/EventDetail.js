@@ -114,11 +114,18 @@ const EventDetail = () => {
               {!user ? (
                 <div className="card-body text-center">
                   <p style={{ marginBottom: '1rem', color: '#6b7280', fontSize: '0.875rem' }}>
-                    Membership is required to register for events. Please sign in to continue.
+                    Active membership is required to register for events. Please sign in to continue.
                   </p>
                   <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => navigate('/login')}>
                     Sign In to Register
                   </button>
+                </div>
+              ) : user.member_status !== 'Active' ? (
+                <div className="card-body text-center">
+                  <p style={{ marginBottom: '1rem', color: '#6b7280', fontSize: '0.875rem' }}>
+                    Only active members can register for events. Your membership status is: <strong>{user.member_status || 'Pending'}</strong>.
+                  </p>
+                  <a href="/membership" className="btn btn-outline" style={{ width: '100%' }}>Learn About Membership</a>
                 </div>
               ) : registered ? (
                 <div className="card-body text-center">

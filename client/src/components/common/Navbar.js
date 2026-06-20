@@ -6,15 +6,16 @@ import { Menu, X, ChevronDown, User, LayoutDashboard, LogOut } from 'lucide-reac
 import './Navbar.css';
 
 const NAV_LINKS = [
-  { to: '/',           label: 'Home',       end: true },
-  { to: '/about',      label: 'About' },
-  { to: '/membership', label: 'Membership' },
-  { to: '/events',     label: 'Events' },
-  { to: '/gallery',    label: 'Gallery' },
-  { to: '/business',   label: 'Business' },
-  { to: '/news',       label: 'News' },
-  { to: '/forum',      label: 'Forum' },
-  { to: '/contact',    label: 'Contact' },
+  { to: '/',                    label: 'Home',       end: true },
+  { to: '/about',               label: 'About' },
+  { to: '/membership',          label: 'Membership' },
+  { to: '/events',              label: 'Events' },
+  { to: '/gallery',             label: 'Gallery' },
+  { to: '/business',            label: 'Business' },
+  { to: '/news',                label: 'News' },
+  { to: '/forum',               label: 'Forum' },
+  { to: '/tn-sourash-connect',  label: 'TN Connect' },
+  { to: '/contact',             label: 'Contact' },
 ];
 
 const Navbar = () => {

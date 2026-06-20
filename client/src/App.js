@@ -29,6 +29,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/public/ForgotPassword'));
 const VerifyEmailPage = lazy(() => import('./pages/public/VerifyEmail'));
 const YouthWingPage = lazy(() => import('./pages/public/YouthWing'));
 const WomenWingPage = lazy(() => import('./pages/public/WomenWing'));
+const TnSourashConnectPage = lazy(() => import('./pages/public/TnSourashConnect'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Admin Pages — lazy loaded
@@ -107,6 +108,7 @@ const AppRoutes = () => (
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/youth" element={<YouthWingPage />} />
       <Route path="/women" element={<WomenWingPage />} />
+      <Route path="/tn-sourash-connect" element={<TnSourashConnectPage />} />
 
       {/* Admin */}
       <Route path="/admin" element={

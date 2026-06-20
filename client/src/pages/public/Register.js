@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { User, Phone, Mail, Lock, MapPin, Briefcase, GraduationCap, Camera, ArrowRight, CheckCircle, Users } from 'lucide-react';
+import { User, Phone, Mail, Lock, MapPin, Briefcase, GraduationCap, Camera, ArrowRight, CheckCircle, Users, Plus, Trash2 } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
 import api from '../../services/api';
 
 const STEPS = [
-  { id: 1, title: 'Account',    subtitle: 'Login credentials' },
-  { id: 2, title: 'Personal',   subtitle: 'Your information' },
-  { id: 3, title: 'Location',   subtitle: 'Where you live' },
-  { id: 4, title: 'Membership', subtitle: 'Choose your plan' },
+  { id: 1, title: 'Account',  subtitle: 'Login credentials' },
+  { id: 2, title: 'Personal', subtitle: 'Your information' },
+  { id: 3, title: 'Location', subtitle: 'Where you live' },
 ];
 
 const FieldGroup = ({ children }) => (
@@ -45,24 +44,37 @@ const Register = () => {
   const [form, setForm] = useState({
     email: '', password: '', mobileNumber: '',
     fullName: '', gender: '', dateOfBirth: '',
-    gotra: '', ghernov: '', fatherName: '', motherName: '', spouseName: '', childrenCount: '',
+    gotra: '', ghernov: '', fatherName: '', motherName: '', spouseName: '', wifeAge: '',
+    childrenCount: '',
     occupation: '', education: '',
     address: '', district: '', city: '', pincode: '', state: '', referenceBy: '',
-    membershipTypeId: '',
   });
+  const [children, setChildren] = useState([]);
   const [photo, setPhoto]         = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [types, setTypes]         = useState([]);
+  const [refMember, setRefMember]   = useState(null);
+  const [refLoading, setRefLoading] = useState(false);
   const [loading, setLoading]     = useState(false);
   const navigate  = useNavigate();
   const settings  = useSiteSettings();
   const siteName  = settings.site_name || 'Saurashtra Heritage Chair';
 
-  useEffect(() => {
-    api.get('/members/types').then(r => setTypes(r.data)).catch(() => {});
-  }, []);
-
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+
+  // Sync children array length with childrenCount
+  useEffect(() => {
+    const count = Math.max(0, parseInt(form.childrenCount) || 0);
+    setChildren(prev => {
+      if (count > prev.length) {
+        return [...prev, ...Array(count - prev.length).fill({ name: '', age: '' })];
+      }
+      return prev.slice(0, count);
+    });
+  }, [form.childrenCount]);
+
+  const updateChild = (idx, field, val) => {
+    setChildren(prev => prev.map((c, i) => i === idx ? { ...c, [field]: val } : c));
+  };
 
   const handlePhoto = (e) => {
     const file = e.target.files[0];
@@ -73,15 +85,30 @@ const Register = () => {
     reader.readAsDataURL(file);
   };
 
+  const lookupMemberId = async (memberId) => {
+    if (!memberId) { setRefMember(null); return; }
+    setRefLoading(true);
+    try {
+      const r = await api.get(`/members?search=${encodeURIComponent(memberId)}&limit=1`);
+      const m = (r.data.data || [])[0];
+      setRefMember(m || null);
+    } catch {
+      setRefMember(null);
+    } finally {
+      setRefLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const fd = new FormData();
-      Object.entries(form).forEach(([k, v]) => v && fd.append(k, v));
+      Object.entries(form).forEach(([k, v]) => { if (v) fd.append(k, v); });
+      if (children.length) fd.append('childrenDetails', JSON.stringify(children));
       if (photo) fd.append('photo', photo);
       await api.post('/members', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      toast.success('Registration submitted! Your application is pending approval.');
+      toast.success('Registration submitted! Your application is pending approval. You can login once approved.');
       navigate('/login');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
@@ -90,16 +117,13 @@ const Register = () => {
     }
   };
 
-  const nextStep = (e) => { e.preventDefault(); setStep(s => Math.min(s + 1, 4)); };
+  const nextStep = (e) => { e.preventDefault(); setStep(s => Math.min(s + 1, 3)); };
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
-
-  // Exclude forum-related membership types from step 4
-  const filteredTypes = types.filter(t => !t.name.toLowerCase().includes('forum'));
 
   return (
     <PublicLayout>
       <div style={{ background: '#f8fafc', minHeight: 'calc(100vh - 68px)', padding: '2.5rem 1rem', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ width: '100%', maxWidth: 620 }}>
+        <div style={{ width: '100%', maxWidth: 640 }}>
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -135,7 +159,7 @@ const Register = () => {
 
           {/* Card */}
           <div style={{ background: 'white', borderRadius: 20, boxShadow: '0 4px 24px -4px rgba(0,0,0,0.10)', border: '1px solid #f1f5f9', padding: '2rem' }}>
-            <form onSubmit={step < 4 ? nextStep : handleSubmit}>
+            <form onSubmit={step < 3 ? nextStep : handleSubmit}>
 
               {/* Step 1: Account */}
               {step === 1 && (
@@ -206,15 +230,15 @@ const Register = () => {
                       <input className="form-control" value={form.motherName} onChange={set('motherName')} placeholder="Mother's full name" />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Husband / Wife Name</label>
+                      <label className="form-label">Wife / Husband Name</label>
                       <div style={{ position: 'relative' }}>
                         <Users size={15} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
                         <input className="form-control" value={form.spouseName} onChange={set('spouseName')} placeholder="Spouse's full name" style={{ paddingLeft: '2.5rem' }} />
                       </div>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Number of Children</label>
-                      <input type="number" min="0" className="form-control" value={form.childrenCount} onChange={set('childrenCount')} placeholder="0" />
+                      <label className="form-label">Wife Age</label>
+                      <input type="number" min="1" max="120" className="form-control" value={form.wifeAge} onChange={set('wifeAge')} placeholder="Wife's age" />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Occupation</label>
@@ -230,9 +254,39 @@ const Register = () => {
                         <input className="form-control" value={form.education} onChange={set('education')} placeholder="Highest qualification" style={{ paddingLeft: '2.5rem' }} />
                       </div>
                     </div>
+                    <div className="form-group">
+                      <label className="form-label">Number of Children</label>
+                      <input type="number" min="0" max="20" className="form-control" value={form.childrenCount} onChange={set('childrenCount')} placeholder="0" />
+                    </div>
                   </FieldGroup>
+
+                  {/* Dynamic children details */}
+                  {children.length > 0 && (
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <p style={{ fontWeight: 600, fontSize: '0.875rem', color: '#374151', marginBottom: '0.75rem' }}>Children Details</p>
+                      {children.map((child, idx) => (
+                        <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.75rem', alignItems: 'flex-end', marginBottom: '0.625rem' }}>
+                          <div className="form-group" style={{ marginBottom: 0 }}>
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Child {idx + 1} Name</label>
+                            <input className="form-control" value={child.name} onChange={e => updateChild(idx, 'name', e.target.value)} placeholder={`Child ${idx + 1} name`} />
+                          </div>
+                          <div className="form-group" style={{ marginBottom: 0, minWidth: 90 }}>
+                            <label className="form-label" style={{ fontSize: '0.8rem' }}>Age</label>
+                            <input type="number" min="0" max="60" className="form-control" value={child.age} onChange={e => updateChild(idx, 'age', e.target.value)} placeholder="Age" />
+                          </div>
+                          <div style={{ paddingBottom: '0.25rem' }}>
+                            <button type="button" onClick={() => { setChildren(p => p.filter((_, i) => i !== idx)); setForm(f => ({ ...f, childrenCount: String(children.length - 1) })); }}
+                              style={{ background: '#fef2f2', border: 'none', color: '#dc2626', borderRadius: 8, width: 34, height: 34, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Photo Upload */}
-                  <div className="form-group">
+                  <div className="form-group" style={{ marginTop: '1rem' }}>
                     <label className="form-label">Profile Photo</label>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                       <div style={{
@@ -289,52 +343,37 @@ const Register = () => {
                       <label className="form-label">Full Address</label>
                       <textarea className="form-control" rows={3} value={form.address} onChange={set('address')} placeholder="House / Street / Area" style={{ resize: 'vertical' }} />
                     </div>
-                    <div className="form-group">
-                      <label className="form-label">Reference By</label>
-                      <input className="form-control" value={form.referenceBy} onChange={set('referenceBy')} placeholder="Name of person who referred you" />
+                    <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                      <label className="form-label">Reference By (Member ID)</label>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                          className="form-control"
+                          value={form.referenceBy}
+                          onChange={e => { set('referenceBy')(e); setRefMember(null); }}
+                          placeholder="Enter member ID (e.g. SCP20240001)"
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline btn-sm"
+                          onClick={() => lookupMemberId(form.referenceBy)}
+                          disabled={!form.referenceBy || refLoading}
+                          style={{ whiteSpace: 'nowrap' }}
+                        >
+                          {refLoading ? '…' : 'Verify'}
+                        </button>
+                      </div>
+                      {refMember && (
+                        <p style={{ fontSize: '0.8rem', color: '#059669', marginTop: '0.375rem' }}>
+                          ✓ {refMember.full_name} ({refMember.membership_number})
+                        </p>
+                      )}
+                      {form.referenceBy && !refLoading && refMember === null && form.referenceBy.length > 3 && (
+                        <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.375rem' }}>
+                          Member ID not found. You can still submit.
+                        </p>
+                      )}
                     </div>
                   </FieldGroup>
-                </div>
-              )}
-
-              {/* Step 4: Membership */}
-              {step === 4 && (
-                <div>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#111827', margin: '0 0 1.25rem' }}>Choose Membership</h3>
-                  {filteredTypes.length === 0 ? (
-                    <p style={{ color: '#9ca3af', fontSize: '0.875rem', textAlign: 'center', padding: '1rem 0' }}>Loading membership types…</p>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      {filteredTypes.map(t => (
-                        <label
-                          key={t.id}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem',
-                            borderRadius: 12, border: `2px solid ${form.membershipTypeId == t.id ? 'var(--primary)' : '#e5e7eb'}`,
-                            cursor: 'pointer', transition: 'all 0.15s',
-                            background: form.membershipTypeId == t.id ? 'rgba(var(--primary-rgb),0.04)' : 'white',
-                          }}
-                        >
-                          <input
-                            type="radio"
-                            name="membershipType"
-                            value={t.id}
-                            checked={form.membershipTypeId == t.id}
-                            onChange={set('membershipTypeId')}
-                            style={{ accentColor: 'var(--primary)', width: 18, height: 18 }}
-                          />
-                          <div style={{ flex: 1 }}>
-                            <p style={{ fontWeight: 600, color: '#111827', fontSize: '0.9375rem', margin: '0 0 2px' }}>{t.name}</p>
-                            {t.description && <p style={{ fontSize: '0.8125rem', color: '#6b7280', margin: 0 }}>{t.description}</p>}
-                          </div>
-                          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                            <p style={{ fontWeight: 700, fontSize: '1.0625rem', color: 'var(--primary)', margin: 0 }}>₹{t.fee}</p>
-                            {t.duration_months && <p style={{ fontSize: '0.75rem', color: '#9ca3af', margin: 0 }}>{t.duration_months} months</p>}
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -353,7 +392,7 @@ const Register = () => {
                 >
                   {loading ? (
                     <><span className="spinner-sm" style={{ borderTopColor: 'white' }} /> Submitting…</>
-                  ) : step < 4 ? (
+                  ) : step < 3 ? (
                     <>Continue <ArrowRight size={15} /></>
                   ) : (
                     <>Submit Registration <ArrowRight size={15} /></>

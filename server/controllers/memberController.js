@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const { query, getClient } = require('../config/database');
 const { paginate, paginatedResponse } = require('../utils/pagination');
 const { sendEmail, emailTemplates } = require('../utils/email');
@@ -63,32 +64,64 @@ exports.getById = async (req, res) => {
 };
 
 exports.create = async (req, res) => {
+  const client = await getClient();
   try {
+    await client.query('BEGIN');
     const {
-      userId, fullName, gender, dateOfBirth, mobileNumber, email,
+      email, password,
+      fullName, gender, dateOfBirth, mobileNumber,
       address, district, city, pincode, state, occupation, education,
       membershipTypeId, aadhaarNumber,
-      gotra, ghernov, fatherName, motherName, spouseName, childrenCount, referenceBy
+      gotra, ghernov, fatherName, motherName, spouseName,
+      childrenCount, childrenDetails,
+      wifeAge, referenceBy
     } = req.body;
     const photoUrl = req.file ? `/uploads/members/${req.file.filename}` : null;
-    const id = uuidv4();
 
-    const result = await query(
+    // Create or find user account so the member can log in
+    let userId;
+    const existing = await client.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existing.rows.length) {
+      userId = existing.rows[0].id;
+    } else if (password) {
+      const hash = await bcrypt.hash(password, 10);
+      userId = uuidv4();
+      await client.query(
+        'INSERT INTO users (id, email, password_hash, role, is_active) VALUES ($1,$2,$3,$4,TRUE)',
+        [userId, email, hash, 'Member']
+      );
+    } else {
+      userId = uuidv4();
+      await client.query(
+        'INSERT INTO users (id, email, password_hash, role, is_active) VALUES ($1,$2,$3,$4,TRUE)',
+        [userId, email, uuidv4(), 'Member']
+      );
+    }
+
+    const id = uuidv4();
+    const result = await client.query(
       `INSERT INTO members (id, user_id, full_name, gender, date_of_birth, mobile_number, email,
         address, district, city, pincode, state, occupation, education, photo_url, membership_type_id,
         aadhaar_number, gotra, ghernov, father_name, mother_name, spouse_name, children_count,
-        reference_by, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,'Pending')
+        wife_age, reference_by, children_details, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,'Pending')
        RETURNING *`,
-      [id, userId, fullName, gender, dateOfBirth, mobileNumber, email,
-       address, district, city, pincode, state || null, occupation, education, photoUrl,
-       membershipTypeId, aadhaarNumber || null,
+      [id, userId, fullName, gender, dateOfBirth || null, mobileNumber, email,
+       address || null, district || null, city || null, pincode || null, state || null,
+       occupation || null, education || null, photoUrl,
+       membershipTypeId || null, aadhaarNumber || null,
        gotra || null, ghernov || null, fatherName || null, motherName || null,
-       spouseName || null, childrenCount ? parseInt(childrenCount) : 0, referenceBy || null]
+       spouseName || null, childrenCount ? parseInt(childrenCount) : 0,
+       wifeAge ? parseInt(wifeAge) : null, referenceBy || null,
+       childrenDetails || null]
     );
+    await client.query('COMMIT');
     res.status(201).json(result.rows[0]);
   } catch (err) {
+    await client.query('ROLLBACK');
     res.status(500).json({ message: err.message });
+  } finally {
+    client.release();
   }
 };
 
@@ -149,6 +182,11 @@ exports.approve = async (req, res) => {
     if (!result.rows.length) {
       await client.query('ROLLBACK');
       return res.status(404).json({ message: 'Member not found' });
+    }
+
+    // Activate the user account so the approved member can log in
+    if (result.rows[0].user_id) {
+      await client.query('UPDATE users SET is_active = TRUE WHERE id = $1', [result.rows[0].user_id]);
     }
 
     const cardId = uuidv4();
@@ -238,6 +276,8 @@ const initMemberExtraFields = async () => {
     `ALTER TABLE members ADD COLUMN IF NOT EXISTS children_count INT DEFAULT 0`,
     `ALTER TABLE members ADD COLUMN IF NOT EXISTS state VARCHAR(100)`,
     `ALTER TABLE members ADD COLUMN IF NOT EXISTS reference_by VARCHAR(255)`,
+    `ALTER TABLE members ADD COLUMN IF NOT EXISTS wife_age INT`,
+    `ALTER TABLE members ADD COLUMN IF NOT EXISTS children_details JSONB`,
   ];
   for (const sql of cols) { try { await query(sql); } catch (_) {} }
 };
