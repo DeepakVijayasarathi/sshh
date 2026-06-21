@@ -1,7 +1,10 @@
-const { query } = require('../config/database');
+const { query, pool } = require('../config/database');
 const { paginate, paginatedResponse } = require('../utils/pagination');
 const { sendEmail, emailTemplates } = require('../utils/email');
 const { v4: uuidv4 } = require('uuid');
+
+// Ensure member_submitted column exists
+pool.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS member_submitted BOOLEAN DEFAULT FALSE`).catch(() => {});
 
 exports.getAll = async (req, res) => {
   try {
@@ -11,6 +14,7 @@ exports.getAll = async (req, res) => {
     let where = '';
     if (upcoming === 'true') where = `WHERE e.event_date >= CURRENT_DATE AND e.is_published = TRUE`;
     else if (past === 'true') where = `WHERE e.event_date < CURRENT_DATE AND e.is_published = TRUE`;
+    else where = `WHERE e.is_published = TRUE`;
 
     const total = parseInt((await query(`SELECT COUNT(*) FROM events e ${where}`)).rows[0].count);
     const data = await query(
@@ -91,6 +95,44 @@ exports.remove = async (req, res) => {
     const result = await query('DELETE FROM events WHERE id=$1 RETURNING id', [req.params.id]);
     if (!result.rows.length) return res.status(404).json({ message: 'Event not found' });
     res.json({ message: 'Event deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getAdminAll = async (req, res) => {
+  try {
+    const { page, limit, offset } = paginate(req);
+    const total = parseInt((await query(`SELECT COUNT(*) FROM events e`)).rows[0].count);
+    const data = await query(
+      `SELECT e.*, COUNT(er.id) as registered_count
+       FROM events e
+       LEFT JOIN event_registrations er ON er.event_id = e.id
+       GROUP BY e.id
+       ORDER BY e.event_date DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+    res.json(paginatedResponse(data.rows, total, page, limit));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.memberSubmit = async (req, res) => {
+  try {
+    const { title, description, eventDate, eventTime, venue, contactPerson, contactNumber } = req.body;
+    if (!title || !eventDate) return res.status(400).json({ message: 'Title and date are required' });
+    const bannerUrl = req.file ? `/uploads/events/${req.file.filename}` : null;
+    const id = uuidv4();
+    const result = await query(
+      `INSERT INTO events (id, title, description, event_date, event_time, venue,
+        banner_image_url, contact_person, contact_number, is_published, member_submitted, created_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,FALSE,TRUE,$10) RETURNING *`,
+      [id, title, description || null, eventDate, eventTime || null, venue || null,
+       bannerUrl, contactPerson || null, contactNumber || null, req.user.id]
+    );
+    res.status(201).json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -38,7 +38,7 @@ const Forum = () => {
 
   const load = useCallback(() => {
     setLoading(true);
-    const params = new URLSearchParams({ limit: 100 });
+    const params = new URLSearchParams({ limit: 100, include_pending: 'true' });
     if (statusFilter) params.set('status', statusFilter);
     if (catFilter)    params.set('category', catFilter);
     api.get(`/forums/issues?${params}`)

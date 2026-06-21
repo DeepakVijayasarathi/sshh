@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Clock, ChevronRight, CalendarDays } from 'lucide-react';
+import { MapPin, Clock, ChevronRight, CalendarDays, Plus, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import PublicLayout from '../../components/common/PublicLayout';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import useSEO from '../../hooks/useSEO';
 
@@ -84,11 +86,19 @@ const EventCard = ({ ev }) => {
   );
 };
 
+const PROPOSE_DEFAULTS = { title: '', description: '', eventDate: '', eventTime: '', venue: '', contactPerson: '', contactNumber: '' };
+
 const Events = () => {
   useSEO({ title: 'Events', description: 'Upcoming and past events of the Sourashtra community.' });
+  const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('upcoming');
+
+  const [showPropose, setShowPropose] = useState(false);
+  const [proposeForm, setProposeForm] = useState(PROPOSE_DEFAULTS);
+  const [proposeBanner, setProposeBanner] = useState(null);
+  const [proposing, setProposing] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -97,6 +107,27 @@ const Events = () => {
       .catch(() => setEvents([]))
       .finally(() => setLoading(false));
   }, [tab]);
+
+  const setField = (f) => (e) => setProposeForm(p => ({ ...p, [f]: e.target.value }));
+
+  const handlePropose = async (e) => {
+    e.preventDefault();
+    setProposing(true);
+    try {
+      const fd = new FormData();
+      Object.entries(proposeForm).forEach(([k, v]) => v && fd.append(k, v));
+      if (proposeBanner) fd.append('banner', proposeBanner);
+      await api.post('/events/member-submit', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      toast.success('Event proposed! It will appear publicly once approved by the admin.');
+      setShowPropose(false);
+      setProposeForm(PROPOSE_DEFAULTS);
+      setProposeBanner(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit event');
+    } finally {
+      setProposing(false);
+    }
+  };
 
   return (
     <PublicLayout>
@@ -108,6 +139,68 @@ const Events = () => {
       </div>
       <section className="section">
         <div className="container">
+          {/* Propose Event button for logged-in members */}
+          {user && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowPropose(!showPropose)}
+                style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                {showPropose ? <><X size={15} /> Cancel</> : <><Plus size={15} /> Propose an Event</>}
+              </button>
+            </div>
+          )}
+
+          {/* Propose Event form */}
+          {showPropose && user && (
+            <div style={{ background: 'white', borderRadius: 16, border: '1.5px solid #f1f5f9', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', padding: '1.75rem', marginBottom: '1.75rem' }}>
+              <h3 style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#0f172a', marginBottom: '1.25rem' }}>Propose a Community Event</h3>
+              <form onSubmit={handlePropose}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px,1fr))', gap: '0 1.25rem' }}>
+                  <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                    <label className="form-label">Event Title <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input className="form-control" value={proposeForm.title} onChange={setField('title')} required placeholder="Name of the event" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Date <span style={{ color: '#ef4444' }}>*</span></label>
+                    <input type="date" className="form-control" value={proposeForm.eventDate} onChange={setField('eventDate')} required />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Time</label>
+                    <input type="time" className="form-control" value={proposeForm.eventTime} onChange={setField('eventTime')} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Venue</label>
+                    <input className="form-control" value={proposeForm.venue} onChange={setField('venue')} placeholder="Location / venue" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Contact Person</label>
+                    <input className="form-control" value={proposeForm.contactPerson} onChange={setField('contactPerson')} placeholder="Organiser name" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Contact Number</label>
+                    <input className="form-control" value={proposeForm.contactNumber} onChange={setField('contactNumber')} placeholder="Mobile number" />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Banner Image</label>
+                    <input type="file" className="form-control" accept="image/*" onChange={e => setProposeBanner(e.target.files[0])} />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Description</label>
+                  <textarea className="form-control" rows={3} value={proposeForm.description} onChange={setField('description')} placeholder="Brief description of the event…" style={{ resize: 'vertical' }} />
+                </div>
+                <p style={{ fontSize: '0.8125rem', color: '#94a3b8', marginBottom: '0.875rem' }}>
+                  Your event will be reviewed by an admin before it is published.
+                </p>
+                <button type="submit" className="btn btn-primary" disabled={proposing}>
+                  {proposing ? 'Submitting…' : 'Submit for Approval'}
+                </button>
+              </form>
+            </div>
+          )}
+
           <div className="ev-tab-bar">
             <button className={`ev-tab ${tab === 'upcoming' ? 'active' : ''}`} onClick={() => setTab('upcoming')}>
               <CalendarDays size={15} /> Upcoming Events

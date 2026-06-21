@@ -6,6 +6,8 @@ const { uploadImage } = require('../config/multer');
 const upload = uploadImage('events');
 
 router.get('/', ctrl.getAll);
+router.get('/admin/all', authenticate, authorize('SuperAdmin', 'Admin'), ctrl.getAdminAll);
+router.post('/member-submit', authenticate, upload.single('banner'), ctrl.memberSubmit);
 router.get('/:id', ctrl.getById);
 router.get('/:id/participants', authenticate, authorize('SuperAdmin', 'Admin'), ctrl.getParticipants);
 router.post('/', authenticate, authorize('SuperAdmin', 'Admin'), upload.single('banner'), ctrl.create);

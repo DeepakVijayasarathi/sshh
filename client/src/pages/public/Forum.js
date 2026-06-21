@@ -107,7 +107,7 @@ const Forum = () => {
       Object.entries(form).forEach(([k, v]) => v && fd.append(k, v));
       if (picture) fd.append('picture', picture);
       await api.post('/forums/issues', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      toast.success('Issue submitted! Admin will review shortly.');
+      toast.success('Issue submitted! It is pending admin approval before it appears publicly.');
       setShowForm(false);
       setForm({ forumName: '', name: '', location: '', issueTitle: '', issueDescription: '', contactNumber: '', category: '' });
       setPicture(null);
@@ -320,9 +320,15 @@ const Forum = () => {
                   <option value="">All Status</option>
                   {['Pending','Under Review','Resolved','Closed'].map(s => <option key={s}>{s}</option>)}
                 </select>
-                <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} style={{ whiteSpace: 'nowrap' }}>
-                  {showForm ? 'Cancel' : '+ Raise an Issue'}
-                </button>
+                {user ? (
+                  <button className="btn btn-primary" onClick={() => setShowForm(!showForm)} style={{ whiteSpace: 'nowrap' }}>
+                    {showForm ? 'Cancel' : '+ Raise an Issue'}
+                  </button>
+                ) : (
+                  <a href="/login" className="btn btn-primary" style={{ whiteSpace: 'nowrap', textDecoration: 'none' }}>
+                    Login to raise an issue
+                  </a>
+                )}
               </div>
 
               {/* ── Category Tabs ── */}

@@ -15,10 +15,20 @@ const Events = () => {
 
   const load = () => {
     setLoading(true);
-    api.get('/events?limit=50')
+    api.get('/events/admin/all?limit=100')
       .then(r => setEvents(r.data.data || []))
       .catch(() => setEvents([]))
       .finally(() => setLoading(false));
+  };
+
+  const publish = async (id) => {
+    try {
+      const fd = new FormData();
+      fd.append('isPublished', 'true');
+      await api.put(`/events/${id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      toast.success('Event approved and published');
+      load();
+    } catch { toast.error('Failed to publish'); }
   };
 
   useEffect(() => { load(); }, []);
@@ -143,9 +153,16 @@ const Events = () => {
                     <td>{new Date(ev.event_date).toLocaleDateString('en-IN')}</td>
                     <td>{ev.venue || '—'}</td>
                     <td>{ev.registered_count || 0}{ev.registration_limit ? `/${ev.registration_limit}` : ''}</td>
-                    <td><span className={`badge ${ev.is_published ? 'badge-success' : 'badge-warning'}`}>{ev.is_published ? 'Published' : 'Draft'}</span></td>
                     <td>
-                      <div style={{ display: 'flex', gap: '0.375rem' }}>
+                      <span className={`badge ${ev.is_published ? 'badge-success' : ev.member_submitted ? 'badge-warning' : 'badge-secondary'}`}>
+                        {ev.is_published ? 'Published' : ev.member_submitted ? 'Pending Approval' : 'Draft'}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
+                        {ev.member_submitted && !ev.is_published && (
+                          <button className="btn btn-sm btn-primary" onClick={() => publish(ev.id)}>Approve</button>
+                        )}
                         <button className="btn btn-sm btn-outline" onClick={() => openEdit(ev)}>Edit</button>
                         <button className="btn btn-sm btn-danger" onClick={() => remove(ev.id)}>Delete</button>
                       </div>

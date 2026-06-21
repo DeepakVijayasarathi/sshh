@@ -5,13 +5,18 @@ const { v4: uuidv4 } = require('uuid');
 exports.getIssues = async (req, res) => {
   try {
     const { page, limit, offset } = paginate(req);
-    const { status, category, search } = req.query;
+    const { status, category, search, include_pending } = req.query;
 
     let conditions = [];
     let params = [];
     let idx = 1;
 
-    if (status) { conditions.push(`ci.status = $${idx}`); params.push(status); idx++; }
+    if (status) {
+      conditions.push(`ci.status = $${idx}`); params.push(status); idx++;
+    } else if (include_pending !== 'true') {
+      // exclude Pending from public view; admins pass include_pending=true
+      conditions.push(`ci.status != 'Pending'`);
+    }
     if (category) { conditions.push(`ci.category = $${idx}`); params.push(category); idx++; }
     if (search) {
       conditions.push(`(ci.issue_title ILIKE $${idx} OR ci.name ILIKE $${idx} OR ci.contact_number ILIKE $${idx} OR ci.location ILIKE $${idx})`);

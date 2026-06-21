@@ -21,7 +21,11 @@ const Login = () => {
     try {
       const user = await login(form.email, form.password);
       toast.success('Welcome back!');
-      navigate(['SuperAdmin', 'Admin'].includes(user.role) ? '/admin' : '/');
+      if (['SuperAdmin', 'Admin'].includes(user.role)) {
+        navigate('/admin');
+      } else {
+        window.location.href = 'https://sshtn.com/';
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Invalid email or password');
     } finally {
