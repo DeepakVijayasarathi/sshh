@@ -70,6 +70,10 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
+    const current = await query('SELECT * FROM events WHERE id=$1', [req.params.id]);
+    if (!current.rows.length) return res.status(404).json({ message: 'Event not found' });
+    const ev = current.rows[0];
+
     const { title, description, eventDate, eventTime, venue, googleMapLink,
       registrationLimit, contactPerson, contactNumber, isPublished } = req.body;
     const bannerUrl = req.file ? `/uploads/events/${req.file.filename}` : undefined;
@@ -77,8 +81,19 @@ exports.update = async (req, res) => {
     let sets = `title=$2, description=$3, event_date=$4, event_time=$5, venue=$6,
       google_map_link=$7, registration_limit=$8, contact_person=$9, contact_number=$10,
       is_published=$11, updated_at=NOW()`;
-    let values = [req.params.id, title, description, eventDate, eventTime, venue,
-      googleMapLink, registrationLimit, contactPerson, contactNumber, isPublished === 'true'];
+    let values = [
+      req.params.id,
+      title          ?? ev.title,
+      description    ?? ev.description,
+      eventDate      ?? ev.event_date,
+      eventTime      ?? ev.event_time,
+      venue          ?? ev.venue,
+      googleMapLink  ?? ev.google_map_link,
+      registrationLimit ?? ev.registration_limit,
+      contactPerson  ?? ev.contact_person,
+      contactNumber  ?? ev.contact_number,
+      isPublished !== undefined ? isPublished === 'true' : ev.is_published,
+    ];
 
     if (bannerUrl) { sets += `, banner_image_url=$${values.length + 1}`; values.push(bannerUrl); }
 
