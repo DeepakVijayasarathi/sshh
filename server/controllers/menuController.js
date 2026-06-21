@@ -41,49 +41,41 @@ const PUBLIC_MENUS = [
 /* ─── Table init + seed ─────────────────────────────────────────── */
 
 const initAndSeed = async () => {
+  // Phase 1: DDL — run outside a transaction so FKs resolve correctly
+  // roles table already exists (SERIAL PK from schema.sql); just ensure is_system column exists
+  await pool.query(`ALTER TABLE roles ADD COLUMN IF NOT EXISTS is_system BOOLEAN NOT NULL DEFAULT FALSE`);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS menus (
+      id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      label       VARCHAR(100) NOT NULL,
+      path        VARCHAR(255) NOT NULL,
+      icon        VARCHAR(100),
+      target      VARCHAR(20) NOT NULL DEFAULT 'admin',
+      group_label VARCHAR(100),
+      sort_order  INTEGER NOT NULL DEFAULT 0,
+      is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(path, target)
+    )
+  `);
+  // role_id is INTEGER because roles.id is SERIAL (integer)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS role_menus (
+      role_id INTEGER NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+      menu_id UUID    NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+      PRIMARY KEY (role_id, menu_id)
+    )
+  `);
+
+  // Phase 2: Seed data in a transaction
   const client = await getClient();
   try {
     await client.query('BEGIN');
 
-    // Tables
+    // Mark system roles (rows already exist from schema.sql seed)
     await client.query(`
-      CREATE TABLE IF NOT EXISTS roles (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name VARCHAR(100) NOT NULL UNIQUE,
-        description TEXT,
-        is_system BOOLEAN NOT NULL DEFAULT FALSE,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      )
-    `);
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS menus (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        label VARCHAR(100) NOT NULL,
-        path VARCHAR(255) NOT NULL,
-        icon VARCHAR(100),
-        target VARCHAR(20) NOT NULL DEFAULT 'admin',
-        group_label VARCHAR(100),
-        sort_order INTEGER NOT NULL DEFAULT 0,
-        is_active BOOLEAN NOT NULL DEFAULT TRUE,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        UNIQUE(path, target)
-      )
-    `);
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS role_menus (
-        role_id UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-        menu_id UUID NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
-        PRIMARY KEY (role_id, menu_id)
-      )
-    `);
-
-    // Seed roles
-    await client.query(`
-      INSERT INTO roles (name, description, is_system) VALUES
-        ('SuperAdmin', 'Full system access including roles and menu management', TRUE),
-        ('Admin',      'Administrative access — content and member management', TRUE),
-        ('Member',     'Regular community member — public site access only', TRUE)
-      ON CONFLICT (name) DO NOTHING
+      UPDATE roles SET is_system = TRUE WHERE name IN ('SuperAdmin', 'Admin', 'Member')
     `);
 
     // Seed admin menus (upsert so label/icon stay current)
@@ -111,12 +103,12 @@ const initAndSeed = async () => {
       `, [m.label, m.path, m.icon, m.sort]);
     }
 
-    // Get IDs for mapping
-    const rolesRes  = await client.query('SELECT id, name FROM roles');
-    const menusRes  = await client.query('SELECT id, path, target FROM menus');
-    const roleMap   = Object.fromEntries(rolesRes.rows.map(r => [r.name, r.id]));
+    // Get IDs for role → menu mapping
+    const rolesRes = await client.query('SELECT id, name FROM roles');
+    const menusRes = await client.query('SELECT id, path, target FROM menus');
+    const roleMap  = Object.fromEntries(rolesRes.rows.map(r => [r.name, r.id]));
 
-    const adminOnly   = ['/admin/roles', '/admin/menus', '/admin/role-menus'];
+    const adminOnly = ['/admin/roles', '/admin/menus', '/admin/role-menus'];
 
     for (const m of menusRes.rows) {
       const isSystemOnly = m.target === 'admin' && adminOnly.includes(m.path);
@@ -126,7 +118,6 @@ const initAndSeed = async () => {
         'INSERT INTO role_menus (role_id, menu_id) VALUES ($1,$2) ON CONFLICT DO NOTHING',
         [roleMap['SuperAdmin'], m.id]
       );
-
       // Admin → all except system-management pages
       if (!isSystemOnly) {
         await client.query(
@@ -134,7 +125,6 @@ const initAndSeed = async () => {
           [roleMap['Admin'], m.id]
         );
       }
-
       // Member → public only
       if (m.target === 'public') {
         await client.query(

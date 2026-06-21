@@ -442,6 +442,52 @@ CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(target_user_id);
 
 -- ============================================================
+-- ROLE-BASED MENU SYSTEM
+-- ============================================================
+ALTER TABLE roles ADD COLUMN IF NOT EXISTS is_system BOOLEAN NOT NULL DEFAULT FALSE;
+UPDATE roles SET is_system = TRUE WHERE name IN ('SuperAdmin', 'Admin', 'Member');
+
+CREATE TABLE IF NOT EXISTS menus (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  label       VARCHAR(100) NOT NULL,
+  path        VARCHAR(255) NOT NULL,
+  icon        VARCHAR(100),
+  target      VARCHAR(20) NOT NULL DEFAULT 'admin',
+  group_label VARCHAR(100),
+  sort_order  INTEGER NOT NULL DEFAULT 0,
+  is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(path, target)
+);
+
+-- role_id is INTEGER because roles.id is SERIAL
+CREATE TABLE IF NOT EXISTS role_menus (
+  role_id INTEGER NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+  menu_id UUID    NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
+  PRIMARY KEY (role_id, menu_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_role_menus_role ON role_menus(role_id);
+CREATE INDEX IF NOT EXISTS idx_menus_target    ON menus(target, is_active);
+
+-- ============================================================
+-- CULTURAL HERITAGE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS cultural_posts (
+  id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title        VARCHAR(255) NOT NULL,
+  category     VARCHAR(100),
+  content      TEXT,
+  image_url    VARCHAR(500),
+  author_name  VARCHAR(150),
+  submitted_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  status       VARCHAR(20) NOT NULL DEFAULT 'Pending',
+  is_published BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
 -- DEFAULT SUPER ADMIN USER
 -- !! SECURITY WARNING !!
 -- The password hash below corresponds to 'Admin@123'.
