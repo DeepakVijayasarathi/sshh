@@ -187,7 +187,7 @@ exports.getByRole = async (req, res) => {
        JOIN role_menus rm ON rm.menu_id = m.id
        JOIN roles r ON r.id = rm.role_id
        WHERE r.name = $1 AND m.target = $2 AND m.is_active = TRUE
-       ORDER BY m.group_label, m.sort_order`,
+       ORDER BY MIN(m.sort_order) OVER (PARTITION BY m.group_label), m.sort_order`,
       [role, target]
     );
     res.json(result.rows);
