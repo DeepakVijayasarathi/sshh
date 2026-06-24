@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SiteSettingsProvider } from './context/SiteSettingsContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 // Public Pages — lazy loaded
 const Home = lazy(() => import('./pages/public/Home'));
@@ -31,6 +32,7 @@ const YouthWingPage = lazy(() => import('./pages/public/YouthWing'));
 const WomenWingPage = lazy(() => import('./pages/public/WomenWing'));
 const TnSourashConnectPage = lazy(() => import('./pages/public/TnSourashConnect'));
 const CulturalHeritagePage = lazy(() => import('./pages/public/CulturalHeritage'));
+const OurTeamPage          = lazy(() => import('./pages/public/OurTeam'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Admin Pages — lazy loaded
@@ -115,6 +117,7 @@ const AppRoutes = () => (
       <Route path="/women" element={<WomenWingPage />} />
       <Route path="/tn-sourash-connect" element={<TnSourashConnectPage />} />
       <Route path="/cultural-heritage" element={<CulturalHeritagePage />} />
+      <Route path="/our-team" element={<OurTeamPage />} />
 
       {/* Admin */}
       <Route path="/admin" element={
@@ -155,12 +158,14 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
-        <SiteSettingsProvider>
-          <AuthProvider>
-            <AppRoutes />
-            <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
-          </AuthProvider>
-        </SiteSettingsProvider>
+        <LanguageProvider>
+          <SiteSettingsProvider>
+            <AuthProvider>
+              <AppRoutes />
+              <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
+            </AuthProvider>
+          </SiteSettingsProvider>
+        </LanguageProvider>
       </Router>
     </ErrorBoundary>
   );

@@ -6,19 +6,24 @@ const fs = require('fs').promises;
 const initTable = async () => {
   await query(`
     CREATE TABLE IF NOT EXISTS team_members (
-      id            SERIAL PRIMARY KEY,
-      name          VARCHAR(150)  NOT NULL,
-      role          VARCHAR(100)  NOT NULL DEFAULT 'Coordinator',
-      designation   VARCHAR(200),
-      division      VARCHAR(150),
-      photo_url     VARCHAR(500),
-      quote         TEXT,
-      display_order INT           NOT NULL DEFAULT 0,
-      is_active     BOOLEAN       NOT NULL DEFAULT true,
-      created_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
-      updated_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+      id             SERIAL PRIMARY KEY,
+      name           VARCHAR(150)  NOT NULL,
+      role           VARCHAR(100)  NOT NULL DEFAULT 'Coordinator',
+      designation    VARCHAR(200),
+      division       VARCHAR(150),
+      photo_url      VARCHAR(500),
+      quote          TEXT,
+      contact_number VARCHAR(20),
+      display_order  INT           NOT NULL DEFAULT 0,
+      is_active      BOOLEAN       NOT NULL DEFAULT true,
+      created_at     TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+      updated_at     TIMESTAMPTZ   NOT NULL DEFAULT NOW()
     )
   `);
+  // Add contact_number column if the table already existed without it
+  await query(`
+    ALTER TABLE team_members ADD COLUMN IF NOT EXISTS contact_number VARCHAR(20)
+  `).catch(() => {});
   // Add unique constraint on name so seed can upsert safely
   await query(`
     DO $$ BEGIN
@@ -61,12 +66,12 @@ exports.getAll = async (req, res) => {
 /* ── Admin: create ── */
 exports.create = async (req, res) => {
   try {
-    const { name, role, designation, division, quote, display_order, is_active } = req.body;
+    const { name, role, designation, division, quote, contact_number, display_order, is_active } = req.body;
     const photo_url = req.file ? `/uploads/team/${req.file.filename}` : null;
     const result = await query(
-      `INSERT INTO team_members (name, role, designation, division, photo_url, quote, display_order, is_active)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-      [name, role || 'Coordinator', designation, division, photo_url, quote,
+      `INSERT INTO team_members (name, role, designation, division, photo_url, quote, contact_number, display_order, is_active)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      [name, role || 'Coordinator', designation, division, photo_url, quote, contact_number || null,
        parseInt(display_order) || 0, is_active !== 'false']
     );
     res.status(201).json(result.rows[0]);
@@ -79,7 +84,7 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, role, designation, division, quote, display_order, is_active } = req.body;
+    const { name, role, designation, division, quote, contact_number, display_order, is_active } = req.body;
 
     let photo_url = req.body.photo_url || null;
     if (req.file) photo_url = `/uploads/team/${req.file.filename}`;
@@ -87,10 +92,11 @@ exports.update = async (req, res) => {
     const result = await query(
       `UPDATE team_members SET
          name=$1, role=$2, designation=$3, division=$4, photo_url=COALESCE($5, photo_url),
-         quote=$6, display_order=$7, is_active=$8, updated_at=NOW()
-       WHERE id=$9 RETURNING *`,
+         quote=$6, contact_number=$7, display_order=$8, is_active=$9, updated_at=NOW()
+       WHERE id=$10 RETURNING *`,
       [name, role || 'Coordinator', designation, division, photo_url, quote,
-       parseInt(display_order) || 0, is_active !== 'false' && is_active !== false, id]
+       contact_number || null, parseInt(display_order) || 0,
+       is_active !== 'false' && is_active !== false, id]
     );
     if (!result.rows.length) return res.status(404).json({ message: 'Not found' });
     res.json(result.rows[0]);

@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import api from '../../services/api';
-import { Plus, Pencil, Trash2, User, UploadCloud, X, Star, Users } from 'lucide-react';
+import { Plus, Pencil, Trash2, User, UploadCloud, X, Star, Users, Phone } from 'lucide-react';
 
-const EMPTY_PATRON = { name: '', role: 'Chief Patron', designation: '', division: 'Patron', quote: '', display_order: 0, is_active: true };
-const EMPTY_TEAM   = { name: '', role: 'Coordinator',  designation: '', division: '',       quote: '', display_order: 0, is_active: true };
+const EMPTY_PATRON = { name: '', role: 'Chief Patron', designation: '', division: 'Patron', quote: '', contact_number: '', display_order: 0, is_active: true };
+const EMPTY_TEAM   = { name: '', role: 'Coordinator',  designation: '', division: '',       quote: '', contact_number: '', display_order: 0, is_active: true };
 
 const PATRON_ROLES = ['Inspiration Behind SHC TN', 'Chief Patron', 'Patron of SHC', 'Honorary Patron', 'Patron'];
 
@@ -37,6 +37,7 @@ export default function TeamMembers() {
   const openEdit = (m) => {
     setForm({ name: m.name, role: m.role, designation: m.designation || '',
               division: m.division || '', quote: m.quote || '',
+              contact_number: m.contact_number || '',
               display_order: m.display_order, is_active: m.is_active });
     setEditId(m.id); setPreview(m.photo_url || null); setModal(true);
   };
@@ -144,6 +145,11 @@ export default function TeamMembers() {
                                 letterSpacing: '0.08em', color: '#b45309' }}>{p.role}</div>
                   <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a' }}>{p.name}</div>
                   {p.designation && <div style={{ fontSize: '0.72rem', color: '#64748b' }}>{p.designation}</div>}
+                  {p.contact_number && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#475569' }}>
+                      <Phone size={11} /> {p.contact_number}
+                    </div>
+                  )}
                   {p.quote && <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontStyle: 'italic',
                                             borderTop: '1px solid #f1f5f9', paddingTop: '0.5rem', marginTop: '0.25rem' }}>
                     "{p.quote.substring(0, 80)}{p.quote.length > 80 ? '…' : ''}"
@@ -199,6 +205,11 @@ export default function TeamMembers() {
                                         letterSpacing: '0.08em', color: 'var(--primary,#8B0000)', marginBottom: 2 }}>{m.role}</div>
                           <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>{m.name}</div>
                           {m.designation && <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 2 }}>{m.designation}</div>}
+                          {m.contact_number && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.72rem', color: '#475569', marginTop: 3 }}>
+                              <Phone size={11} /> {m.contact_number}
+                            </div>
+                          )}
                           <div style={{ display: 'inline-flex', alignItems: 'center', marginTop: 6, padding: '2px 8px',
                                         background: m.is_active ? 'rgba(5,150,105,0.08)' : 'rgba(239,68,68,0.08)',
                                         borderRadius: 20, fontSize: '0.65rem', fontWeight: 600,
@@ -307,6 +318,14 @@ export default function TeamMembers() {
               <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#374151', marginBottom: 4 }}>Quote</label>
               <textarea rows={3} value={form.quote} onChange={e => setForm(p => ({ ...p, quote: e.target.value }))}
                 style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 8, border: '1.5px solid #e2e8f0', fontSize: '0.875rem', boxSizing: 'border-box', resize: 'vertical', outline: 'none' }} />
+            </div>
+
+            {/* Contact Number */}
+            <div style={{ marginBottom: '0.875rem' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#374151', marginBottom: 4 }}>Contact Number</label>
+              <input type="tel" value={form.contact_number} onChange={e => setForm(p => ({ ...p, contact_number: e.target.value }))}
+                placeholder="e.g. 9876543210"
+                style={{ width: '100%', padding: '0.5rem 0.75rem', borderRadius: 8, border: '1.5px solid #e2e8f0', fontSize: '0.875rem', boxSizing: 'border-box', outline: 'none' }} />
             </div>
 
             {/* Display order */}

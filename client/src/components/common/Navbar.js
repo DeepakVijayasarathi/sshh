@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
-import { Menu, X, ChevronDown, User, LayoutDashboard, LogOut } from 'lucide-react';
+import { useLanguage, LANGUAGES } from '../../context/LanguageContext';
+import { Menu, X, ChevronDown, User, LayoutDashboard, LogOut, Globe } from 'lucide-react';
 import api from '../../services/api';
 import './Navbar.css';
 
@@ -17,14 +18,18 @@ const FALLBACK_LINKS = [
   { to: '/forum',              label: 'Forum' },
   { to: '/cultural-heritage',  label: 'Cultural Heritage' },
   { to: '/tn-sourash-connect', label: 'TN Connect' },
+  { to: '/our-team',           label: 'Our Team' },
   { to: '/contact',            label: 'Contact' },
 ];
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen]         = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [scrolled, setScrolled]         = useState(false);
   const [navLinks, setNavLinks]         = useState(FALLBACK_LINKS);
+  const langMenuRef                     = useRef(null);
+  const { lang, switchLang, t }         = useLanguage();
 
   useEffect(() => {
     api.get('/menus/public')
@@ -53,9 +58,8 @@ const Navbar = () => {
   // Close on outside click
   useEffect(() => {
     const handler = (e) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-        setUserMenuOpen(false);
-      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenuOpen(false);
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target)) setLangMenuOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -124,7 +128,7 @@ const Navbar = () => {
                 >
                   {({ isActive }) => (
                     <>
-                      {link.label}
+                      {t(link.label)}
                       {isActive && (
                         <span style={{
                           position: 'absolute', bottom: -3, left: '50%', transform: 'translateX(-50%)',
@@ -138,8 +142,48 @@ const Navbar = () => {
             ))}
           </ul>
 
+          {/* ── Language switcher ────────────────────────── */}
+          <div className="desktop-nav" ref={langMenuRef} style={{ position: 'relative', flexShrink: 0 }}>
+            <button
+              onClick={() => setLangMenuOpen(o => !o)}
+              title="Change language"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '0.35rem 0.6rem', borderRadius: 8, border: '1.5px solid #e5e7eb',
+                background: langMenuOpen ? '#f9fafb' : 'transparent',
+                cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600, color: '#374151',
+              }}
+            >
+              <Globe size={13} />
+              {LANGUAGES.find(l => l.code === lang)?.label}
+            </button>
+            {langMenuOpen && (
+              <div style={{
+                position: 'absolute', right: 0, top: 'calc(100% + 6px)', zIndex: 300,
+                background: 'white', borderRadius: 10, minWidth: 130,
+                boxShadow: '0 8px 24px -4px rgba(0,0,0,0.12)', border: '1px solid #f1f5f9',
+              }}>
+                {LANGUAGES.map(l => (
+                  <button key={l.code} onClick={() => { switchLang(l.code); setLangMenuOpen(false); }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      width: '100%', padding: '0.5rem 0.875rem', border: 'none',
+                      background: lang === l.code ? 'rgba(139,0,0,0.06)' : 'transparent',
+                      color: lang === l.code ? 'var(--primary)' : '#374151',
+                      fontSize: '0.8125rem', fontWeight: lang === l.code ? 600 : 400,
+                      cursor: 'pointer', textAlign: 'left', borderRadius: 0,
+                    }}
+                  >
+                    <span style={{ fontWeight: 700, minWidth: 20, fontSize: '0.875rem' }}>{l.label}</span>
+                    {l.full}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* ── Auth section ────────────────────────────── */}
-          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0, marginLeft: 'auto' }}>
+          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
             {user ? (
               <div className="user-menu-wrapper" ref={userMenuRef} style={{ position: 'relative' }}>
                 <button
@@ -181,13 +225,13 @@ const Navbar = () => {
                     <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#4b5563', transition: 'background 0.15s' }}
                       onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <User size={14} /> My Profile & Card
+                      <User size={14} /> {t('My Profile & Card')}
                     </Link>
                     {['SuperAdmin', 'Admin'].includes(user.role) && (
                       <Link to="/admin" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 1rem', fontSize: '0.8125rem', color: '#4b5563', transition: 'background 0.15s' }}
                         onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                        <LayoutDashboard size={14} /> Admin Dashboard
+                        <LayoutDashboard size={14} /> {t('Admin Dashboard')}
                       </Link>
                     )}
                     <button
@@ -196,7 +240,7 @@ const Navbar = () => {
                       onMouseEnter={e => e.currentTarget.style.background = '#fef2f2'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >
-                      <LogOut size={14} /> Sign Out
+                      <LogOut size={14} /> {t('Sign Out')}
                     </button>
                   </div>
                 )}
@@ -204,10 +248,10 @@ const Navbar = () => {
             ) : (
               <>
                 <Link to="/login" className="btn btn-sm btn-ghost" style={{ color: '#4b5563', borderRadius: 8 }}>
-                  Sign In
+                  {t('Sign In')}
                 </Link>
                 <Link to="/register" className="btn btn-sm btn-primary" style={{ borderRadius: 8 }}>
-                  Join Now
+                  {t('Join Now')}
                 </Link>
               </>
             )}
@@ -255,9 +299,28 @@ const Navbar = () => {
                   transition: 'all 0.15s', textDecoration: 'none',
                 })}
               >
-                {link.label}
+                {t(link.label)}
               </NavLink>
             ))}
+            {/* Mobile language switcher */}
+            <div style={{ margin: '0.5rem 0', paddingTop: '0.5rem', borderTop: '1px solid #f3f4f6' }}>
+              <p style={{ fontSize: '0.6875rem', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem', padding: '0 0.875rem' }}>Language</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: '0 0.875rem' }}>
+                {LANGUAGES.map(l => (
+                  <button key={l.code} onClick={() => switchLang(l.code)}
+                    style={{
+                      padding: '0.375rem 0.75rem', borderRadius: 20, border: '1.5px solid',
+                      borderColor: lang === l.code ? 'var(--primary)' : '#e5e7eb',
+                      background: lang === l.code ? 'rgba(139,0,0,0.06)' : 'white',
+                      color: lang === l.code ? 'var(--primary)' : '#374151',
+                      fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer',
+                    }}
+                  >
+                    {l.full}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div style={{ margin: '0.75rem 0', borderTop: '1px solid #f3f4f6' }} />
 
@@ -265,22 +328,22 @@ const Navbar = () => {
               <>
                 <Link to="/profile" onClick={() => setMenuOpen(false)}
                   className="btn btn-ghost" style={{ width: '100%', justifyContent: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
-                  <User size={16} /> My Profile &amp; Card
+                  <User size={16} /> {t('My Profile & Card')}
                 </Link>
                 {['SuperAdmin', 'Admin'].includes(user.role) && (
                   <Link to="/admin" onClick={() => setMenuOpen(false)}
                     className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', marginBottom: '0.5rem' }}>
-                    <LayoutDashboard size={16} /> Admin Dashboard
+                    <LayoutDashboard size={16} /> {t('Admin Dashboard')}
                   </Link>
                 )}
                 <button onClick={handleLogout} className="btn btn-danger" style={{ width: '100%', justifyContent: 'center' }}>
-                  <LogOut size={16} /> Sign Out
+                  <LogOut size={16} /> {t('Sign Out')}
                 </button>
               </>
             ) : (
               <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <Link to="/login" onClick={() => setMenuOpen(false)} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }}>Sign In</Link>
-                <Link to="/register" onClick={() => setMenuOpen(false)} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}>Join Now</Link>
+                <Link to="/login" onClick={() => setMenuOpen(false)} className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }}>{t('Sign In')}</Link>
+                <Link to="/register" onClick={() => setMenuOpen(false)} className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}>{t('Join Now')}</Link>
               </div>
             )}
           </div>

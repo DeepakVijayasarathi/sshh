@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import { User, MapPin, Phone, Briefcase, Send } from 'lucide-react';
+import { User, MapPin, Phone, Briefcase, Send, Hash, FileText } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
 
 const TnSourashConnect = () => {
   const [form, setForm] = useState({
-    name: '', ghornav: '', gothtra: '', workOrganization: '', place: '', contactNo: '',
+    name: '', ghornav: '', gothtra: '', workOrganization: '', workOrganizationIntro: '', place: '', pincode: '', contactNo: '',
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -24,7 +24,7 @@ const TnSourashConnect = () => {
       await api.post('/forums/issues', {
         forumName: 'TN Sourash Connect',
         issueTitle: `Connect Request - ${form.name}`,
-        issueDescription: `Ghornav: ${form.ghornav || '—'}\nGothtra: ${form.gothtra || '—'}\nWork / Organisation: ${form.workOrganization || '—'}\nPlace: ${form.place || '—'}`,
+        issueDescription: `Ghornav: ${form.ghornav || '—'}\nGothtra: ${form.gothtra || '—'}\nWork / Organisation: ${form.workOrganization || '—'}\nWork Intro: ${form.workOrganizationIntro || '—'}\nPlace: ${form.place || '—'}\nPincode: ${form.pincode || '—'}`,
         name: form.name,
         contactNumber: form.contactNo,
         location: form.place,
@@ -63,7 +63,7 @@ const TnSourashConnect = () => {
                 </p>
                 <button
                   className="btn btn-outline"
-                  onClick={() => { setSubmitted(false); setForm({ name: '', ghornav: '', gothtra: '', workOrganization: '', place: '', contactNo: '' }); }}
+                  onClick={() => { setSubmitted(false); setForm({ name: '', ghornav: '', gothtra: '', workOrganization: '', workOrganizationIntro: '', place: '', pincode: '', contactNo: '' }); }}
                 >
                   Submit Another Request
                 </button>
@@ -107,11 +107,34 @@ const TnSourashConnect = () => {
                       </div>
                     </div>
 
+                    <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                      <label className="form-label">Work / Organisation — Brief Intro</label>
+                      <div style={{ position: 'relative' }}>
+                        <FileText size={15} style={{ position: 'absolute', left: '0.875rem', top: '0.875rem', color: '#9ca3af', pointerEvents: 'none' }} />
+                        <textarea
+                          className="form-control"
+                          rows={3}
+                          value={form.workOrganizationIntro}
+                          onChange={set('workOrganizationIntro')}
+                          placeholder="Briefly describe your work, role, or what your organisation does"
+                          style={{ paddingLeft: '2.5rem', resize: 'vertical' }}
+                        />
+                      </div>
+                    </div>
+
                     <div className="form-group">
                       <label className="form-label">Place / City</label>
                       <div style={{ position: 'relative' }}>
                         <MapPin size={15} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
                         <input className="form-control" value={form.place} onChange={set('place')} placeholder="Your city or town" style={{ paddingLeft: '2.5rem' }} />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Pincode</label>
+                      <div style={{ position: 'relative' }}>
+                        <Hash size={15} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
+                        <input className="form-control" value={form.pincode} onChange={set('pincode')} placeholder="6-digit PIN code" style={{ paddingLeft: '2.5rem' }} maxLength={6} />
                       </div>
                     </div>
 

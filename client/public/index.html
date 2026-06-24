@@ -15,6 +15,14 @@
     <meta name="twitter:description" content="Connecting the Sourashtra community through membership, events, jobs, news and more." />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <link rel="canonical" href="https://sourashtra.org/" />
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%REACT_APP_GA_ID%"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '%REACT_APP_GA_ID%');
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
     <title>Sourashtra Community Portal</title>

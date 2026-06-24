@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Users, CheckCircle2, Phone, ExternalLink } from 'lucide-react';
+import { Calendar, Users, CheckCircle2, Phone, ExternalLink, Share2 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PublicLayout from '../../components/common/PublicLayout';
@@ -46,6 +46,12 @@ const EventDetail = () => {
     const cleaned = number.replace(/\D/g, '');
     const phone = cleaned.startsWith('91') ? cleaned : `91${cleaned}`;
     window.open(`https://wa.me/${phone}`, '_blank');
+  };
+
+  const shareOnWhatsApp = () => {
+    const url = window.location.href;
+    const text = `Check out this event: *${event.title}*\n${event.venue ? `📍 ${event.venue}\n` : ''}${event.event_date ? `📅 ${new Date(event.event_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}\n` : ''}\n${url}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   if (loading) return <PublicLayout><div className="loading-center"><div className="spinner" /></div></PublicLayout>;
@@ -99,6 +105,21 @@ const EventDetail = () => {
                   <ExternalLink size={13} /> View on Map / URL
                 </a>
               )}
+
+              {/* WhatsApp Share */}
+              <div style={{ marginTop: '1.25rem' }}>
+                <button
+                  onClick={shareOnWhatsApp}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    background: '#25D366', color: 'white', border: 'none',
+                    borderRadius: 8, padding: '0.5rem 1rem', cursor: 'pointer',
+                    fontSize: '0.875rem', fontWeight: 600,
+                  }}
+                >
+                  <Share2 size={14} /> Share on WhatsApp
+                </button>
+              </div>
 
               {event.description && (
                 <div style={{ marginTop: '1.5rem', lineHeight: 1.8, color: 'var(--text-medium)' }}>
