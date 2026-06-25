@@ -28,6 +28,12 @@ const NewsDetail = () => {
             <span className="text-muted" style={{ fontSize: '0.875rem' }}>
               {new Date(article.publish_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
             </span>
+            <button
+              onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`${article.title} — ${window.location.href}`)}`, '_blank')}
+              style={{ marginLeft: 'auto', background: '#25D366', color: 'white', border: 'none', borderRadius: 8, padding: '0.4rem 0.875rem', fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer' }}
+            >
+              Share on WhatsApp
+            </button>
           </div>
           <h1 style={{ fontSize: '1.875rem', fontFamily: "'Playfair Display', serif", marginBottom: '1.5rem', lineHeight: 1.3 }}>{article.title}</h1>
           {article.video_url && (

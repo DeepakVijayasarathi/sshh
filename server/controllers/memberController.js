@@ -50,9 +50,10 @@ exports.getAll = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     const result = await query(
-      `SELECT m.*, mt.name as membership_type_name
+      `SELECT m.*, mt.name as membership_type_name, ref.full_name as reference_by_name
        FROM members m
        LEFT JOIN membership_types mt ON mt.id = m.membership_type_id
+       LEFT JOIN members ref ON ref.membership_number = m.reference_by
        WHERE m.id = $1`,
       [req.params.id]
     );

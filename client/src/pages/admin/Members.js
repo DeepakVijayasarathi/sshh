@@ -17,6 +17,17 @@ const STATUS_STYLE = {
   Suspended: { bg: '#fef2f2', color: '#dc2626' },
 };
 
+const calcAge = (dob) => {
+  if (!dob) return null;
+  const birth = new Date(dob);
+  if (isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+};
+
 const Avatar = ({ name, photo }) => {
   if (photo) {
     return <img src={photo} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />;
@@ -154,9 +165,9 @@ const Members = () => {
       if (filters.district) params.set('district', filters.district);
       const r = await api.get(`/members?${params}`);
       const rows = r.data.data || [];
-      const headers = ['Member No', 'Full Name', 'Mobile', 'Email', 'District', 'City', 'State', 'Gotra', 'Ghernov', 'Father Name', 'Mother Name', 'Spouse Name', 'Children Count', 'Membership Type', 'Status', 'Joined Date'];
+      const headers = ['Member No', 'Full Name', 'Age', 'Mobile', 'Email', 'District', 'City', 'State', 'Gotra', 'Ghernov', 'Father Name', 'Mother Name', 'Spouse Name', 'Children Count', 'Membership Type', 'Status', 'Joined Date'];
       const csvRows = [headers, ...rows.map(m => [
-        m.membership_number || '', m.full_name || '', m.mobile_number || '', m.email || '',
+        m.membership_number || '', m.full_name || '', calcAge(m.date_of_birth) ?? '', m.mobile_number || '', m.email || '',
         m.district || '', m.city || '', m.state || '', m.gotra || '', m.ghernov || '',
         m.father_name || '', m.mother_name || '', m.spouse_name || '', m.children_count || '',
         m.membership_type_name || '', m.status || '',
@@ -326,7 +337,7 @@ const Members = () => {
                     <th style={{ width: 44, padding: '0.75rem 1rem', textAlign: 'center' }}>
                       <span style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>#</span>
                     </th>
-                    {['Member No.', 'Member', 'Mobile', 'District', 'Type', 'Status', 'Actions'].map(h => (
+                    {['Member No.', 'Member', 'Age', 'Mobile', 'District', 'Type', 'Status', 'Actions'].map(h => (
                       <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.6875rem', fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
                         {h}
                       </th>
@@ -336,7 +347,7 @@ const Members = () => {
                 <tbody>
                   {members.length === 0 ? (
                     <tr>
-                      <td colSpan={8} style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                      <td colSpan={9} style={{ textAlign: 'center', padding: '4rem 2rem' }}>
                         <Users size={40} style={{ color: '#e5e7eb', margin: '0 auto 0.75rem' }} />
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem', fontWeight: 500 }}>No members found</p>
                         <p style={{ color: '#d1d5db', fontSize: '0.8125rem', marginTop: 4 }}>Try adjusting your search or filters</p>
@@ -378,6 +389,7 @@ const Members = () => {
                         </div>
                       </td>
 
+                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: '#4b5563' }}>{calcAge(m.date_of_birth) ?? '—'}</td>
                       <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: '#4b5563' }}>{m.mobile_number}</td>
                       <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: '#4b5563' }}>{m.district || '—'}</td>
                       <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: '#4b5563' }}>{m.membership_type_name || '—'}</td>
@@ -608,7 +620,8 @@ const Members = () => {
                   ['City', detailMember.city],
                   ['Pincode', detailMember.pincode],
                   ['State', detailMember.state],
-                  ['Reference By', detailMember.reference_by],
+                  ['Reference By (Member ID)', detailMember.reference_by],
+                  ['Reference By (Name)', detailMember.reference_by_name],
                   ['Membership Type', detailMember.membership_type_name],
                   ['Joined Date', new Date(detailMember.created_at).toLocaleDateString('en-IN')],
                 ].filter(([, v]) => v != null && v !== '' && v !== 0).map(([label, value]) => (

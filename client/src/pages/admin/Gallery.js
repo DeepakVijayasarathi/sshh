@@ -72,6 +72,14 @@ const Gallery = () => {
     catch { toast.error('Failed'); }
   };
 
+  const moderateAlbum = async (id, approve) => {
+    try {
+      await api.put(`/gallery/albums/${id}/moderate`, { approve });
+      toast.success(approve ? 'Submission approved & published' : 'Submission rejected');
+      loadAlbums();
+    } catch { toast.error('Failed'); }
+  };
+
   const shareWhatsApp = (album) => {
     if (album.whatsapp_number) {
       const cleaned = album.whatsapp_number.replace(/\D/g, '');
@@ -141,6 +149,11 @@ const Gallery = () => {
                 🔗 View URL
               </a>
             )}
+            {selected.whatsapp_number && (
+              <a href={`tel:${selected.whatsapp_number}`} className="btn btn-sm btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                📞 Call
+              </a>
+            )}
             <button onClick={() => shareWhatsApp(selected)} className="btn btn-sm" style={{ background: '#25D366', color: 'white', border: 'none', borderRadius: 6, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
               WhatsApp Share
             </button>
@@ -172,8 +185,27 @@ const Gallery = () => {
           )}
         </div>
       ) : loading ? <div className="loading-center"><div className="spinner" /></div> : (
+        <>
+          {albums.some(a => a.approval_status === 'Pending') && (
+            <div className="admin-card" style={{ marginBottom: '1.5rem', background: '#fffbeb', border: '1px solid #fde68a' }}>
+              <h4 style={{ fontWeight: 600, marginBottom: '1rem', color: '#92400e' }}>Pending Public Submissions</h4>
+              {albums.filter(a => a.approval_status === 'Pending').map(album => (
+                <div key={album.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', borderBottom: '1px solid #fde68a' }}>
+                  {album.cover_image_url
+                    ? <img src={album.cover_image_url} alt="" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 6 }} />
+                    : <div style={{ width: 48, height: 48, background: '#f3f4f6', borderRadius: 6 }} />}
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontWeight: 600, margin: 0 }}>{album.title}</p>
+                    {album.description && <p className="text-muted" style={{ fontSize: '0.8rem', margin: 0 }}>{album.description}</p>}
+                  </div>
+                  <button className="btn btn-sm btn-primary" onClick={() => moderateAlbum(album.id, true)}>Approve</button>
+                  <button className="btn btn-sm btn-danger" onClick={() => moderateAlbum(album.id, false)}>Reject</button>
+                </div>
+              ))}
+            </div>
+          )}
         <div className="grid grid-3">
-          {albums.map(album => (
+          {albums.filter(a => a.approval_status !== 'Pending').map(album => (
             <div key={album.id} className="card">
               {album.cover_image_url
                 ? <img src={album.cover_image_url} alt={album.title} style={{ width: '100%', height: 160, objectFit: 'cover' }} />
@@ -186,12 +218,14 @@ const Gallery = () => {
                   <button className="btn btn-sm btn-outline" onClick={() => openAlbum(album)}>Manage</button>
                   <button className="btn btn-sm" onClick={() => shareWhatsApp(album)} style={{ background: '#25D366', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>WhatsApp</button>
                   {album.external_url && <a href={album.external_url} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline">🔗 URL</a>}
+                  {album.whatsapp_number && <a href={`tel:${album.whatsapp_number}`} className="btn btn-sm btn-outline">📞 Call</a>}
                   <button className="btn btn-sm btn-danger" onClick={() => deleteAlbum(album.id)}>Delete</button>
                 </div>
               </div>
             </div>
           ))}
         </div>
+        </>
       )}
     </div>
   );

@@ -21,14 +21,15 @@ const TnSourashConnect = () => {
     }
     setLoading(true);
     try {
-      await api.post('/forums/issues', {
-        forumName: 'TN Sourash Connect',
-        issueTitle: `Connect Request - ${form.name}`,
-        issueDescription: `Ghornav: ${form.ghornav || '—'}\nGothtra: ${form.gothtra || '—'}\nWork / Organisation: ${form.workOrganization || '—'}\nWork Intro: ${form.workOrganizationIntro || '—'}\nPlace: ${form.place || '—'}\nPincode: ${form.pincode || '—'}`,
+      await api.post('/tn-connect', {
         name: form.name,
-        contactNumber: form.contactNo,
-        location: form.place,
-        category: 'Community Welfare',
+        ghornav: form.ghornav,
+        gothtra: form.gothtra,
+        workOrganization: form.workOrganization,
+        workOrganizationIntro: form.workOrganizationIntro,
+        place: form.place,
+        pincode: form.pincode,
+        contactNo: form.contactNo,
       });
       setSubmitted(true);
       toast.success('Your connect request has been submitted!');

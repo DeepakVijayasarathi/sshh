@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { CheckCircle, XCircle, Trash2, Eye, PlusCircle, X, Image } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, Eye, PlusCircle, Pencil, X, Image } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 
@@ -23,6 +23,11 @@ const AdminCulturalHeritage = () => {
   const [form, setForm]           = useState({ title: '', category: '', content: '', author_name: '' });
   const [imageFile, setImageFile] = useState(null);
   const [imgPreview, setImgPreview] = useState('');
+  const [editing, setEditing]     = useState(null);
+  const [editForm, setEditForm]   = useState({ title: '', category: '', content: '', author_name: '' });
+  const [editImageFile, setEditImageFile] = useState(null);
+  const [editImgPreview, setEditImgPreview] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -56,6 +61,45 @@ const AdminCulturalHeritage = () => {
       load();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Delete failed');
+    }
+  };
+
+  const openEdit = (post) => {
+    setEditing(post);
+    setEditForm({
+      title: post.title || '', category: post.category || '',
+      content: post.content || '', author_name: post.author_name || '',
+    });
+    setEditImageFile(null);
+    setEditImgPreview('');
+  };
+
+  const handleEditFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setEditImageFile(file);
+    setEditImgPreview(URL.createObjectURL(file));
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editForm.title.trim()) { toast.error('Title is required'); return; }
+    setSavingEdit(true);
+    try {
+      const fd = new FormData();
+      fd.append('title',       editForm.title);
+      fd.append('category',    editForm.category);
+      fd.append('content',     editForm.content);
+      fd.append('author_name', editForm.author_name);
+      if (editImageFile) fd.append('image', editImageFile);
+      await api.put(`/cultural/${editing.id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      toast.success('Post updated');
+      setEditing(null);
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Update failed');
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -230,6 +274,13 @@ const AdminCulturalHeritage = () => {
                         >
                           <Eye size={13} /> View
                         </button>
+                        <button
+                          onClick={() => openEdit(post)}
+                          title="Edit"
+                          style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', color: '#4b5563', display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem' }}
+                        >
+                          <Pencil size={13} /> Edit
+                        </button>
                         {post.status === 'Pending' && (
                           <>
                             <button
@@ -328,6 +379,52 @@ const AdminCulturalHeritage = () => {
                 <button onClick={() => setDetail(null)} className="btn btn-ghost">Close</button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit modal */}
+      {editing && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} onClick={() => setEditing(null)}>
+          <div style={{ background: 'white', borderRadius: 20, width: '100%', maxWidth: 560, boxShadow: '0 24px 60px rgba(0,0,0,0.25)', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+            <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ fontSize: '1.0625rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>Edit Post</h2>
+              <button onClick={() => setEditing(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}><X size={20} /></button>
+            </div>
+            <form onSubmit={handleSaveEdit} className="card-body" style={{ padding: '1.5rem', display: 'grid', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label">Title *</label>
+                  <input className="form-control" value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} required />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label">Category</label>
+                  <select className="form-control" value={editForm.category} onChange={e => setEditForm(f => ({ ...f, category: e.target.value }))}>
+                    <option value="">Select</option>
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label">Author Name</label>
+                <input className="form-control" value={editForm.author_name} onChange={e => setEditForm(f => ({ ...f, author_name: e.target.value }))} />
+              </div>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label">Content</label>
+                <textarea className="form-control" rows={4} value={editForm.content} onChange={e => setEditForm(f => ({ ...f, content: e.target.value }))} style={{ resize: 'vertical' }} />
+              </div>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label">Replace Image (optional)</label>
+                <input type="file" accept="image/*" onChange={handleEditFileChange} style={{ fontSize: '0.875rem' }} />
+                {editImgPreview && <img src={editImgPreview} alt="preview" style={{ width: 100, height: 70, objectFit: 'cover', borderRadius: 6, marginTop: 6 }} />}
+              </div>
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                <button type="button" className="btn btn-ghost" onClick={() => setEditing(null)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={savingEdit}>
+                  {savingEdit ? 'Saving…' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

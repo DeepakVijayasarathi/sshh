@@ -115,12 +115,29 @@ const Forum = () => {
     );
   });
 
+  const statCounts = {
+    Pending: issues.filter(i => i.status === 'Pending').length,
+    'Under Review': issues.filter(i => i.status === 'Under Review').length,
+    Resolved: issues.filter(i => i.status === 'Resolved').length,
+    Closed: issues.filter(i => i.status === 'Closed').length,
+  };
+
   return (
     <div>
       {/* ── Header ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <h1 className="page-title" style={{ marginBottom: 0 }}>Community Forum</h1>
         <span style={{ fontSize: '0.8125rem', color: '#9ca3af' }}>{filtered.length} issue{filtered.length !== 1 ? 's' : ''}</span>
+      </div>
+
+      {/* ── Stats overview ── */}
+      <div className="forum-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
+        {Object.entries(statCounts).map(([label, count]) => (
+          <div key={label} className="admin-card" style={{ padding: '0.875rem 1rem' }}>
+            <p style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>{label}</p>
+            <p style={{ fontSize: '1.375rem', fontWeight: 700, color: '#0f172a', margin: '0.25rem 0 0' }}>{count}</p>
+          </div>
+        ))}
       </div>
 
       {/* ── Filters ── */}
@@ -276,7 +293,7 @@ const Forum = () => {
             </div>
 
             {/* Modal body */}
-            <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 220px', gap: '1.25rem' }}>
+            <div className="forum-modal-body" style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 220px', gap: '1.25rem' }}>
               {/* Left: Description + Comments */}
               <div>
                 {/* Meta */}
@@ -389,6 +406,13 @@ const Forum = () => {
           </div>
         </div>
       )}
+
+      <style>{`
+        @media (max-width: 640px) {
+          .forum-stats { grid-template-columns: repeat(2, 1fr) !important; }
+          .forum-modal-body { grid-template-columns: 1fr !important; padding: 1rem !important; }
+        }
+      `}</style>
     </div>
   );
 };
