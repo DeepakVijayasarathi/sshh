@@ -5,7 +5,7 @@ import PublicLayout from '../../components/common/PublicLayout';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
-const BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const BASE = process.env.REACT_APP_API_URL || '';
 
 const CATEGORIES = ['Music', 'Dance', 'Food', 'Tradition', 'Language', 'Festival', 'History', 'Craft', 'Other'];
 

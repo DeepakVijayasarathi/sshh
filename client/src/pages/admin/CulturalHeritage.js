@@ -3,7 +3,7 @@ import { CheckCircle, XCircle, Trash2, Eye, PlusCircle, X, Image } from 'lucide-
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 
-const BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const BASE = process.env.REACT_APP_API_URL || '';
 const CATEGORIES = ['Music', 'Dance', 'Food', 'Tradition', 'Language', 'Festival', 'History', 'Craft', 'Other'];
 
 const STATUS_BADGE = {

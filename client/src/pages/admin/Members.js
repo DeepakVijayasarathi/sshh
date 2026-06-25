@@ -326,8 +326,8 @@ const Members = () => {
                     <th style={{ width: 44, padding: '0.75rem 1rem', textAlign: 'center' }}>
                       <span style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>#</span>
                     </th>
-                    {['Member No.', 'Member', 'Mobile', 'District', 'Type', 'Status', 'Actions'].map(h => (
-                      <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.6875rem', fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+                    {['Member No.', 'Member', 'Age', 'Mobile', 'Ghernov', 'Gothtra', 'Father', 'Mother', 'Spouse', 'Children', 'District', 'Status', 'Actions'].map(h => (
+                      <th key={h} style={{ padding: '0.75rem 0.625rem', textAlign: 'left', fontSize: '0.6875rem', fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
                         {h}
                       </th>
                     ))}
@@ -336,7 +336,7 @@ const Members = () => {
                 <tbody>
                   {members.length === 0 ? (
                     <tr>
-                      <td colSpan={8} style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                      <td colSpan={14} style={{ textAlign: 'center', padding: '4rem 2rem' }}>
                         <Users size={40} style={{ color: '#e5e7eb', margin: '0 auto 0.75rem' }} />
                         <p style={{ color: '#9ca3af', fontSize: '0.875rem', fontWeight: 500 }}>No members found</p>
                         <p style={{ color: '#d1d5db', fontSize: '0.8125rem', marginTop: 4 }}>Try adjusting your search or filters</p>
@@ -378,9 +378,17 @@ const Members = () => {
                         </div>
                       </td>
 
-                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: '#4b5563' }}>{m.mobile_number}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: '#4b5563' }}>{m.district || '—'}</td>
-                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: '#4b5563' }}>{m.membership_type_name || '—'}</td>
+                      <td style={{ padding: '0.75rem 0.625rem', fontSize: '0.8rem', color: '#4b5563' }}>
+                        {m.date_of_birth ? Math.floor((Date.now() - new Date(m.date_of_birth)) / (365.25 * 24 * 60 * 60 * 1000)) + ' yrs' : '—'}
+                      </td>
+                      <td style={{ padding: '0.75rem 0.625rem', fontSize: '0.8rem', color: '#4b5563' }}>{m.mobile_number || '—'}</td>
+                      <td style={{ padding: '0.75rem 0.625rem', fontSize: '0.8rem', color: '#4b5563' }}>{m.ghernov || '—'}</td>
+                      <td style={{ padding: '0.75rem 0.625rem', fontSize: '0.8rem', color: '#4b5563' }}>{m.gotra || '—'}</td>
+                      <td style={{ padding: '0.75rem 0.625rem', fontSize: '0.8rem', color: '#4b5563' }}>{m.father_name || '—'}</td>
+                      <td style={{ padding: '0.75rem 0.625rem', fontSize: '0.8rem', color: '#4b5563' }}>{m.mother_name || '—'}</td>
+                      <td style={{ padding: '0.75rem 0.625rem', fontSize: '0.8rem', color: '#4b5563' }}>{m.spouse_name || '—'}</td>
+                      <td style={{ padding: '0.75rem 0.625rem', fontSize: '0.8rem', color: '#4b5563', textAlign: 'center' }}>{m.children_count ?? '—'}</td>
+                      <td style={{ padding: '0.75rem 0.625rem', fontSize: '0.8rem', color: '#4b5563' }}>{m.district || '—'}</td>
 
                       {/* Status */}
                       <td style={{ padding: '0.75rem 1rem' }}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { User, MapPin, Phone, Briefcase, Send, Hash, FileText } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
@@ -10,6 +10,15 @@ const TnSourashConnect = () => {
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (window.gtag) {
+      window.gtag('event', 'page_view', {
+        page_title: 'TN Sourash Connect',
+        page_path: '/tn-sourash-connect',
+      });
+    }
+  }, []);
 
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
 
@@ -30,6 +39,12 @@ const TnSourashConnect = () => {
         location: form.place,
         category: 'Community Welfare',
       });
+      if (window.gtag) {
+        window.gtag('event', 'connect_form_submit', {
+          event_category: 'TN Sourash Connect',
+          event_label: form.place || 'unknown',
+        });
+      }
       setSubmitted(true);
       toast.success('Your connect request has been submitted!');
     } catch (err) {

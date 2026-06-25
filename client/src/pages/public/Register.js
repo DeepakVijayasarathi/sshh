@@ -180,13 +180,6 @@ const Register = () => {
                     </div>
                     <p className="form-hint">Use at least 8 characters with a mix of letters and numbers.</p>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Contact Number <span style={{ color: '#ef4444' }}>*</span></label>
-                    <div style={{ position: 'relative' }}>
-                      <Phone size={15} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
-                      <input className="form-control" value={form.mobileNumber} onChange={set('mobileNumber')} required placeholder="10-digit mobile number" style={{ paddingLeft: '2.5rem' }} />
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -200,6 +193,13 @@ const Register = () => {
                       <div style={{ position: 'relative' }}>
                         <User size={15} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
                         <input className="form-control" value={form.fullName} onChange={set('fullName')} required placeholder="Your full name" style={{ paddingLeft: '2.5rem' }} />
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Contact Number <span style={{ color: '#ef4444' }}>*</span></label>
+                      <div style={{ position: 'relative' }}>
+                        <Phone size={15} style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
+                        <input className="form-control" value={form.mobileNumber} onChange={set('mobileNumber')} required placeholder="10-digit mobile number" style={{ paddingLeft: '2.5rem' }} />
                       </div>
                     </div>
                     <div className="form-group">
