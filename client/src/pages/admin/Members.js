@@ -17,6 +17,17 @@ const STATUS_STYLE = {
   Suspended: { bg: '#fef2f2', color: '#dc2626' },
 };
 
+const calcAge = (dob) => {
+  if (!dob) return null;
+  const birth = new Date(dob);
+  if (isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+};
+
 const Avatar = ({ name, photo }) => {
   if (photo) {
     return <img src={photo} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />;
@@ -154,9 +165,9 @@ const Members = () => {
       if (filters.district) params.set('district', filters.district);
       const r = await api.get(`/members?${params}`);
       const rows = r.data.data || [];
-      const headers = ['Member No', 'Full Name', 'Mobile', 'Email', 'District', 'City', 'State', 'Gotra', 'Ghernov', 'Father Name', 'Mother Name', 'Spouse Name', 'Children Count', 'Membership Type', 'Status', 'Joined Date'];
+      const headers = ['Member No', 'Full Name', 'Age', 'Mobile', 'Email', 'District', 'City', 'State', 'Gotra', 'Ghernov', 'Father Name', 'Mother Name', 'Spouse Name', 'Children Count', 'Membership Type', 'Status', 'Joined Date'];
       const csvRows = [headers, ...rows.map(m => [
-        m.membership_number || '', m.full_name || '', m.mobile_number || '', m.email || '',
+        m.membership_number || '', m.full_name || '', calcAge(m.date_of_birth) ?? '', m.mobile_number || '', m.email || '',
         m.district || '', m.city || '', m.state || '', m.gotra || '', m.ghernov || '',
         m.father_name || '', m.mother_name || '', m.spouse_name || '', m.children_count || '',
         m.membership_type_name || '', m.status || '',
@@ -616,7 +627,8 @@ const Members = () => {
                   ['City', detailMember.city],
                   ['Pincode', detailMember.pincode],
                   ['State', detailMember.state],
-                  ['Reference By', detailMember.reference_by],
+                  ['Reference By (Member ID)', detailMember.reference_by],
+                  ['Reference By (Name)', detailMember.reference_by_name],
                   ['Membership Type', detailMember.membership_type_name],
                   ['Joined Date', new Date(detailMember.created_at).toLocaleDateString('en-IN')],
                 ].filter(([, v]) => v != null && v !== '' && v !== 0).map(([label, value]) => (

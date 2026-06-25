@@ -7,9 +7,11 @@ const upload = uploadImage('gallery');
 
 router.get('/albums', ctrl.getAlbums);
 router.get('/albums/all', authenticate, authorize('SuperAdmin', 'Admin'), ctrl.getAllAlbums);
+router.post('/albums/submit', authenticate, upload.single('cover'), ctrl.submitAlbum);
 router.get('/albums/:id', ctrl.getAlbumItems);
 router.post('/albums', authenticate, authorize('SuperAdmin', 'Admin'), upload.single('cover'), ctrl.createAlbum);
 router.put('/albums/:id', authenticate, authorize('SuperAdmin', 'Admin'), ctrl.updateAlbum);
+router.put('/albums/:id/moderate', authenticate, authorize('SuperAdmin', 'Admin'), ctrl.moderateAlbum);
 router.delete('/albums/:id', authenticate, authorize('SuperAdmin', 'Admin'), ctrl.deleteAlbum);
 router.post('/albums/:id/items', authenticate, authorize('SuperAdmin', 'Admin'), upload.array('files', 20), ctrl.addItems);
 router.delete('/albums/:id/items/:itemId', authenticate, authorize('SuperAdmin', 'Admin'), ctrl.deleteItem);

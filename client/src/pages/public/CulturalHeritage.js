@@ -9,6 +9,11 @@ const BASE = process.env.REACT_APP_API_URL || '';
 
 const CATEGORIES = ['Music', 'Dance', 'Food', 'Tradition', 'Language', 'Festival', 'History', 'Craft', 'Other'];
 
+const shareWhatsApp = (post) => {
+  const text = `${post.title} — ${window.location.origin}/cultural-heritage`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+};
+
 const CulturalHeritage = () => {
   const { user } = useAuth();
   const [posts, setPosts]         = useState([]);
@@ -203,7 +208,15 @@ const CulturalHeritage = () => {
                       {post.author_name && <span>{post.author_name}</span>}
                       <span>{new Date(post.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     </div>
-                    <span className="ch-read">Read more <ChevronRight size={12} /></span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.25rem' }}>
+                      <span className="ch-read">Read more <ChevronRight size={12} /></span>
+                      <button
+                        onClick={e => { e.stopPropagation(); shareWhatsApp(post); }}
+                        style={{ background: '#25D366', color: 'white', border: 'none', borderRadius: 6, padding: '0.25rem 0.6rem', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        WhatsApp
+                      </button>
+                    </div>
                   </div>
                 </article>
               ))}
@@ -248,6 +261,12 @@ const CulturalHeritage = () => {
                   {detail.content}
                 </div>
               )}
+              <button
+                onClick={() => shareWhatsApp(detail)}
+                style={{ marginTop: '1.5rem', background: '#25D366', color: 'white', border: 'none', borderRadius: 8, padding: '0.5rem 1rem', fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                Share on WhatsApp
+              </button>
             </div>
           </div>
         </div>

@@ -47,6 +47,7 @@ const AdminJobs = lazy(() => import('./pages/admin/Jobs'));
 const AdminScholarships = lazy(() => import('./pages/admin/Scholarships'));
 const AdminDonations = lazy(() => import('./pages/admin/Donations'));
 const AdminForum = lazy(() => import('./pages/admin/Forum'));
+const AdminTnConnect = lazy(() => import('./pages/admin/TnConnect'));
 const AdminReports = lazy(() => import('./pages/admin/Reports'));
 const AdminYouthWing = lazy(() => import('./pages/admin/YouthWing'));
 const AdminWomenWing = lazy(() => import('./pages/admin/WomenWing'));
@@ -135,6 +136,7 @@ const AppRoutes = () => (
         <Route path="scholarships" element={<AdminScholarships />} />
         <Route path="donations" element={<AdminDonations />} />
         <Route path="forum" element={<AdminForum />} />
+        <Route path="tn-connect" element={<AdminTnConnect />} />
         <Route path="reports" element={<AdminReports />} />
         <Route path="youth" element={<AdminYouthWing />} />
         <Route path="women" element={<AdminWomenWing />} />
