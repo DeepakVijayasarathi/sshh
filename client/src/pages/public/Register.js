@@ -359,27 +359,39 @@ const Register = () => {
                       <textarea className="form-control" rows={3} value={form.address} onChange={set('address')} placeholder="House / Street / Area" style={{ resize: 'vertical' }} />
                     </div>
                     <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                      <label className="form-label">Reference By (Member ID)</label>
+                      <label className="form-label">
+                        Reference By (Member ID)
+                        {refLocked && (
+                          <span style={{ marginLeft: 8, fontSize: '0.75rem', background: '#d1fae5', color: '#065f46', padding: '0.125rem 0.5rem', borderRadius: 999, fontWeight: 600 }}>
+                            Pre-filled via referral link
+                          </span>
+                        )}
+                      </label>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <input
                           className="form-control"
                           value={form.referenceBy}
-                          onChange={e => { set('referenceBy')(e); setRefMember(null); }}
+                          onChange={e => { if (refLocked) return; set('referenceBy')(e); setRefMember(null); }}
                           placeholder="Enter member ID (e.g. SCP20240001)"
+                          readOnly={refLocked}
+                          style={refLocked ? { background: '#f0fdf4', color: '#065f46', cursor: 'not-allowed' } : {}}
                         />
-                        <button
-                          type="button"
-                          className="btn btn-outline btn-sm"
-                          onClick={() => lookupMemberId(form.referenceBy)}
-                          disabled={!form.referenceBy || refLoading}
-                          style={{ whiteSpace: 'nowrap' }}
-                        >
-                          {refLoading ? '…' : 'Verify'}
-                        </button>
+                        {!refLocked && (
+                          <button
+                            type="button"
+                            className="btn btn-outline btn-sm"
+                            onClick={() => lookupMemberId(form.referenceBy)}
+                            disabled={!form.referenceBy || refLoading}
+                            style={{ whiteSpace: 'nowrap' }}
+                          >
+                            {refLoading ? '…' : 'Verify'}
+                          </button>
+                        )}
                       </div>
                       {refMember && (
                         <p style={{ fontSize: '0.8rem', color: '#059669', marginTop: '0.375rem' }}>
                           ✓ {refMember.full_name} ({refMember.membership_number})
+                          {refMember.district ? ` — ${refMember.district}` : ''}
                         </p>
                       )}
                       {form.referenceBy && !refLoading && refMember === null && form.referenceBy.length > 3 && (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { toast } from 'react-toastify'; // eslint-disable-line no-unused-vars
-import { User, Lock } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { User, Lock, Link2, Copy, Share2 } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import ImageUploadPreview from '../../components/common/ImageUploadPreview';
 import MembershipCard from '../../components/common/MembershipCard';
@@ -123,7 +123,40 @@ const Profile = () => {
               </div>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {profile?.member_status === 'Active' && (
-                  <button className="btn btn-secondary btn-sm" onClick={fetchCard}>View ID Card</button>
+                  <>
+                    <button className="btn btn-secondary btn-sm" onClick={fetchCard}>View ID Card</button>
+                    <button
+                      className="btn btn-sm"
+                      style={{ background: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', display: 'flex', alignItems: 'center', gap: 4 }}
+                      onClick={() => {
+                        const link = `${window.location.origin}/register?ref=${profile.membership_number}`;
+                        if (navigator.clipboard) {
+                          navigator.clipboard.writeText(link).then(() => toast.success('Referral link copied!'));
+                        } else {
+                          const el = document.createElement('textarea');
+                          el.value = link;
+                          document.body.appendChild(el);
+                          el.select();
+                          document.execCommand('copy');
+                          document.body.removeChild(el);
+                          toast.success('Referral link copied!');
+                        }
+                      }}
+                    >
+                      <Copy size={13} /> Copy Referral Link
+                    </button>
+                    <button
+                      className="btn btn-sm"
+                      style={{ background: '#25D366', color: 'white', border: 'none', display: 'flex', alignItems: 'center', gap: 4 }}
+                      onClick={() => {
+                        const link = `${window.location.origin}/register?ref=${profile.membership_number}`;
+                        const text = `Join the Saurashtra Heritage Chair community!\n\nI'm inviting you to register as a member. Click the link below to apply — your application will be pre-filled with my reference.\n\n${link}\n\nReferring Member: ${profile.full_name} (${profile.membership_number})`;
+                        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                      }}
+                    >
+                      <Share2 size={13} /> Share via WhatsApp
+                    </button>
+                  </>
                 )}
                 <button className="btn btn-primary btn-sm" onClick={() => setEditing(!editing)}>
                   {editing ? 'Cancel' : 'Edit Profile'}
@@ -223,6 +256,44 @@ const Profile = () => {
                       </div>
                     )}
                   </div>
+
+                  {profile?.member_status === 'Active' && profile?.membership_number && (
+                    <div style={{ marginTop: '1.5rem', padding: '1rem 1.25rem', background: '#f0fdf4', borderRadius: 12, border: '1px solid #bbf7d0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: '0.5rem' }}>
+                        <Link2 size={14} style={{ color: '#15803d' }} />
+                        <p style={{ fontWeight: 700, fontSize: '0.875rem', color: '#15803d', margin: 0 }}>Your Referral Link</p>
+                      </div>
+                      <p style={{ fontSize: '0.8rem', color: '#166534', marginBottom: '0.625rem' }}>
+                        Share this link to invite new members — your Member ID will be pre-filled automatically.
+                      </p>
+                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <code style={{ flex: 1, background: 'white', border: '1px solid #bbf7d0', borderRadius: 8, padding: '0.375rem 0.75rem', fontSize: '0.8rem', color: '#166534', wordBreak: 'break-all' }}>
+                          {window.location.origin}/register?ref={profile.membership_number}
+                        </code>
+                        <button
+                          className="btn btn-sm"
+                          style={{ background: '#15803d', color: 'white', border: 'none', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}
+                          onClick={() => {
+                            const link = `${window.location.origin}/register?ref=${profile.membership_number}`;
+                            navigator.clipboard?.writeText(link).then(() => toast.success('Copied!')).catch(() => {});
+                          }}
+                        >
+                          <Copy size={13} /> Copy
+                        </button>
+                        <button
+                          className="btn btn-sm"
+                          style={{ background: '#25D366', color: 'white', border: 'none', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}
+                          onClick={() => {
+                            const link = `${window.location.origin}/register?ref=${profile.membership_number}`;
+                            const text = `Join the Saurashtra Heritage Chair community!\n\nI'm ${profile.full_name} (${profile.membership_number}) and I'd like to invite you to become a member.\n\nClick here to register — my reference will be auto-filled:\n${link}`;
+                            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                          }}
+                        >
+                          <Share2 size={13} /> WhatsApp
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )

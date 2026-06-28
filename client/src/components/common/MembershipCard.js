@@ -1,9 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
 import { MapPin, Download, Share2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import './MembershipCard.css';
 
 const MembershipCard = ({ member, onClose }) => {
   const cardRef = useRef(null);
+  const [sharing, setSharing] = useState(false);
 
   const handlePrint = () => {
     const printContents = cardRef.current.innerHTML;
@@ -26,9 +29,61 @@ const MembershipCard = ({ member, onClose }) => {
     win.print();
   };
 
-  const handleWhatsApp = () => {
-    const text = `*Saurashtra Heritage Chair*\nDigital Membership Card\n\nName: ${member.full_name}\nMember No: ${member.membership_number}\nType: ${member.membership_type}\nDistrict: ${member.district || '—'}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  const captureCard = async () => {
+    const canvas = await html2canvas(cardRef.current, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    });
+    return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+  };
+
+  const handleDownloadImage = async () => {
+    setSharing(true);
+    try {
+      const blob = await captureCard();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `membership-card-${member.membership_number}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      handlePrint();
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleWhatsApp = async () => {
+    setSharing(true);
+    try {
+      const blob = await captureCard();
+      const file = new File([blob], `membership-card-${member.membership_number}.png`, { type: 'image/png' });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `${member.full_name} — Membership Card`,
+          text: `Saurashtra Heritage Chair — Digital Membership Card\nMember: ${member.full_name} | No: ${member.membership_number}`,
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `membership-card-${member.membership_number}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.info('Card image downloaded! Open WhatsApp and attach it from your Downloads folder.', { autoClose: 6000 });
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        toast.error('Could not share card. Try Download / Print instead.');
+      }
+    } finally {
+      setSharing(false);
+    }
   };
 
   if (!member) return null;
@@ -46,8 +101,15 @@ const MembershipCard = ({ member, onClose }) => {
         <div className="mc-actions">
           <h3>Digital Membership Card</h3>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button className="btn btn-primary btn-sm" onClick={handlePrint} style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Download size={13} /> Download / Print</button>
-            <button className="btn btn-outline btn-sm" onClick={handleWhatsApp} style={{ display: 'flex', alignItems: 'center', gap: 4, borderColor: '#25D366', color: '#25D366' }}><Share2 size={13} /> Share on WhatsApp</button>
+            <button className="btn btn-primary btn-sm" onClick={handleDownloadImage} disabled={sharing} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Download size={13} /> {sharing ? 'Preparing…' : 'Download Image'}
+            </button>
+            <button className="btn btn-outline btn-sm" onClick={handlePrint} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Download size={13} /> Print / PDF
+            </button>
+            <button className="btn btn-outline btn-sm" onClick={handleWhatsApp} disabled={sharing} style={{ display: 'flex', alignItems: 'center', gap: 4, borderColor: '#25D366', color: '#25D366' }}>
+              <Share2 size={13} /> {sharing ? 'Sharing…' : 'Share on WhatsApp'}
+            </button>
             <button className="btn btn-outline btn-sm" onClick={onClose}>Close</button>
           </div>
         </div>
