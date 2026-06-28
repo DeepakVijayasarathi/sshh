@@ -22,24 +22,53 @@ const FEATURES = [
   { Icon: MessageSquare, title: 'Forum',         desc: 'Raise issues, share ideas, discuss & collaborate.',      link: '/forum',       color: '#d97706', bg: 'rgba(217,119,6,0.09)'   },
 ];
 
-const BannerSlider = ({ banners }) => {
+const BannerSlider = ({ banners, siteName, siteTag, settings }) => {
   const [current, setCurrent] = useState(0);
   const timerRef = useRef(null);
 
-  const next = useCallback(() => setCurrent(c => (c + 1) % banners.length), [banners.length]);
-  const prev = useCallback(() => setCurrent(c => (c - 1 + banners.length) % banners.length), [banners.length]);
+  const hasBanners = banners && banners.length > 0;
+  const count = hasBanners ? banners.length : 0;
+
+  const next = useCallback(() => setCurrent(c => (c + 1) % count), [count]);
+  const prev = useCallback(() => setCurrent(c => (c - 1 + count) % count), [count]);
 
   useEffect(() => {
-    if (banners.length <= 1) return;
+    if (count <= 1) return;
     timerRef.current = setInterval(next, 5000);
     return () => clearInterval(timerRef.current);
-  }, [next, banners.length]);
+  }, [next, count]);
 
-  const resetTimer = () => { clearInterval(timerRef.current); if (banners.length > 1) timerRef.current = setInterval(next, 5000); };
-
+  const resetTimer = () => { clearInterval(timerRef.current); if (count > 1) timerRef.current = setInterval(next, 5000); };
   const goTo = (i) => { setCurrent(i); resetTimer(); };
   const handlePrev = () => { prev(); resetTimer(); };
   const handleNext = () => { next(); resetTimer(); };
+
+  /* ── Fallback: no banners configured ── */
+  if (!hasBanners) {
+    return (
+      <div className="b-banner-slider" style={{ background: 'linear-gradient(130deg, var(--primary,#8B0000) 0%, #1a0a1e 100%)' }}>
+        <div className="b-banner-bg-pattern" />
+        <div className="b-banner-content">
+          {settings?.logo_url && (
+            <img src={settings.logo_url} alt={siteName} style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'contain', marginBottom: '0.875rem', border: '2px solid rgba(255,255,255,0.25)' }} />
+          )}
+          <div className="b-banner-sub" style={{ color: 'var(--secondary,#D4AF37)' }}>
+            {siteTag}
+          </div>
+          <h2 className="b-banner-title" style={{ color: '#fff' }}>{siteName}</h2>
+          <p className="b-banner-desc">A digital platform for the Sourashtra community to connect, celebrate and collaborate.</p>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <Link to="/membership" className="b-banner-btn" style={{ background: 'var(--secondary,#D4AF37)', color: '#1a1a1a' }}>
+              Become a Member <ChevronRight size={14} />
+            </Link>
+            <Link to="/about" className="b-banner-btn" style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1.5px solid rgba(255,255,255,0.3)' }}>
+              Learn More <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const b = banners[current];
   const hasBg = !!b.image_url;
@@ -62,7 +91,7 @@ const BannerSlider = ({ banners }) => {
           </Link>
         )}
       </div>
-      {banners.length > 1 && (
+      {count > 1 && (
         <>
           <button className="b-banner-arrow b-banner-arrow--prev" onClick={handlePrev} aria-label="Previous"><ChevronLeft size={18} /></button>
           <button className="b-banner-arrow b-banner-arrow--next" onClick={handleNext} aria-label="Next"><ChevronRight size={18} /></button>
@@ -165,25 +194,10 @@ export default function Home() {
         {/* ══════════════ BENTO GRID ══════════════ */}
         <div className="bento-grid">
 
-          {/* Logo */}
-          <div className="b-logo">
-            <div className="logo-circle">
-              {settings.logo_url
-                ? <img src={settings.logo_url} alt={siteName} />
-                : <span>{siteName.slice(0, 2).toUpperCase()}</span>
-              }
-            </div>
-            <div className="logo-name">{siteName}</div>
-            <div className="logo-sub">Est. Since Ancient Times</div>
-          </div>
+          {/* Banner Slider — left side */}
+          <BannerSlider banners={banners} siteName={siteName} siteTag={siteTag} settings={settings} />
 
-          {/* Heading */}
-          <div className="b-card b-heading">
-            <h1>{siteName.toUpperCase()}</h1>
-            <div className="tagline">{siteTag.toUpperCase()}</div>
-          </div>
-
-          {/* Stats */}
+          {/* Stats — right column, numbers only */}
           <div className="b-card b-stats">
             {STATS.map(s => (
               <div key={s.label} className="b-stat-item">
@@ -193,50 +207,18 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Hero */}
-          <div className="b-card b-hero">
-            <p>
-              A digital platform for the Sourashtra community to connect, celebrate and collaborate.
-              Manage memberships, discover events, find jobs, explore businesses and more — all in one place.
-            </p>
-            <div className="b-hero-btns">
-              <Link to="/membership" className="btn btn-sm"
-                style={{ background: 'var(--secondary,#D4AF37)', color: '#1a1a1a', fontWeight: 700 }}>
-                Become a Member
-              </Link>
-              <Link to="/about" className="btn btn-sm"
-                style={{ background: 'rgba(255,255,255,0.12)', color: 'white', border: '1.5px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                Learn More <ArrowRight size={13} />
-              </Link>
-            </div>
-          </div>
-
-          {/* Banner Slider (replaces first 3 feature boxes) */}
+          {/* 4 Feature tiles — row below banner */}
           <div className="b-features">
-            {banners.length > 0 ? (
-              <BannerSlider banners={banners} />
-            ) : (
-              <>
-                {FEATURES.slice(0, 3).map(f => (
-                  <Link key={f.title} to={f.link} className="b-feat">
-                    <div className="b-feat-icon" style={{ background: f.bg, color: f.color }}>
-                      <f.Icon size={17} strokeWidth={1.75} />
-                    </div>
-                    <div className="b-feat-title">{f.title}</div>
-                    <p className="b-feat-desc">{f.desc}</p>
-                    <span className="b-feat-link">Explore <ChevronRight size={11} /></span>
-                  </Link>
-                ))}
-                {FEATURES.slice(3).map(f => (
-                  <Link key={f.title} to={f.link} className="b-feat">
-                    <div className="b-feat-icon" style={{ background: f.bg, color: f.color }}>
-                      <f.Icon size={17} strokeWidth={1.75} />
-                    </div>
-                    <div className="b-feat-title">{f.title}</div>
-                    <p className="b-feat-desc">{f.desc}</p>
-                    <span className="b-feat-link">Explore <ChevronRight size={11} /></span>
-                  </Link>
-                ))}
+            {FEATURES.slice(0, 4).map(f => (
+              <Link key={f.title} to={f.link} className="b-feat">
+                <div className="b-feat-icon" style={{ background: f.bg, color: f.color }}>
+                  <f.Icon size={17} strokeWidth={1.75} />
+                </div>
+                <div className="b-feat-title">{f.title}</div>
+                <p className="b-feat-desc">{f.desc}</p>
+                <span className="b-feat-link">Explore <ChevronRight size={11} /></span>
+              </Link>
+            ))}
               </>
             )}
           </div>

@@ -6,16 +6,14 @@
 
 .bento-grid {
   display: grid;
-  grid-template-columns: 180px 1fr 1fr 1fr 200px;
-  grid-template-rows: auto auto auto auto auto auto auto;
+  grid-template-columns: 1fr 1fr 1fr 1fr 190px;
   grid-template-areas:
-    "logo  heading heading heading stats"
-    "hero  hero    hero    hero    stats"
-    "feats feats   feats   news    news "
-    "feats feats   feats   news    news "
-    "evts  evts    evts    evts    evts "
-    "fill  fill    fill    fill    fill "
-    "join  join    join    join    join ";
+    "banner banner banner banner stats"
+    "banner banner banner banner stats"
+    "feats  feats  feats  feats  feats"
+    "news   news   news   evts   evts "
+    "fill   fill   fill   fill   fill "
+    "join   join   join   join   join ";
   gap: 10px;
   max-width: 1380px;
   margin: 0 auto;
@@ -28,53 +26,7 @@
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
 
-/* ── Logo ── */
-.b-logo {
-  grid-area: logo;
-  background: var(--primary, #8B0000);
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.625rem;
-  padding: 1.25rem 0.875rem;
-  color: #fff;
-}
-.b-logo .logo-circle {
-  width: 110px; height: 110px; border-radius: 50%;
-  background: #fff;
-  border: 3px solid rgba(255,255,255,0.5);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.25rem; font-weight: 800;
-  overflow: hidden; flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-}
-.b-logo .logo-circle img { width: 100%; height: 100%; object-fit: contain; }
-.b-logo .logo-name {
-  font-size: 0.8rem; font-weight: 700;
-  text-align: center; line-height: 1.3;
-}
-.b-logo .logo-sub { font-size: 0.58rem; opacity: 0.55; text-align: center; letter-spacing: 0.04em; }
-
-/* ── Heading ── */
-.b-heading {
-  grid-area: heading;
-  background: #0f172a;
-  border-radius: 14px;
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 1.25rem 2rem;
-}
-.b-heading h1 {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(1rem, 2.2vw, 1.75rem);
-  font-weight: 700; color: #fff;
-  margin: 0 0 0.25rem; letter-spacing: 0.03em; text-transform: uppercase;
-}
-.b-heading .tagline {
-  font-size: 0.7rem; color: var(--secondary, #D4AF37);
-  font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
-}
+/* (logo, heading, hero grid areas removed — replaced by banner slider) */
 
 /* ── Stats ── */
 .b-stats {
@@ -99,39 +51,12 @@
   text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px;
 }
 
-/* ── Hero ── */
-.b-hero {
-  grid-area: hero;
-  background: linear-gradient(130deg, var(--primary, #8B0000) 0%, #1a0a1e 100%);
-  border-radius: 14px; padding: 2rem 2.5rem;
-  display: flex; flex-direction: column; justify-content: space-between;
-  min-height: 150px; position: relative; overflow: hidden;
-}
-.b-hero::before {
-  content: '';
-  position: absolute; top: -80px; right: -80px;
-  width: 280px; height: 280px; border-radius: 50%;
-  background: rgba(255,255,255,0.035); pointer-events: none;
-}
-.b-hero::after {
-  content: '';
-  position: absolute; bottom: -50px; left: 40%;
-  width: 180px; height: 180px; border-radius: 50%;
-  background: rgba(255,255,255,0.025); pointer-events: none;
-}
-.b-hero p {
-  font-size: 0.9rem; color: rgba(255,255,255,0.82);
-  line-height: 1.8; margin: 0 0 1.25rem;
-  max-width: 560px; position: relative;
-}
-.b-hero-btns { display: flex; gap: 0.625rem; flex-wrap: wrap; position: relative; }
 
 /* ── Feature tiles ── */
 .b-features {
   grid-area: feats;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 }
 .b-feat {
@@ -228,12 +153,17 @@
 
 /* ── Banner Slider ── */
 .b-banner-slider {
-  grid-column: 1 / -1;
+  grid-area: banner;
   border-radius: 14px;
   overflow: hidden;
   position: relative;
-  min-height: 220px;
+  min-height: 300px;
   display: flex; align-items: center;
+}
+.b-banner-bg-pattern {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.04) 0%, transparent 60%),
+                    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 0%, transparent 50%);
 }
 .b-banner-bg {
   position: absolute; inset: 0;
@@ -781,7 +711,9 @@
 
 /* ─── Responsive ─────────────────────────────────────────── */
 @media (max-width: 1024px) {
-  .bento-grid { grid-template-columns: 160px 1fr 1fr 1fr 145px; }
+  .bento-grid {
+    grid-template-columns: 1fr 1fr 1fr 1fr 145px;
+  }
   .initiatives-grid { grid-template-columns: 1fr 1fr; }
   .patrons-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 320px)); }
   .patrons-section-inner { padding: 3.5rem 1.5rem 4rem; }
@@ -791,17 +723,16 @@
   .bento-grid {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
-      "logo    heading"
+      "banner  banner "
       "stats   stats  "
-      "hero    hero   "
       "feats   feats  "
       "evts    evts   "
       "news    news   "
       "fill    fill   "
-      "join    join   "
-      "cta     cta    ";
+      "join    join   ";
   }
-  .b-features { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, auto); }
+  .b-banner-slider { min-height: 220px; }
+  .b-features { grid-template-columns: repeat(2, 1fr); }
   .b-stats    { flex-direction: row; }
   .b-stat-item { border-bottom: none; border-right: 1px solid rgba(255,255,255,0.07); }
   .b-stat-item:last-child { border-right: none; }
@@ -819,8 +750,9 @@
 @media (max-width: 480px) {
   .bento-grid {
     grid-template-columns: 1fr;
-    grid-template-areas: "logo" "heading" "stats" "hero" "feats" "evts" "news" "fill" "join" "cta";
+    grid-template-areas: "banner" "stats" "feats" "evts" "news" "fill" "join";
   }
+  .b-banner-slider { min-height: 200px; }
   .b-features { grid-template-columns: 1fr 1fr; }
   .b-fillers  { grid-template-columns: 1fr; }
   .about-strip-cards { grid-template-columns: 1fr; }

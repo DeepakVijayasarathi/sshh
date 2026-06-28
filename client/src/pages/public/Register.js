@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { User, Phone, Mail, Lock, MapPin, Briefcase, GraduationCap, Camera, ArrowRight, CheckCircle, Users, Plus, Trash2 } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
@@ -54,12 +54,28 @@ const Register = () => {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [refMember, setRefMember]   = useState(null);
   const [refLoading, setRefLoading] = useState(false);
+  const [refLocked, setRefLocked]   = useState(false);
   const [loading, setLoading]     = useState(false);
   const navigate  = useNavigate();
+  const [searchParams] = useSearchParams();
   const settings  = useSiteSettings();
   const siteName  = settings.site_name || 'Saurashtra Heritage Chair';
 
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+
+  // Pre-fill Reference By from ?ref= URL param (referral link)
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref) {
+      const memberNo = ref.trim().toUpperCase();
+      setForm(f => ({ ...f, referenceBy: memberNo }));
+      setRefLocked(true);
+      api.get(`/members/lookup?memberNo=${encodeURIComponent(memberNo)}`)
+        .then(r => setRefMember(r.data))
+        .catch(() => setRefMember(null));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sync children array length with childrenCount
   useEffect(() => {
@@ -89,9 +105,8 @@ const Register = () => {
     if (!memberId) { setRefMember(null); return; }
     setRefLoading(true);
     try {
-      const r = await api.get(`/members?search=${encodeURIComponent(memberId)}&limit=1`);
-      const m = (r.data.data || [])[0];
-      setRefMember(m || null);
+      const r = await api.get(`/members/lookup?memberNo=${encodeURIComponent(memberId.trim().toUpperCase())}`);
+      setRefMember(r.data || null);
     } catch {
       setRefMember(null);
     } finally {

@@ -10,6 +10,7 @@ router.get('/types/all',   authenticate, authorize('SuperAdmin', 'Admin'), ctrl.
 router.post('/types',      authenticate, authorize('SuperAdmin', 'Admin'), ctrl.createMembershipType);
 router.put('/types/:id',   authenticate, authorize('SuperAdmin', 'Admin'), ctrl.updateMembershipType);
 router.delete('/types/:id',authenticate, authorize('SuperAdmin', 'Admin'), ctrl.deleteMembershipType);
+router.get('/lookup', ctrl.publicLookup);
 router.get('/', authenticate, authorize('SuperAdmin', 'Admin'), ctrl.getAll);
 router.get('/:id', authenticate, ctrl.getById);
 router.post('/', upload.single('photo'), ctrl.create);

@@ -4,6 +4,22 @@ const { paginate, paginatedResponse } = require('../utils/pagination');
 const { sendEmail, emailTemplates } = require('../utils/email');
 const { v4: uuidv4 } = require('uuid');
 
+exports.publicLookup = async (req, res) => {
+  try {
+    const { memberNo } = req.query;
+    if (!memberNo) return res.status(400).json({ message: 'memberNo is required' });
+    const result = await query(
+      `SELECT full_name, membership_number, district, city
+       FROM members WHERE UPPER(membership_number) = $1 AND status = 'Active'`,
+      [memberNo.trim().toUpperCase()]
+    );
+    if (!result.rows.length) return res.status(404).json({ message: 'Member not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.getAll = async (req, res) => {
   try {
     const { page, limit, offset } = paginate(req);
