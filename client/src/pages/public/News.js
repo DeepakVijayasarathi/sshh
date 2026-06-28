@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Newspaper, ChevronRight, AlertTriangle, Briefcase, GraduationCap, CalendarDays, Users, Share2 } from 'lucide-react';
+import { Newspaper, ChevronRight, AlertTriangle, GraduationCap, CalendarDays, Users, Share2 } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
 import useSEO from '../../hooks/useSEO';
 
-const CATEGORIES = ['All', 'Community News', 'Emergency Announcement', 'Events', 'Education', 'Jobs'];
+const CATEGORIES = ['All', 'Community News', 'Emergency Announcement', 'Events', 'Education'];
 
 const CAT_CONFIG = {
   'Community News':         { bg: '#dbeafe', color: '#1d4ed8', Icon: Users },
   'Emergency Announcement': { bg: '#fee2e2', color: '#b91c1c', Icon: AlertTriangle },
   'Events':                 { bg: '#fef3c7', color: '#b45309', Icon: CalendarDays },
   'Education':              { bg: '#dcfce7', color: '#15803d', Icon: GraduationCap },
-  'Jobs':                   { bg: '#ede9fe', color: '#6d28d9', Icon: Briefcase },
+
 };
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });

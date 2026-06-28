@@ -127,7 +127,7 @@ const Footer = () => {
           <FooterSection title="Services">
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
               <FooterLink to="/business">Business Directory</FooterLink>
-              <FooterLink to="/jobs">Jobs Portal</FooterLink>
+
               <FooterLink to="/scholarship">Scholarships</FooterLink>
               <FooterLink to="/forum">Community Forum</FooterLink>
               <FooterLink to="/donate">Donations</FooterLink>

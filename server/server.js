@@ -91,7 +91,7 @@ app.use('/api/events', require('./routes/events'));
 app.use('/api/news', require('./routes/news'));
 app.use('/api/gallery', require('./routes/gallery'));
 app.use('/api/businesses', require('./routes/businesses'));
-app.use('/api/jobs', require('./routes/jobs'));
+
 app.use('/api/scholarships', require('./routes/scholarships'));
 app.use('/api/donations', require('./routes/donations'));
 app.use('/api/forums', require('./routes/forums'));

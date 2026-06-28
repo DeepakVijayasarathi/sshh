@@ -15,8 +15,6 @@ const EventsPage = lazy(() => import('./pages/public/Events'));
 const EventDetailPage = lazy(() => import('./pages/public/EventDetail'));
 const GalleryPage = lazy(() => import('./pages/public/Gallery'));
 const BusinessDirectoryPage = lazy(() => import('./pages/public/BusinessDirectory'));
-const JobsPage = lazy(() => import('./pages/public/Jobs'));
-const JobDetailPage = lazy(() => import('./pages/public/JobDetail'));
 const ForumPage = lazy(() => import('./pages/public/Forum'));
 const NewsPage = lazy(() => import('./pages/public/News'));
 const NewsDetailPage = lazy(() => import('./pages/public/NewsDetail'));
@@ -43,7 +41,6 @@ const AdminEvents = lazy(() => import('./pages/admin/Events'));
 const AdminNews = lazy(() => import('./pages/admin/News'));
 const AdminGallery = lazy(() => import('./pages/admin/Gallery'));
 const AdminBusinesses = lazy(() => import('./pages/admin/Businesses'));
-const AdminJobs = lazy(() => import('./pages/admin/Jobs'));
 const AdminScholarships = lazy(() => import('./pages/admin/Scholarships'));
 const AdminDonations = lazy(() => import('./pages/admin/Donations'));
 const AdminForum = lazy(() => import('./pages/admin/Forum'));
@@ -102,8 +99,6 @@ const AppRoutes = () => (
       <Route path="/events/:id" element={<EventDetailPage />} />
       <Route path="/gallery" element={<GalleryPage />} />
       <Route path="/business" element={<BusinessDirectoryPage />} />
-      <Route path="/jobs" element={<JobsPage />} />
-      <Route path="/jobs/:id" element={<JobDetailPage />} />
       <Route path="/forum" element={<ForumPage />} />
       <Route path="/news" element={<NewsPage />} />
       <Route path="/news/:id" element={<NewsDetailPage />} />
@@ -133,7 +128,6 @@ const AppRoutes = () => (
         <Route path="news" element={<AdminNews />} />
         <Route path="gallery" element={<AdminGallery />} />
         <Route path="businesses" element={<AdminBusinesses />} />
-        <Route path="jobs" element={<AdminJobs />} />
         <Route path="scholarships" element={<AdminScholarships />} />
         <Route path="donations" element={<AdminDonations />} />
         <Route path="forum" element={<AdminForum />} />

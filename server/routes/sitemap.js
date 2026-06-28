@@ -5,10 +5,9 @@ router.get('/', async (req, res) => {
   try {
     const base = process.env.CLIENT_URL || 'https://sourashtra.org';
 
-    const [events, news, jobs] = await Promise.all([
+    const [events, news] = await Promise.all([
       query("SELECT id, updated_at FROM events WHERE is_published=TRUE ORDER BY updated_at DESC LIMIT 200"),
       query("SELECT id, updated_at FROM news WHERE is_published=TRUE ORDER BY updated_at DESC LIMIT 200"),
-      query("SELECT id, updated_at FROM jobs WHERE is_published=TRUE AND status='Active' ORDER BY updated_at DESC LIMIT 200"),
     ]);
 
     const staticPages = [
@@ -19,7 +18,7 @@ router.get('/', async (req, res) => {
       { url: '/events', priority: '0.9', changefreq: 'daily' },
       { url: '/gallery', priority: '0.7', changefreq: 'weekly' },
       { url: '/business', priority: '0.8', changefreq: 'weekly' },
-      { url: '/jobs', priority: '0.8', changefreq: 'daily' },
+
       { url: '/news', priority: '0.8', changefreq: 'daily' },
       { url: '/forum', priority: '0.7', changefreq: 'weekly' },
       { url: '/donate', priority: '0.8', changefreq: 'monthly' },
@@ -46,13 +45,6 @@ router.get('/', async (req, res) => {
     <loc>${base}/news/${r.id}</loc>
     <lastmod>${new Date(r.updated_at).toISOString().split('T')[0]}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>`),
-      ...jobs.rows.map(r => `
-  <url>
-    <loc>${base}/jobs/${r.id}</loc>
-    <lastmod>${new Date(r.updated_at).toISOString().split('T')[0]}</lastmod>
-    <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>`),
     ];

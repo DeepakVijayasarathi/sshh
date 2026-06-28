@@ -20,7 +20,7 @@ const NotFound = () => {
             <Link to="/" className="btn btn-outline">Go to Home</Link>
           </div>
           <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            {[['Events', '/events'], ['Members', '/members'], ['Jobs', '/jobs'], ['Contact', '/contact']].map(([label, path]) => (
+            {[['Events', '/events'], ['Members', '/members'], ['Contact', '/contact']].map(([label, path]) => (
               <Link key={label} to={path} style={{ color: 'var(--primary)', fontSize: '0.875rem', fontWeight: 500 }}>{label}</Link>
             ))}
           </div>

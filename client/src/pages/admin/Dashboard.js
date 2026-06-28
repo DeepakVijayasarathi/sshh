@@ -5,7 +5,7 @@ import {
   PieChart, Pie, Cell, Legend, CartesianGrid,
 } from 'recharts';
 import {
-  Users, Clock, Calendar, Building2, Briefcase,
+  Users, Clock, Calendar, Building2,
   GraduationCap, MessageSquare, Heart, TrendingUp,
   ArrowRight, Activity, ChevronRight,
 } from 'lucide-react';
@@ -130,7 +130,7 @@ const Dashboard = () => {
     { icon: Clock,         label: 'Pending Approvals',    value: stats.pendingApprovals,               color: '#d97706', bg: 'rgba(217,119,6,0.08)',   link: '/admin/members' },
     { icon: Calendar,      label: 'Total Events',         value: stats.totalEvents,                    color: '#2563eb', bg: 'rgba(37,99,235,0.08)',    link: '/admin/events' },
     { icon: Building2,     label: 'Active Businesses',    value: stats.activeBusinesses,               color: '#059669', bg: 'rgba(5,150,105,0.08)',    link: '/admin/businesses' },
-    { icon: Briefcase,     label: 'Active Jobs',          value: stats.activeJobs,                     color: '#7c3aed', bg: 'rgba(124,58,237,0.08)',   link: '/admin/jobs' },
+
     { icon: GraduationCap, label: 'Pending Scholarships', value: stats.pendingScholarships,            color: '#0891b2', bg: 'rgba(8,145,178,0.08)',    link: '/admin/scholarships' },
     { icon: MessageSquare, label: 'Open Issues',          value: stats.openIssues,                     color: '#dc2626', bg: 'rgba(220,38,38,0.08)',    link: '/admin/forum' },
     { icon: Heart,         label: 'Total Donations',      value: `₹${(stats.totalDonations || 0).toLocaleString()}`, color: '#059669', bg: 'rgba(5,150,105,0.08)', link: '/admin/donations' },

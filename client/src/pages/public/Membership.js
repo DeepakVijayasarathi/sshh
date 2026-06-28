@@ -17,7 +17,7 @@ const FEATURES = [
   'Business Networking',
   'Scholarship Programs',
   'Community Forum',
-  'Job Opportunities',
+
   'Community Updates',
 ];
 

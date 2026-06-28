@@ -5,11 +5,11 @@ import { useSiteSettings } from '../../context/SiteSettingsContext';
 import api from '../../services/api';
 import useSEO from '../../hooks/useSEO';
 import {
-  Users, Calendar, Building2, Briefcase, GraduationCap, MessageSquare,
+  Users, Calendar, Building2, GraduationCap, MessageSquare,
   Landmark, BookOpen, Heart, Music, Globe, Target, FileText,
-  Palette, Award, Newspaper, UserPlus, Activity, MapPin,
+  Newspaper, UserPlus, Activity, MapPin,
   ArrowRight, ChevronRight, ChevronLeft, Camera, Image as ImageIcon,
-  HandCoins, BookMarked, Stethoscope, University, BadgeCheck,
+  HandCoins, BookMarked, Stethoscope, University, Images,
 } from 'lucide-react';
 import './Home.css';
 
@@ -17,7 +17,7 @@ const FEATURES = [
   { Icon: Users,         title: 'Membership',   desc: 'Join and connect with members across Tamil Nadu.',        link: '/membership',  color: '#8B0000', bg: 'rgba(139,0,0,0.09)'   },
   { Icon: Calendar,      title: 'Events',        desc: 'Cultural, educational & community events year-round.',    link: '/events',      color: '#2563eb', bg: 'rgba(37,99,235,0.09)'  },
   { Icon: Building2,     title: 'Businesses',    desc: 'Discover Sourashtra-owned businesses near you.',          link: '/business',    color: '#059669', bg: 'rgba(5,150,105,0.09)'  },
-  { Icon: Briefcase,     title: 'Jobs',          desc: 'Career opportunities within the community.',              link: '/jobs',        color: '#7c3aed', bg: 'rgba(124,58,237,0.09)' },
+
   { Icon: GraduationCap, title: 'Scholarships',  desc: 'Educational support for deserving students.',            link: '/scholarship', color: '#0891b2', bg: 'rgba(8,145,178,0.09)'  },
   { Icon: MessageSquare, title: 'Forum',         desc: 'Raise issues, share ideas, discuss & collaborate.',      link: '/forum',       color: '#d97706', bg: 'rgba(217,119,6,0.09)'   },
 ];
@@ -122,17 +122,10 @@ const ABOUT_CARDS = [
 
 const INITIATIVES = [
   { Icon: GraduationCap, color: '#0891b2', bg: 'rgba(8,145,178,0.15)',   cat: 'Education',      title: 'Scholarship Programme',  desc: 'Financial support for meritorious Sourashtra students pursuing higher education.', link: '/scholarship' },
-  { Icon: Briefcase,     color: '#059669', bg: 'rgba(5,150,105,0.15)',   cat: 'Employment',     title: 'Job Connect Portal',      desc: 'Linking job seekers within the community to employers and opportunities.',          link: '/jobs'        },
+
   { Icon: Activity,      color: '#e11d48', bg: 'rgba(225,29,72,0.15)',   cat: 'Health & Welfare',title: 'Community Health Camps', desc: 'Annual health screening, medical camps and wellness programs for all members.',     link: '/about'       },
 ];
 
-const GALLERY_SLOTS = [
-  { big: true,  label: 'Annual Convention 2024', Icon: Award,         color: '#D4AF37' },
-  { big: false, label: 'Cultural Festival',      Icon: Palette,       color: '#e11d48' },
-  { big: false, label: 'Youth Talent Day',       Icon: BadgeCheck,    color: '#2563eb' },
-  { big: false, label: 'Scholarship Day',        Icon: GraduationCap, color: '#059669' },
-  { big: false, label: 'Heritage Walk',          Icon: Landmark,      color: '#7c3aed' },
-];
 
 const TAG_COLORS = ['#c2410c', '#1d4ed8', '#15803d', '#7c3aed', '#b45309'];
 
@@ -161,6 +154,7 @@ export default function Home() {
   const [team,      setTeam]      = useState([]);
   const [patrons,   setPatrons]   = useState([]);
   const [banners,   setBanners]   = useState([]);
+  const [gallery,   setGallery]   = useState([]);
 
   useEffect(() => {
     api.get('/events?upcoming=true&limit=4').then(r => setEvents(r.data.data || [])).catch(() => {});
@@ -168,6 +162,7 @@ export default function Home() {
     api.get('/news?limit=4&category=Cultural+Heritage').then(r => setHeritage(r.data.data || [])).catch(() => {});
     api.get('/dashboard/public-stats').then(r       => setLiveStats(r.data)).catch(() => {});
     api.get('/banners?active=true').then(r          => setBanners(r.data || [])).catch(() => {});
+    api.get('/gallery/albums').then(r               => setGallery(r.data || [])).catch(() => {});
     api.get('/team').then(r => {
       const all = r.data || [];
       setPatrons(all.filter(m => m.division === 'Patron'));
@@ -466,23 +461,31 @@ export default function Home() {
         </div>
 
         {/* ── Gallery Preview ─── */}
-        <div className="gallery-section">
-          <div className="section-header">
-            <h2>Photo Gallery</h2>
-            <Link to="/gallery">View all →</Link>
+        {gallery.length > 0 && (
+          <div className="gallery-section">
+            <div className="section-header">
+              <h2>Photo Gallery</h2>
+              <Link to="/gallery">View all →</Link>
+            </div>
+            <div className="gallery-grid">
+              {gallery.slice(0, 5).map((album, i) => (
+                <Link
+                  key={album.id}
+                  to="/gallery"
+                  className={`gallery-cell${i === 0 ? ' big' : ''}`}
+                  style={album.cover_image_url ? { backgroundImage: `url(${album.cover_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+                >
+                  {!album.cover_image_url && (
+                    <Images size={i === 0 ? 52 : 36} color="#D4AF37" strokeWidth={1.25} />
+                  )}
+                  <div className="gallery-overlay">
+                    <span>{album.title}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-          <div className="gallery-grid">
-            {GALLERY_SLOTS.map((g, i) => (
-              <Link key={i} to="/gallery"
-                className={`gallery-cell${g.big ? ' big' : ''}`}>
-                <g.Icon size={g.big ? 52 : 36} color={g.color} strokeWidth={1.25} />
-                <div className="gallery-overlay">
-                  <span>{g.label}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        )}
 
         {/* ── Cultural Heritage Posts ─── */}
         <div className="initiatives-section">
