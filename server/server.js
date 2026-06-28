@@ -5,9 +5,50 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
 const path = require('path');
+const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
+
+// Auto-run pending SQL migrations on startup
+(async () => {
+  try {
+    const { pool } = require('./config/database');
+    const client = await pool.connect();
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS _migrations (
+          id         SERIAL PRIMARY KEY,
+          filename   VARCHAR(255) UNIQUE NOT NULL,
+          applied_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      const migrationsDir = path.join(__dirname, '..', 'database', 'migrations');
+      if (fs.existsSync(migrationsDir)) {
+        const files = fs.readdirSync(migrationsDir).filter(f => f.endsWith('.sql')).sort();
+        for (const file of files) {
+          const { rows } = await client.query('SELECT id FROM _migrations WHERE filename=$1', [file]);
+          if (rows.length > 0) continue;
+          const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
+          await client.query('BEGIN');
+          try {
+            await client.query(sql);
+            await client.query('INSERT INTO _migrations (filename) VALUES ($1)', [file]);
+            await client.query('COMMIT');
+            console.log(`[migration] applied: ${file}`);
+          } catch (err) {
+            await client.query('ROLLBACK');
+            console.error(`[migration] failed: ${file} —`, err.message);
+          }
+        }
+      }
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('[migration] startup error:', err.message);
+  }
+})();
 
 // Trust the nginx reverse proxy sitting in front of us.
 // Required so express-rate-limit reads the real client IP from X-Forwarded-For.
