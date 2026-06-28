@@ -219,8 +219,6 @@ export default function Home() {
                 <span className="b-feat-link">Explore <ChevronRight size={11} /></span>
               </Link>
             ))}
-              </>
-            )}
           </div>
 
           {/* Latest News */}
