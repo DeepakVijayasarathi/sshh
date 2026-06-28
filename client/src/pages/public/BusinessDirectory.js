@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Globe, Phone, Star, ChevronRight, Building2, Lock, X } from 'lucide-react';
+import { MapPin, Globe, Phone, Star, ChevronRight, Building2, Lock, X, Share2, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import PublicLayout from '../../components/common/PublicLayout';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
+
+const EMPTY_BIZ_FORM = { businessName: '', ownerName: '', categoryId: '', mobileNumber: '', email: '', address: '', city: '', website: '', description: '' };
 
 const openWhatsApp = (number) => {
   const cleaned = (number || '').replace(/\D/g, '');
   const phone = cleaned.startsWith('91') ? cleaned : `91${cleaned}`;
   window.open(`https://wa.me/${phone}`, '_blank');
+};
+
+const shareBusinessWhatsApp = (b, e) => {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const text = `🏢 *${b.business_name}*\n👤 ${b.owner_name}${b.category_name ? ` | ${b.category_name}` : ''}${b.city ? `\n📍 ${b.city}` : ''}${b.description ? `\n\n${b.description.slice(0, 150)}` : ''}\n\n🌐 ${window.location.origin}/business`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 };
 
 const BusinessDirectory = () => {
@@ -20,6 +29,10 @@ const BusinessDirectory = () => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [detail, setDetail] = useState(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [bizForm, setBizForm] = useState(EMPTY_BIZ_FORM);
+  const [bizLogo, setBizLogo] = useState(null);
+  const [bizSaving, setBizSaving] = useState(false);
 
   useEffect(() => {
     api.get('/businesses/categories').then(r => setCategories(r.data)).catch(() => {});
@@ -36,14 +49,84 @@ const BusinessDirectory = () => {
       .finally(() => setLoading(false));
   }, [search, category]);
 
+  const setF = (k) => (e) => setBizForm(f => ({ ...f, [k]: e.target.value }));
+
+  const handleCreateBusiness = async (e) => {
+    e.preventDefault();
+    if (!user) return;
+    setBizSaving(true);
+    try {
+      const fd = new FormData();
+      Object.entries(bizForm).forEach(([k, v]) => { if (v) fd.append(k, v); });
+      if (bizLogo) fd.append('logo', bizLogo);
+      await api.post('/businesses', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      toast.success('Business submitted! It will appear once approved by admin.');
+      setShowCreateForm(false);
+      setBizForm(EMPTY_BIZ_FORM);
+      setBizLogo(null);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit business');
+    } finally {
+      setBizSaving(false);
+    }
+  };
+
   return (
     <PublicLayout>
       <div className="page-header">
         <div className="container">
           <h1>Business Directory</h1>
           <p>Discover Sourashtra community businesses and services</p>
+          {user && (
+            <button
+              onClick={() => setShowCreateForm(s => !s)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: '1rem', background: 'rgba(255,255,255,0.15)', color: 'white', border: '1.5px solid rgba(255,255,255,0.3)', borderRadius: 10, padding: '0.625rem 1.5rem', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+            >
+              <Plus size={16} /> List My Business
+            </button>
+          )}
         </div>
       </div>
+
+      {showCreateForm && user && (
+        <div style={{ background: '#f0fdf4', borderBottom: '1px solid #bbf7d0', padding: '2rem 0' }}>
+          <div className="container" style={{ maxWidth: 680 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+              <h3 style={{ fontWeight: 700, color: '#15803d', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Building2 size={18} /> List Your Business
+              </h3>
+              <button onClick={() => setShowCreateForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}><X size={20} /></button>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: '#4b5563', marginBottom: '1.25rem' }}>
+              Submit your business details below. After admin approval it will appear in the public directory.
+            </p>
+            <form onSubmit={handleCreateBusiness}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px,1fr))', gap: '0 1.25rem' }}>
+                <div className="form-group"><label className="form-label">Business Name *</label><input className="form-control" required value={bizForm.businessName} onChange={setF('businessName')} placeholder="Your business name" /></div>
+                <div className="form-group"><label className="form-label">Owner Name *</label><input className="form-control" required value={bizForm.ownerName} onChange={setF('ownerName')} placeholder="Your name" /></div>
+                <div className="form-group"><label className="form-label">Category</label>
+                  <select className="form-control" value={bizForm.categoryId} onChange={setF('categoryId')}>
+                    <option value="">Select category</option>
+                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="form-group"><label className="form-label">Mobile Number</label><input className="form-control" value={bizForm.mobileNumber} onChange={setF('mobileNumber')} placeholder="10-digit number" /></div>
+                <div className="form-group"><label className="form-label">Email</label><input type="email" className="form-control" value={bizForm.email} onChange={setF('email')} /></div>
+                <div className="form-group"><label className="form-label">City</label><input className="form-control" value={bizForm.city} onChange={setF('city')} /></div>
+                <div className="form-group"><label className="form-label">Website</label><input type="url" className="form-control" value={bizForm.website} onChange={setF('website')} placeholder="https://..." /></div>
+                <div className="form-group"><label className="form-label">Business Logo</label><input type="file" className="form-control" accept="image/*" onChange={e => setBizLogo(e.target.files[0])} /></div>
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}><label className="form-label">Address</label><input className="form-control" value={bizForm.address} onChange={setF('address')} /></div>
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}><label className="form-label">Description</label><textarea className="form-control" rows={3} value={bizForm.description} onChange={setF('description')} placeholder="Briefly describe your business…" style={{ resize: 'vertical' }} /></div>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.875rem' }}>Your submission will be reviewed by an admin before it is published.</p>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button type="submit" className="btn btn-primary" disabled={bizSaving}>{bizSaving ? 'Submitting…' : 'Submit for Approval'}</button>
+                <button type="button" className="btn btn-outline" onClick={() => setShowCreateForm(false)}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       <section className="section">
         <div className="container">
           <div className="biz-search-bar">
@@ -115,9 +198,17 @@ const BusinessDirectory = () => {
                         <Globe size={12} /> Visit Website
                       </a>
                     ) : <span />}
-                    <span className="biz-view">
-                      {isActiveMember ? <>View Details <ChevronRight size={12} /></> : <><Lock size={11} /> Members Only</>}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button
+                        onClick={(e) => shareBusinessWhatsApp(b, e)}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: '#25D366', color: 'white', border: 'none', borderRadius: 6, padding: '0.2rem 0.5rem', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        <Share2 size={11} /> Share
+                      </button>
+                      <span className="biz-view">
+                        {isActiveMember ? <>View Details <ChevronRight size={12} /></> : <><Lock size={11} /> Members Only</>}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}

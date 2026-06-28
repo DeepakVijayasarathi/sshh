@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Clock, ChevronRight, CalendarDays, Plus, X } from 'lucide-react';
+import { MapPin, Clock, ChevronRight, CalendarDays, Plus, X, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PublicLayout from '../../components/common/PublicLayout';
@@ -26,6 +26,14 @@ const CATEGORY_COLORS = {
 };
 
 const getCatStyle = (cat) => CATEGORY_COLORS[cat] || { bg: '#f1f5f9', color: '#475569' };
+
+const shareEventWhatsApp = (ev, e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const date = new Date(ev.event_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  const text = `📅 *${ev.title}*\n${ev.venue ? `📍 Venue: ${ev.venue}\n` : ''}🗓 Date: ${date}${ev.event_time ? ` at ${ev.event_time}` : ''}\n${ev.description ? `\n${ev.description.slice(0, 120)}…\n` : ''}\n🔗 ${window.location.origin}/events/${ev.id}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+};
 
 const EventCard = ({ ev }) => {
   const d = new Date(ev.event_date);
@@ -78,8 +86,14 @@ const EventCard = ({ ev }) => {
             {ev.description.length > 90 ? ev.description.slice(0, 90) + '…' : ev.description}
           </p>
         )}
-        <div className="ev-footer">
+        <div className="ev-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span className="ev-link">View Details <ChevronRight size={13} /></span>
+          <button
+            onClick={(e) => shareEventWhatsApp(ev, e)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#25D366', color: 'white', border: 'none', borderRadius: 6, padding: '0.25rem 0.625rem', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}
+          >
+            <Share2 size={11} /> Share
+          </button>
         </div>
       </div>
     </Link>

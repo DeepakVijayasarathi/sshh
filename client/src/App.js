@@ -60,6 +60,7 @@ const AdminCulturalHeritage     = lazy(() => import('./pages/admin/CulturalHerit
 const AdminRoles                = lazy(() => import('./pages/admin/Roles'));
 const AdminMenus                = lazy(() => import('./pages/admin/Menus'));
 const AdminRoleMenus            = lazy(() => import('./pages/admin/RoleMenus'));
+const AdminBanners              = lazy(() => import('./pages/admin/Banners'));
 
 const PageLoader = () => (
   <div className="loading-center"><div className="spinner" /></div>
@@ -149,6 +150,7 @@ const AppRoutes = () => (
         <Route path="roles"              element={<AdminRoles />} />
         <Route path="menus"              element={<AdminMenus />} />
         <Route path="role-menus"         element={<AdminRoleMenus />} />
+        <Route path="banners"            element={<AdminBanners />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

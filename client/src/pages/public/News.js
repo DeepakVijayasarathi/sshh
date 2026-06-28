@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Newspaper, ChevronRight, AlertTriangle, Briefcase, GraduationCap, CalendarDays, Users } from 'lucide-react';
+import { Newspaper, ChevronRight, AlertTriangle, Briefcase, GraduationCap, CalendarDays, Users, Share2 } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
 import useSEO from '../../hooks/useSEO';
@@ -16,6 +16,14 @@ const CAT_CONFIG = {
 };
 
 const formatDate = (d) => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+const shareNewsWhatsApp = (n, e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const date = new Date(n.publish_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  const text = `📰 *${n.title}*\n🗓 ${date}${n.category ? ` | ${n.category}` : ''}\n${n.content ? `\n${n.content.slice(0, 150)}…\n` : ''}\n🔗 ${window.location.origin}/news/${n.id}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+};
 
 const NewsCard = ({ n }) => {
   const cfg = CAT_CONFIG[n.category] || { bg: '#f1f5f9', color: '#475569', Icon: Newspaper };
@@ -44,8 +52,14 @@ const NewsCard = ({ n }) => {
         <p className="news-excerpt">
           {n.content.substring(0, 110)}{n.content.length > 110 ? '…' : ''}
         </p>
-        <div className="news-read-more">
-          Read More <ChevronRight size={13} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.875rem', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
+          <span className="news-read-more" style={{ margin: 0, padding: 0, border: 'none' }}>Read More <ChevronRight size={13} /></span>
+          <button
+            onClick={(e) => shareNewsWhatsApp(n, e)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#25D366', color: 'white', border: 'none', borderRadius: 6, padding: '0.25rem 0.625rem', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}
+          >
+            <Share2 size={11} /> Share
+          </button>
         </div>
       </div>
     </Link>

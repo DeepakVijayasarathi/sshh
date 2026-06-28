@@ -66,6 +66,7 @@ app.use('/api/cultural', require('./routes/cultural'));
 app.use('/api/tn-connect', require('./routes/tnConnect'));
 app.use('/api/menus',   require('./routes/menus'));
 app.use('/api/roles',   require('./routes/roles'));
+app.use('/api/banners', require('./routes/banners'));
 app.use('/sitemap.xml', require('./routes/sitemap'));
 
 // Health check

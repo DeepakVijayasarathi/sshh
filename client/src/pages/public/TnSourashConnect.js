@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { User, MapPin, Phone, Briefcase, Send, Hash, FileText } from 'lucide-react';
+import { User, MapPin, Phone, Briefcase, Send, Hash, FileText, Users } from 'lucide-react';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
 
 const TnSourashConnect = () => {
   const [form, setForm] = useState({
-    name: '', ghornav: '', gothtra: '', workOrganization: '', workOrganizationIntro: '', place: '', pincode: '', contactNo: '',
+    name: '', ghornav: '', workOrganization: '', workOrganizationIntro: '', place: '', pincode: '', contactNo: '',
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -33,7 +33,6 @@ const TnSourashConnect = () => {
       await api.post('/tn-connect', {
         name: form.name,
         ghornav: form.ghornav,
-        gothtra: form.gothtra,
         workOrganization: form.workOrganization,
         workOrganizationIntro: form.workOrganizationIntro,
         place: form.place,
@@ -79,7 +78,7 @@ const TnSourashConnect = () => {
                 </p>
                 <button
                   className="btn btn-outline"
-                  onClick={() => { setSubmitted(false); setForm({ name: '', ghornav: '', gothtra: '', workOrganization: '', workOrganizationIntro: '', place: '', pincode: '', contactNo: '' }); }}
+                  onClick={() => { setSubmitted(false); setForm({ name: '', ghornav: '', workOrganization: '', workOrganizationIntro: '', place: '', pincode: '', contactNo: '' }); }}
                 >
                   Submit Another Request
                 </button>
@@ -108,11 +107,6 @@ const TnSourashConnect = () => {
                     <div className="form-group">
                       <label className="form-label">Ghornav (Family Group)</label>
                       <input className="form-control" value={form.ghornav} onChange={set('ghornav')} placeholder="Your Ghornav / family group" />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Gothtra (Clan / Gotra)</label>
-                      <input className="form-control" value={form.gothtra} onChange={set('gothtra')} placeholder="Your Gothtra / clan lineage" />
                     </div>
 
                     <div className="form-group">

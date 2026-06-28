@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../../components/common/PublicLayout';
 import { useSiteSettings } from '../../context/SiteSettingsContext';
@@ -8,7 +8,7 @@ import {
   Users, Calendar, Building2, Briefcase, GraduationCap, MessageSquare,
   Landmark, BookOpen, Heart, Music, Globe, Target, FileText,
   Palette, Award, Newspaper, UserPlus, Activity, MapPin,
-  ArrowRight, ChevronRight, Camera, Image as ImageIcon,
+  ArrowRight, ChevronRight, ChevronLeft, Camera, Image as ImageIcon,
   HandCoins, BookMarked, Stethoscope, University, BadgeCheck,
 } from 'lucide-react';
 import './Home.css';
@@ -21,6 +21,61 @@ const FEATURES = [
   { Icon: GraduationCap, title: 'Scholarships',  desc: 'Educational support for deserving students.',            link: '/scholarship', color: '#0891b2', bg: 'rgba(8,145,178,0.09)'  },
   { Icon: MessageSquare, title: 'Forum',         desc: 'Raise issues, share ideas, discuss & collaborate.',      link: '/forum',       color: '#d97706', bg: 'rgba(217,119,6,0.09)'   },
 ];
+
+const BannerSlider = ({ banners }) => {
+  const [current, setCurrent] = useState(0);
+  const timerRef = useRef(null);
+
+  const next = useCallback(() => setCurrent(c => (c + 1) % banners.length), [banners.length]);
+  const prev = useCallback(() => setCurrent(c => (c - 1 + banners.length) % banners.length), [banners.length]);
+
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    timerRef.current = setInterval(next, 5000);
+    return () => clearInterval(timerRef.current);
+  }, [next, banners.length]);
+
+  const resetTimer = () => { clearInterval(timerRef.current); if (banners.length > 1) timerRef.current = setInterval(next, 5000); };
+
+  const goTo = (i) => { setCurrent(i); resetTimer(); };
+  const handlePrev = () => { prev(); resetTimer(); };
+  const handleNext = () => { next(); resetTimer(); };
+
+  const b = banners[current];
+  const hasBg = !!b.image_url;
+
+  return (
+    <div className="b-banner-slider" style={{ background: hasBg ? 'transparent' : (b.bg_color || '#1a1a2e'), color: b.text_color || '#fff' }}>
+      {hasBg && (
+        <div className="b-banner-bg">
+          <img src={b.image_url} alt={b.title} />
+          <div className="b-banner-overlay" />
+        </div>
+      )}
+      <div className="b-banner-content" style={{ color: b.text_color || '#fff' }}>
+        {b.subtitle && <div className="b-banner-sub">{b.subtitle}</div>}
+        <h2 className="b-banner-title">{b.title}</h2>
+        {b.description && <p className="b-banner-desc">{b.description}</p>}
+        {b.button_text && b.button_link && (
+          <Link to={b.button_link} className="b-banner-btn" style={{ background: 'var(--secondary,#D4AF37)', color: '#1a1a1a' }}>
+            {b.button_text} <ChevronRight size={14} />
+          </Link>
+        )}
+      </div>
+      {banners.length > 1 && (
+        <>
+          <button className="b-banner-arrow b-banner-arrow--prev" onClick={handlePrev} aria-label="Previous"><ChevronLeft size={18} /></button>
+          <button className="b-banner-arrow b-banner-arrow--next" onClick={handleNext} aria-label="Next"><ChevronRight size={18} /></button>
+          <div className="b-banner-dots">
+            {banners.map((_, i) => (
+              <button key={i} className={`b-banner-dot${i === current ? ' active' : ''}`} onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
 
 const FILLERS = [
   { Icon: Landmark,   color: '#8B0000', bg: 'rgba(139,0,0,0.08)',   title: 'Cultural Heritage', text: 'Preserving Sourashtra customs, traditions and language passed down through generations.' },
@@ -76,12 +131,14 @@ export default function Home() {
   const [liveStats, setLiveStats] = useState(null);
   const [team,      setTeam]      = useState([]);
   const [patrons,   setPatrons]   = useState([]);
+  const [banners,   setBanners]   = useState([]);
 
   useEffect(() => {
     api.get('/events?upcoming=true&limit=4').then(r => setEvents(r.data.data || [])).catch(() => {});
     api.get('/news?limit=6&featured=true').then(r  => setNews(r.data.data || [])).catch(() => {});
     api.get('/news?limit=4&category=Cultural+Heritage').then(r => setHeritage(r.data.data || [])).catch(() => {});
     api.get('/dashboard/public-stats').then(r       => setLiveStats(r.data)).catch(() => {});
+    api.get('/banners?active=true').then(r          => setBanners(r.data || [])).catch(() => {});
     api.get('/team').then(r => {
       const all = r.data || [];
       setPatrons(all.filter(m => m.division === 'Patron'));
@@ -154,18 +211,34 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Feature tiles */}
+          {/* Banner Slider (replaces first 3 feature boxes) */}
           <div className="b-features">
-            {FEATURES.map(f => (
-              <Link key={f.title} to={f.link} className="b-feat">
-                <div className="b-feat-icon" style={{ background: f.bg, color: f.color }}>
-                  <f.Icon size={17} strokeWidth={1.75} />
-                </div>
-                <div className="b-feat-title">{f.title}</div>
-                <p className="b-feat-desc">{f.desc}</p>
-                <span className="b-feat-link">Explore <ChevronRight size={11} /></span>
-              </Link>
-            ))}
+            {banners.length > 0 ? (
+              <BannerSlider banners={banners} />
+            ) : (
+              <>
+                {FEATURES.slice(0, 3).map(f => (
+                  <Link key={f.title} to={f.link} className="b-feat">
+                    <div className="b-feat-icon" style={{ background: f.bg, color: f.color }}>
+                      <f.Icon size={17} strokeWidth={1.75} />
+                    </div>
+                    <div className="b-feat-title">{f.title}</div>
+                    <p className="b-feat-desc">{f.desc}</p>
+                    <span className="b-feat-link">Explore <ChevronRight size={11} /></span>
+                  </Link>
+                ))}
+                {FEATURES.slice(3).map(f => (
+                  <Link key={f.title} to={f.link} className="b-feat">
+                    <div className="b-feat-icon" style={{ background: f.bg, color: f.color }}>
+                      <f.Icon size={17} strokeWidth={1.75} />
+                    </div>
+                    <div className="b-feat-title">{f.title}</div>
+                    <p className="b-feat-desc">{f.desc}</p>
+                    <span className="b-feat-link">Explore <ChevronRight size={11} /></span>
+                  </Link>
+                ))}
+              </>
+            )}
           </div>
 
           {/* Latest News */}

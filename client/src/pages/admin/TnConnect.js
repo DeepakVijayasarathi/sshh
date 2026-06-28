@@ -94,7 +94,6 @@ const TnConnect = () => {
                   <th>Name</th>
                   <th>Contact No.</th>
                   <th>Ghornav</th>
-                  <th>Gothtra</th>
                   <th>Place</th>
                   <th>Status</th>
                   <th>Date</th>
@@ -104,7 +103,7 @@ const TnConnect = () => {
               <tbody>
                 {requests.length === 0 ? (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-light)' }}>
+                    <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-light)' }}>
                       No requests found
                     </td>
                   </tr>
@@ -125,7 +124,6 @@ const TnConnect = () => {
                       </div>
                     </td>
                     <td style={{ fontSize: '0.8125rem', color: '#4b5563' }}>{r.ghornav || '—'}</td>
-                    <td style={{ fontSize: '0.8125rem', color: '#4b5563' }}>{r.gothtra || '—'}</td>
                     <td style={{ fontSize: '0.8125rem', color: '#4b5563' }}>{r.place || '—'}</td>
                     <td>
                       <span className={`badge ${STATUS_BADGES[r.status] || 'badge-secondary'}`}>{r.status}</span>
@@ -173,7 +171,6 @@ const TnConnect = () => {
               </div>
               {[
                 ['Ghornav (Family Group)', detail.ghornav],
-                ['Gothtra (Clan / Gotra)', detail.gothtra],
                 ['Work / Organisation', detail.work_organization],
                 ['Work Intro', detail.work_organization_intro],
                 ['Place', detail.place],
