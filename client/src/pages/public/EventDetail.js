@@ -105,8 +105,18 @@ const EventDetail = () => {
 
               {youtubeEmbedUrl && (
                 <div style={{ marginTop: '1.5rem' }}>
-                  <h3 style={{ marginBottom: '0.75rem' }}>Event Video</h3>
-                  <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: 12, overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <h3 style={{ margin: 0 }}>Event Video</h3>
+                    <a
+                      href={event.youtube_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FF0000', color: 'white', borderRadius: 8, padding: '0.375rem 0.875rem', fontSize: '0.8125rem', fontWeight: 600, textDecoration: 'none' }}
+                    >
+                      <ExternalLink size={13} /> Watch on YouTube
+                    </a>
+                  </div>
+                  <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: 12, overflow: 'hidden', background: '#000' }}>
                     <iframe
                       src={youtubeEmbedUrl}
                       title="Event Video"
