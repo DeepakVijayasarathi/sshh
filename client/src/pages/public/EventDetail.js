@@ -4,10 +4,10 @@ import { useParams } from 'react-router-dom';
 import PublicLayout from '../../components/common/PublicLayout';
 import api from '../../services/api';
 
-const getYouTubeEmbedUrl = (url) => {
+const getYouTubeVideoId = (url) => {
   if (!url) return null;
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+  return match ? match[1] : null;
 };
 
 const EventDetail = () => {
@@ -37,7 +37,7 @@ const EventDetail = () => {
   if (loading) return <PublicLayout><div className="loading-center"><div className="spinner" /></div></PublicLayout>;
   if (!event) return <PublicLayout><div className="text-center" style={{ padding: '3rem' }}>Event not found.</div></PublicLayout>;
 
-  const youtubeEmbedUrl = getYouTubeEmbedUrl(event.youtube_url);
+  const youtubeVideoId = getYouTubeVideoId(event.youtube_url);
 
   return (
     <PublicLayout>
@@ -103,28 +103,37 @@ const EventDetail = () => {
                 </button>
               </div>
 
-              {youtubeEmbedUrl && (
+              {youtubeVideoId && (
                 <div style={{ marginTop: '1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <h3 style={{ margin: 0 }}>Event Video</h3>
-                    <a
-                      href={event.youtube_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FF0000', color: 'white', borderRadius: 8, padding: '0.375rem 0.875rem', fontSize: '0.8125rem', fontWeight: 600, textDecoration: 'none' }}
-                    >
-                      <ExternalLink size={13} /> Watch on YouTube
-                    </a>
-                  </div>
-                  <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: 12, overflow: 'hidden', background: '#000' }}>
-                    <iframe
-                      src={youtubeEmbedUrl}
-                      title="Event Video"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                  <h3 style={{ marginBottom: '0.75rem' }}>Event Video</h3>
+                  <a
+                    href={event.youtube_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ display: 'block', position: 'relative', borderRadius: 12, overflow: 'hidden', textDecoration: 'none' }}
+                  >
+                    <img
+                      src={`https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg`}
+                      alt="Event Video"
+                      style={{ width: '100%', display: 'block', aspectRatio: '16/9', objectFit: 'cover' }}
                     />
-                  </div>
+                    <div style={{
+                      position: 'absolute', inset: 0,
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      background: 'rgba(0,0,0,0.35)',
+                      transition: 'background 0.2s',
+                    }}>
+                      <div style={{
+                        width: 68, height: 48, background: '#FF0000', borderRadius: 12,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
+                      <span style={{ color: 'white', marginTop: 10, fontSize: '0.875rem', fontWeight: 600 }}>Watch on YouTube</span>
+                    </div>
+                  </a>
                 </div>
               )}
 
