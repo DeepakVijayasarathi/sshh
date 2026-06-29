@@ -166,29 +166,7 @@ async function seed() {
       [uuidv4(), job.title, job.company, job.location, job.salary, job.exp, job.desc, adminUser.id]
     );
   }
-
-  // ─── DONATIONS ──────────────────────────────────────────────
-  console.log('Seeding donations...');
-  const donors = [
-    { name: 'Rajesh Kumar', amount: 5000, method: 'UPI', purpose: 'General Fund' },
-    { name: 'Suresh Babu', amount: 10000, method: 'Bank Transfer', purpose: 'Flood Relief' },
-    { name: 'Karthik Raj', amount: 2500, method: 'Cash', purpose: 'Student Welfare' },
-    { name: 'Lakshmi Narayanan', amount: 25000, method: 'Cheque', purpose: 'Building Fund' },
-    { name: 'Arun Patel', amount: 1000, method: 'UPI', purpose: 'Cultural Fest' },
-    { name: 'Mohan Das', amount: 15000, method: 'Bank Transfer', purpose: 'General Fund' },
-  ];
-
-  for (let i = 0; i < donors.length; i++) {
-    const year = 2025;
-    const seq = String(i + 1).padStart(4, '0');
-    await q(
-      `INSERT INTO donations (id, donor_name, amount, payment_method, purpose, status, receipt_number,
-        donated_at)
-       VALUES ($1,$2,$3,$4,$5,'Completed',$6, NOW() - INTERVAL '${i * 10} days') ON CONFLICT DO NOTHING`,
-      [uuidv4(), donors[i].name, donors[i].amount, donors[i].method, donors[i].purpose, `RCP${year}${seq}`]
-    );
-  }
-
+  
   // ─── FORUM ISSUES ───────────────────────────────────────────
   console.log('Seeding forum issues...');
   const issues = [

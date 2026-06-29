@@ -183,14 +183,17 @@
 .b-banner-sub {
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
   text-transform: uppercase; opacity: 0.75; margin-bottom: 0.5rem;
+  color: inherit;
 }
 .b-banner-title {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: clamp(1rem, 2.5vw, 1.75rem);
   font-weight: 700; margin: 0 0 0.5rem; line-height: 1.25;
+  color: inherit;
 }
 .b-banner-desc {
   font-size: 0.85rem; opacity: 0.85; margin: 0 0 1rem; line-height: 1.6;
+  color: inherit;
 }
 .b-banner-btn {
   display: inline-flex; align-items: center; gap: 5px;
