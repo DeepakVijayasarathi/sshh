@@ -12,6 +12,7 @@ const ADMIN_MENUS = [
   { label: 'Forum',             path: '/admin/forum',             icon: 'MessageSquare',   group: 'Content',  sort: 15 },
   { label: 'Cultural Heritage', path: '/admin/cultural-heritage', icon: 'BookOpen',        group: 'Content',  sort: 16 },
   { label: 'TN Connect',        path: '/admin/tn-connect',        icon: 'Link2',           group: 'Content',  sort: 17 },
+  { label: 'About Us',          path: '/admin/about',             icon: 'Info',            group: 'Content',  sort: 18 },
   { label: 'Businesses',        path: '/admin/businesses',        icon: 'Building2',       group: 'Business', sort: 20 },
   { label: 'Scholarships',      path: '/admin/scholarships',      icon: 'GraduationCap',   group: 'Business', sort: 21 },
   { label: 'Donations',         path: '/admin/donations',         icon: 'Heart',           group: 'Business', sort: 22 },

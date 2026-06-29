@@ -58,6 +58,7 @@ const AdminRoles                = lazy(() => import('./pages/admin/Roles'));
 const AdminMenus                = lazy(() => import('./pages/admin/Menus'));
 const AdminRoleMenus            = lazy(() => import('./pages/admin/RoleMenus'));
 const AdminBanners              = lazy(() => import('./pages/admin/Banners'));
+const AdminAboutUs              = lazy(() => import('./pages/admin/AboutUs'));
 
 const PageLoader = () => (
   <div className="loading-center"><div className="spinner" /></div>
@@ -145,6 +146,7 @@ const AppRoutes = () => (
         <Route path="menus"              element={<AdminMenus />} />
         <Route path="role-menus"         element={<AdminRoleMenus />} />
         <Route path="banners"            element={<AdminBanners />} />
+        <Route path="about"              element={<AdminAboutUs />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
