@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Users, Phone, ExternalLink, Share2 } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import PublicLayout from '../../components/common/PublicLayout';
+import api from '../../services/api';
 
 const getYouTubeEmbedUrl = (url) => {
   if (!url) return null;
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   return match ? `https://www.youtube.com/embed/${match[1]}` : null;
 };
-import { useParams } from 'react-router-dom';
-import PublicLayout from '../../components/common/PublicLayout';
-import api from '../../services/api';
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -36,6 +36,8 @@ const EventDetail = () => {
 
   if (loading) return <PublicLayout><div className="loading-center"><div className="spinner" /></div></PublicLayout>;
   if (!event) return <PublicLayout><div className="text-center" style={{ padding: '3rem' }}>Event not found.</div></PublicLayout>;
+
+  const youtubeEmbedUrl = getYouTubeEmbedUrl(event.youtube_url);
 
   return (
     <PublicLayout>
@@ -101,23 +103,20 @@ const EventDetail = () => {
                 </button>
               </div>
 
-              {event.youtube_url && (() => {
-                const embedUrl = getYouTubeEmbedUrl(event.youtube_url);
-                return embedUrl ? (
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <h3 style={{ marginBottom: '0.75rem' }}>Event Video</h3>
-                    <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: 12, overflow: 'hidden' }}>
-                      <iframe
-                        src={embedUrl}
-                        title="Event Video"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                      />
-                    </div>
+              {youtubeEmbedUrl && (
+                <div style={{ marginTop: '1.5rem' }}>
+                  <h3 style={{ marginBottom: '0.75rem' }}>Event Video</h3>
+                  <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, borderRadius: 12, overflow: 'hidden' }}>
+                    <iframe
+                      src={youtubeEmbedUrl}
+                      title="Event Video"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                    />
                   </div>
-                ) : null;
-              })()}
+                </div>
+              )}
 
               {event.description && (
                 <div style={{ marginTop: '1.5rem', lineHeight: 1.8, color: 'var(--text-medium)' }}>
