@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Clock, ChevronRight, CalendarDays, Plus, X, Share2 } from 'lucide-react';
+import { MapPin, Clock, ChevronRight, CalendarDays, Plus, X, Share2, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PublicLayout from '../../components/common/PublicLayout';
@@ -87,7 +87,14 @@ const EventCard = ({ ev }) => {
           </p>
         )}
         <div className="ev-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span className="ev-link">View Details <ChevronRight size={13} /></span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="ev-link">View Details <ChevronRight size={13} /></span>
+            {ev.youtube_url && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: '#fee2e2', color: '#dc2626', borderRadius: 5, padding: '2px 7px', fontSize: '0.68rem', fontWeight: 700 }}>
+                <Youtube size={11} /> Video
+              </span>
+            )}
+          </div>
           <button
             onClick={(e) => shareEventWhatsApp(ev, e)}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: '#25D366', color: 'white', border: 'none', borderRadius: 6, padding: '0.25rem 0.625rem', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}

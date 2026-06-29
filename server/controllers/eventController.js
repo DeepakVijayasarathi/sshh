@@ -3,8 +3,9 @@ const { paginate, paginatedResponse } = require('../utils/pagination');
 const { sendEmail, emailTemplates } = require('../utils/email');
 const { v4: uuidv4 } = require('uuid');
 
-// Ensure member_submitted column exists
+// Ensure member_submitted and youtube_url columns exist
 pool.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS member_submitted BOOLEAN DEFAULT FALSE`).catch(() => {});
+pool.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS youtube_url VARCHAR(500)`).catch(() => {});
 
 exports.getAll = async (req, res) => {
   try {
@@ -51,16 +52,16 @@ exports.getById = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const { title, description, eventDate, eventTime, venue, googleMapLink,
-      registrationLimit, contactPerson, contactNumber, isPublished } = req.body;
+      registrationLimit, contactPerson, contactNumber, isPublished, youtubeUrl } = req.body;
     const bannerUrl = req.file ? `/uploads/events/${req.file.filename}` : null;
     const id = uuidv4();
 
     const result = await query(
       `INSERT INTO events (id, title, description, event_date, event_time, venue, google_map_link,
-        banner_image_url, registration_limit, contact_person, contact_number, is_published, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+        banner_image_url, registration_limit, contact_person, contact_number, is_published, youtube_url, created_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
       [id, title, description, eventDate, eventTime, venue, googleMapLink,
-       bannerUrl, registrationLimit, contactPerson, contactNumber, isPublished === 'true', req.user.id]
+       bannerUrl, registrationLimit, contactPerson, contactNumber, isPublished === 'true', youtubeUrl || null, req.user.id]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -75,12 +76,12 @@ exports.update = async (req, res) => {
     const ev = current.rows[0];
 
     const { title, description, eventDate, eventTime, venue, googleMapLink,
-      registrationLimit, contactPerson, contactNumber, isPublished } = req.body;
+      registrationLimit, contactPerson, contactNumber, isPublished, youtubeUrl } = req.body;
     const bannerUrl = req.file ? `/uploads/events/${req.file.filename}` : undefined;
 
     let sets = `title=$2, description=$3, event_date=$4, event_time=$5, venue=$6,
       google_map_link=$7, registration_limit=$8, contact_person=$9, contact_number=$10,
-      is_published=$11, updated_at=NOW()`;
+      is_published=$11, youtube_url=$12, updated_at=NOW()`;
     let values = [
       req.params.id,
       title          ?? ev.title,
@@ -93,6 +94,7 @@ exports.update = async (req, res) => {
       contactPerson  ?? ev.contact_person,
       contactNumber  ?? ev.contact_number,
       isPublished !== undefined ? isPublished === 'true' : ev.is_published,
+      youtubeUrl !== undefined ? (youtubeUrl || null) : ev.youtube_url,
     ];
 
     if (bannerUrl) { sets += `, banner_image_url=$${values.length + 1}`; values.push(bannerUrl); }

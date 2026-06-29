@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 
-const defaultForm = { title: '', description: '', eventDate: '', eventTime: '', venue: '', googleMapLink: '', registrationLimit: '', contactPerson: '', contactNumber: '', isPublished: false };
+const defaultForm = { title: '', description: '', eventDate: '', eventTime: '', venue: '', googleMapLink: '', youtubeUrl: '', registrationLimit: '', contactPerson: '', contactNumber: '', isPublished: false };
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -39,7 +39,7 @@ const Events = () => {
       title: ev.title, description: ev.description || '', eventDate: ev.event_date?.split('T')[0] || '',
       eventTime: ev.event_time || '', venue: ev.venue || '', googleMapLink: ev.google_map_link || '',
       registrationLimit: ev.registration_limit || '', contactPerson: ev.contact_person || '',
-      contactNumber: ev.contact_number || '', isPublished: ev.is_published,
+      contactNumber: ev.contact_number || '', youtubeUrl: ev.youtube_url || '', isPublished: ev.is_published,
     });
     setEditing(ev.id); setBanner(null); setShowForm(true);
   };
@@ -117,6 +117,10 @@ const Events = () => {
               <div className="form-group">
                 <label className="form-label">Google Map Link</label>
                 <input className="form-control" value={form.googleMapLink} onChange={set('googleMapLink')} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">YouTube Video URL</label>
+                <input className="form-control" value={form.youtubeUrl} onChange={set('youtubeUrl')} placeholder="https://www.youtube.com/watch?v=..." />
               </div>
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                 <label className="form-label">Description</label>
