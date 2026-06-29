@@ -344,6 +344,79 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
+   GLOBAL MOBILE RESPONSIVE FIXES
+═══════════════════════════════════════════════════════════ */
+
+/* Prevent horizontal overflow on all pages */
+html, body { overflow-x: hidden; }
+* { box-sizing: border-box; }
+
+/* Container responsive padding */
+@media (max-width: 768px) {
+  .container { padding: 0 1rem; }
+}
+@media (max-width: 480px) {
+  .container { padding: 0 0.875rem; }
+}
+
+/* Page header - reduce padding on mobile */
+@media (max-width: 768px) {
+  .page-header { padding-top: 2.5rem !important; padding-bottom: 2.5rem !important; }
+  .page-header h1 { font-size: 1.625rem !important; }
+}
+@media (max-width: 480px) {
+  .page-header { padding-top: 1.75rem !important; padding-bottom: 1.75rem !important; }
+  .page-header h1 { font-size: 1.375rem !important; }
+  .page-header p  { font-size: 0.875rem !important; }
+}
+
+/* Section padding - tighter on mobile */
+@media (max-width: 768px) {
+  .section { padding-top: 2.5rem !important; padding-bottom: 2.5rem !important; }
+}
+@media (max-width: 480px) {
+  .section { padding-top: 1.75rem !important; padding-bottom: 1.75rem !important; }
+}
+
+/* Tables - horizontal scroll on mobile */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+@media (max-width: 768px) {
+  table { min-width: 540px; }
+  thead th, tbody td { padding: 0.625rem 0.75rem; font-size: 0.8rem; }
+}
+
+/* Buttons - ensure touch targets ≥ 44px on mobile */
+@media (max-width: 768px) {
+  .btn     { min-height: 44px; }
+  .btn-sm  { min-height: 36px; }
+}
+
+/* Admin cards - remove side padding on very small screens */
+@media (max-width: 480px) {
+  .admin-card { padding: 1rem; }
+}
+
+/* Forms - full width inputs on mobile */
+@media (max-width: 600px) {
+  .grid.grid-2,
+  .grid.grid-3,
+  .grid.grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+  .form-control { font-size: 16px; } /* prevent iOS zoom on focus */
+}
+
+/* Modal - full width on small screens */
+@media (max-width: 560px) {
+  .modal-overlay { padding: 0.75rem; }
+  .modal-box { border-radius: 1rem; }
+  .modal-header, .modal-body, .modal-footer { padding: 1rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════
    ANIMATIONS (referenced by @keyframes in tailwind config)
 ═══════════════════════════════════════════════════════════ */
 @keyframes fadeIn {

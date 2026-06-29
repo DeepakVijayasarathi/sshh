@@ -8,24 +8,51 @@ import {
   Users, Calendar, Building2, GraduationCap, MessageSquare,
   Landmark, BookOpen, Heart, Music, Globe, Target, FileText,
   Newspaper, UserPlus, Activity, MapPin,
-  ArrowRight, ChevronRight, ChevronLeft, Camera, Image as ImageIcon,
-  HandCoins, BookMarked, Stethoscope, University, Images,
+  ArrowRight, ChevronRight, ChevronLeft, Images,
+  HandCoins, BookMarked, Stethoscope,
 } from 'lucide-react';
 import './Home.css';
 
+/* ── Constants ────────────────────────────────────────────── */
 const FEATURES = [
-  { Icon: Users,         title: 'Membership',   desc: 'Join and connect with members across Tamil Nadu.',        link: '/membership',  color: '#8B0000', bg: 'rgba(139,0,0,0.09)'   },
-  { Icon: Calendar,      title: 'Events',        desc: 'Cultural, educational & community events year-round.',    link: '/events',      color: '#2563eb', bg: 'rgba(37,99,235,0.09)'  },
-  { Icon: Building2,     title: 'Businesses',    desc: 'Discover Sourashtra-owned businesses near you.',          link: '/business',    color: '#059669', bg: 'rgba(5,150,105,0.09)'  },
-
-  { Icon: GraduationCap, title: 'Scholarships',  desc: 'Educational support for deserving students.',            link: '/scholarship', color: '#0891b2', bg: 'rgba(8,145,178,0.09)'  },
-  { Icon: MessageSquare, title: 'Forum',         desc: 'Raise issues, share ideas, discuss & collaborate.',      link: '/forum',       color: '#d97706', bg: 'rgba(217,119,6,0.09)'   },
+  { Icon: Users,         title: 'Membership',  desc: 'Join and connect with members across Tamil Nadu.',       link: '/membership',  color: '#8B0000', bg: 'rgba(139,0,0,0.10)'   },
+  { Icon: Calendar,      title: 'Events',       desc: 'Cultural, educational & community events year-round.',   link: '/events',      color: '#2563eb', bg: 'rgba(37,99,235,0.10)'  },
+  { Icon: Building2,     title: 'Businesses',   desc: 'Discover Sourashtra-owned businesses near you.',         link: '/business',    color: '#059669', bg: 'rgba(5,150,105,0.10)'  },
+  { Icon: GraduationCap, title: 'Scholarships', desc: 'Educational support for deserving students.',           link: '/scholarship', color: '#0891b2', bg: 'rgba(8,145,178,0.10)'  },
+  { Icon: MessageSquare, title: 'Forum',        desc: 'Raise issues, share ideas and collaborate.',            link: '/forum',       color: '#d97706', bg: 'rgba(217,119,6,0.10)'   },
 ];
 
+const FILLERS = [
+  { Icon: Landmark,  color: '#8B0000', bg: 'rgba(139,0,0,0.08)',   title: 'Cultural Heritage', text: 'Preserving Sourashtra customs, traditions and language passed down through generations.' },
+  { Icon: BookOpen,  color: '#2563eb', bg: 'rgba(37,99,235,0.08)', title: 'Literary Archive',  text: 'Documenting classical Sourashtra literature, folk songs and historical manuscripts.'     },
+  { Icon: Heart,     color: '#e11d48', bg: 'rgba(225,29,72,0.08)', title: 'Community Welfare', text: 'Running welfare schemes, health camps and support programs for members in need.'         },
+  { Icon: Music,     color: '#7c3aed', bg: 'rgba(124,58,237,0.08)',title: 'Arts & Music',      text: 'Promoting traditional music, dance and classical arts through workshops and festivals.'  },
+];
+
+const ABOUT_CARDS = [
+  { Icon: Landmark,  color: '#8B0000', bg: 'rgba(139,0,0,0.08)',   title: 'Our Heritage',   desc: 'A community rooted in Sourashtra traditions, culture and language for centuries.'    },
+  { Icon: Globe,     color: '#0891b2', bg: 'rgba(8,145,178,0.08)', title: 'Tamil Nadu Wide', desc: 'Members spread across all major districts of Tamil Nadu.'                            },
+  { Icon: FileText,  color: '#059669', bg: 'rgba(5,150,105,0.08)', title: 'Est. 1947',       desc: 'Formally registered post-independence to preserve Sourashtra identity.'              },
+  { Icon: Target,    color: '#7c3aed', bg: 'rgba(124,58,237,0.08)',title: 'Our Mission',     desc: 'Connect, empower and preserve the Sourashtra community for future generations.'      },
+];
+
+const INITIATIVES = [
+  { Icon: GraduationCap, color: '#0891b2', bg: 'rgba(8,145,178,0.15)',  cat: 'Education',       title: 'Scholarship Programme',  desc: 'Financial support for meritorious Sourashtra students pursuing higher education.', link: '/scholarship' },
+  { Icon: Activity,      color: '#e11d48', bg: 'rgba(225,29,72,0.15)',  cat: 'Health & Welfare', title: 'Community Health Camps', desc: 'Annual health screening, medical camps and wellness programs for all members.',     link: '/about'       },
+];
+
+const SPONSORS = [
+  { Icon: Building2,     name: 'Sourashtra Bank'        },
+  { Icon: BookMarked,    name: 'SHC College'            },
+  { Icon: Newspaper,     name: 'Sourashtra Press'       },
+  { Icon: GraduationCap, name: 'SHC Scholarship Trust'  },
+  { Icon: HandCoins,     name: 'Community Welfare Fund' },
+];
+
+/* ── Banner Slider ────────────────────────────────────────── */
 const BannerSlider = ({ banners, siteName, siteTag, settings }) => {
   const [current, setCurrent] = useState(0);
   const timerRef = useRef(null);
-
   const hasBanners = banners && banners.length > 0;
   const count = hasBanners ? banners.length : 0;
 
@@ -43,25 +70,22 @@ const BannerSlider = ({ banners, siteName, siteTag, settings }) => {
   const handlePrev = () => { prev(); resetTimer(); };
   const handleNext = () => { next(); resetTimer(); };
 
-  /* ── Fallback: no banners configured ── */
   if (!hasBanners) {
     return (
-      <div className="b-banner-slider" style={{ background: 'linear-gradient(130deg, var(--primary,#8B0000) 0%, #1a0a1e 100%)' }}>
-        <div className="b-banner-bg-pattern" />
-        <div className="b-banner-content">
+      <div className="h-banner" style={{ background: 'linear-gradient(130deg, var(--primary,#8B0000) 0%, #1a0a1e 100%)' }}>
+        <div className="h-banner-pattern" />
+        <div className="h-banner-content">
           {settings?.logo_url && (
-            <img src={settings.logo_url} alt={siteName} style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'contain', marginBottom: '0.875rem', border: '2px solid rgba(255,255,255,0.25)' }} />
+            <img src={settings.logo_url} alt={siteName} className="h-banner-logo" />
           )}
-          <div className="b-banner-sub" style={{ color: 'var(--secondary,#D4AF37)' }}>
-            {siteTag}
-          </div>
-          <h2 className="b-banner-title" style={{ color: '#fff' }}>{siteName}</h2>
-          <p className="b-banner-desc">A digital platform for the Sourashtra community to connect, celebrate and collaborate.</p>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <Link to="/membership" className="b-banner-btn" style={{ background: 'var(--secondary,#D4AF37)', color: '#1a1a1a' }}>
+          <div className="h-banner-eyebrow">{siteTag}</div>
+          <h1 className="h-banner-title">{siteName}</h1>
+          <p className="h-banner-desc">A digital platform for the Sourashtra community to connect, celebrate and collaborate.</p>
+          <div className="h-banner-actions">
+            <Link to="/membership" className="h-banner-btn h-banner-btn--gold">
               Become a Member <ChevronRight size={14} />
             </Link>
-            <Link to="/about" className="b-banner-btn" style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', border: '1.5px solid rgba(255,255,255,0.3)' }}>
+            <Link to="/about" className="h-banner-btn h-banner-btn--ghost">
               Learn More <ArrowRight size={14} />
             </Link>
           </div>
@@ -71,33 +95,33 @@ const BannerSlider = ({ banners, siteName, siteTag, settings }) => {
   }
 
   const b = banners[current];
-  const hasBg = !!b.image_url;
-
   return (
-    <div className="b-banner-slider" style={{ background: hasBg ? 'transparent' : (b.bg_color || '#1a1a2e'), color: b.text_color || '#fff' }}>
-      {hasBg && (
-        <div className="b-banner-bg">
+    <div className="h-banner" style={{ background: b.image_url ? 'transparent' : (b.bg_color || '#1a1a2e') }}>
+      {b.image_url && (
+        <div className="h-banner-bg">
           <img src={b.image_url} alt={b.title} />
-          <div className="b-banner-overlay" />
+          <div className="h-banner-overlay" />
         </div>
       )}
-      <div className="b-banner-content" style={{ color: b.text_color || '#fff' }}>
-        {b.subtitle && <div className="b-banner-sub">{b.subtitle}</div>}
-        <h2 className="b-banner-title">{b.title}</h2>
-        {b.description && <p className="b-banner-desc">{b.description}</p>}
+      <div className="h-banner-content" style={{ color: b.text_color || '#fff' }}>
+        {b.subtitle && <div className="h-banner-eyebrow">{b.subtitle}</div>}
+        <h1 className="h-banner-title">{b.title}</h1>
+        {b.description && <p className="h-banner-desc">{b.description}</p>}
         {b.button_text && b.button_link && (
-          <Link to={b.button_link} className="b-banner-btn" style={{ background: 'var(--secondary,#D4AF37)', color: '#1a1a1a' }}>
-            {b.button_text} <ChevronRight size={14} />
-          </Link>
+          <div className="h-banner-actions">
+            <Link to={b.button_link} className="h-banner-btn h-banner-btn--gold">
+              {b.button_text} <ChevronRight size={14} />
+            </Link>
+          </div>
         )}
       </div>
       {count > 1 && (
         <>
-          <button className="b-banner-arrow b-banner-arrow--prev" onClick={handlePrev} aria-label="Previous"><ChevronLeft size={18} /></button>
-          <button className="b-banner-arrow b-banner-arrow--next" onClick={handleNext} aria-label="Next"><ChevronRight size={18} /></button>
-          <div className="b-banner-dots">
+          <button className="h-banner-arrow h-banner-arrow--prev" onClick={handlePrev} aria-label="Previous"><ChevronLeft size={18} /></button>
+          <button className="h-banner-arrow h-banner-arrow--next" onClick={handleNext} aria-label="Next"><ChevronRight size={18} /></button>
+          <div className="h-banner-dots">
             {banners.map((_, i) => (
-              <button key={i} className={`b-banner-dot${i === current ? ' active' : ''}`} onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`} />
+              <button key={i} className={`h-banner-dot${i === current ? ' active' : ''}`} onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`} />
             ))}
           </div>
         </>
@@ -106,37 +130,7 @@ const BannerSlider = ({ banners, siteName, siteTag, settings }) => {
   );
 };
 
-const FILLERS = [
-  { Icon: Landmark,   color: '#8B0000', bg: 'rgba(139,0,0,0.08)',   title: 'Cultural Heritage', text: 'Preserving Sourashtra customs, traditions and language passed down through generations.' },
-  { Icon: BookOpen,   color: '#2563eb', bg: 'rgba(37,99,235,0.08)',  title: 'Literary Archive',  text: 'Documenting classical Sourashtra literature, folk songs and historical manuscripts.'     },
-  { Icon: Heart,      color: '#e11d48', bg: 'rgba(225,29,72,0.08)',  title: 'Community Welfare', text: 'Running welfare schemes, health camps and support programs for members in need.'         },
-  { Icon: Music,      color: '#7c3aed', bg: 'rgba(124,58,237,0.08)', title: 'Arts & Music',      text: 'Promoting traditional music, dance and classical arts through workshops and festivals.'  },
-];
-
-const ABOUT_CARDS = [
-  { Icon: Landmark,    color: '#8B0000', bg: 'rgba(139,0,0,0.08)',   title: 'Our Heritage',   desc: 'A community rooted in Sourashtra traditions, culture and language for centuries.'    },
-  { Icon: Globe,       color: '#0891b2', bg: 'rgba(8,145,178,0.08)', title: 'Tamil Nadu Wide', desc: 'Members spread across all major districts of Tamil Nadu.'                            },
-  { Icon: FileText,    color: '#059669', bg: 'rgba(5,150,105,0.08)', title: 'Est. 1947',       desc: 'Formally registered post-independence to preserve Sourashtra identity.'              },
-  { Icon: Target,      color: '#7c3aed', bg: 'rgba(124,58,237,0.08)',title: 'Our Mission',     desc: 'Connect, empower and preserve the Sourashtra community for future generations.'      },
-];
-
-const INITIATIVES = [
-  { Icon: GraduationCap, color: '#0891b2', bg: 'rgba(8,145,178,0.15)',   cat: 'Education',      title: 'Scholarship Programme',  desc: 'Financial support for meritorious Sourashtra students pursuing higher education.', link: '/scholarship' },
-
-  { Icon: Activity,      color: '#e11d48', bg: 'rgba(225,29,72,0.15)',   cat: 'Health & Welfare',title: 'Community Health Camps', desc: 'Annual health screening, medical camps and wellness programs for all members.',     link: '/about'       },
-];
-
-
-const TAG_COLORS = ['#c2410c', '#1d4ed8', '#15803d', '#7c3aed', '#b45309'];
-
-const SPONSORS = [
-  { Icon: Building2,     name: 'Sourashtra Bank'        },
-  { Icon: BookMarked,    name: 'SHC College'            },
-  { Icon: Newspaper,     name: 'Sourashtra Press'       },
-  { Icon: GraduationCap, name: 'SHC Scholarship Trust'  },
-  { Icon: HandCoins,     name: 'Community Welfare Fund' },
-];
-
+/* ── Home Page ────────────────────────────────────────────── */
 export default function Home() {
   const settings = useSiteSettings();
   const siteName = settings.site_name    || 'Saurashtra Heritage Chair';
@@ -147,18 +141,18 @@ export default function Home() {
     description: `Welcome to ${siteName} — connecting members through events, news, business directory, jobs and more.`,
   });
 
-  const [events,    setEvents]    = useState([]);
-  const [news,      setNews]      = useState([]);
-  const [heritage,  setHeritage]  = useState([]);
-  const [liveStats, setLiveStats] = useState(null);
-  const [team,      setTeam]      = useState([]);
-  const [patrons,   setPatrons]   = useState([]);
-  const [banners,   setBanners]   = useState([]);
-  const [gallery,   setGallery]   = useState([]);
+  const [events,   setEvents]   = useState([]);
+  const [news,     setNews]     = useState([]);
+  const [heritage, setHeritage] = useState([]);
+  const [liveStats,setLiveStats]= useState(null);
+  const [team,     setTeam]     = useState([]);
+  const [patrons,  setPatrons]  = useState([]);
+  const [banners,  setBanners]  = useState([]);
+  const [gallery,  setGallery]  = useState([]);
 
   useEffect(() => {
     api.get('/events?upcoming=true&limit=4').then(r => setEvents(r.data.data || [])).catch(() => {});
-    api.get('/news?limit=6&featured=true').then(r  => setNews(r.data.data || [])).catch(() => {});
+    api.get('/news?limit=4&featured=true').then(r  => setNews(r.data.data || [])).catch(() => {});
     api.get('/news?limit=4&category=Cultural+Heritage').then(r => setHeritage(r.data.data || [])).catch(() => {});
     api.get('/dashboard/public-stats').then(r       => setLiveStats(r.data)).catch(() => {});
     api.get('/banners?active=true').then(r          => setBanners(r.data || [])).catch(() => {});
@@ -184,152 +178,162 @@ export default function Home() {
 
   return (
     <PublicLayout>
-      <div className="bento-page">
 
-        {/* ══════════════ BENTO GRID ══════════════ */}
-        <div className="bento-grid">
-
-          {/* Banner Slider — left side */}
-          <BannerSlider banners={banners} siteName={siteName} siteTag={siteTag} settings={settings} />
-
-          {/* Stats — right column, numbers only */}
-          <div className="b-card b-stats">
-            {STATS.map(s => (
-              <div key={s.label} className="b-stat-item">
-                <div className="b-stat-num">{s.num}</div>
-                <div className="b-stat-label">{s.label}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* 4 Feature tiles — row below banner */}
-          <div className="b-features">
-            {FEATURES.slice(0, 4).map(f => (
-              <Link key={f.title} to={f.link} className="b-feat">
-                <div className="b-feat-icon" style={{ background: f.bg, color: f.color }}>
-                  <f.Icon size={17} strokeWidth={1.75} />
+      {/* ══════════════ HERO ══════════════ */}
+      <div className="h-hero">
+        <BannerSlider banners={banners} siteName={siteName} siteTag={siteTag} settings={settings} />
+        <div className="h-stats-bar">
+          <div className="h-container">
+            <div className="h-stats-row">
+              {STATS.map(s => (
+                <div key={s.label} className="h-stat-item">
+                  <span className="h-stat-num">{s.num}</span>
+                  <span className="h-stat-lbl">{s.label}</span>
                 </div>
-                <div className="b-feat-title">{f.title}</div>
-                <p className="b-feat-desc">{f.desc}</p>
-                <span className="b-feat-link">Explore <ChevronRight size={11} /></span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════ QUICK LINKS ══════════════ */}
+      <div className="h-ql-section">
+        <div className="h-container">
+          <div className="h-ql-grid">
+            {FEATURES.map(f => (
+              <Link key={f.title} to={f.link} className="h-ql-card">
+                <div className="h-ql-icon" style={{ background: f.bg, color: f.color }}>
+                  <f.Icon size={22} strokeWidth={1.75} />
+                </div>
+                <div className="h-ql-body">
+                  <span className="h-ql-title">{f.title}</span>
+                  <p className="h-ql-desc">{f.desc}</p>
+                </div>
+                <ChevronRight size={15} className="h-ql-arrow" />
               </Link>
             ))}
           </div>
+        </div>
+      </div>
 
-          {/* Latest News */}
-          <div className="b-card b-news">
-            <div className="b-section-title">
-              Latest News
-              <Link to="/news">View all →</Link>
+      {/* ══════════════ NEWS + EVENTS ══════════════ */}
+      <div className="h-ne-section">
+        <div className="h-container">
+          <div className="h-ne-grid">
+
+            {/* News */}
+            <div className="h-panel">
+              <div className="h-panel-hdr">
+                <h2 className="h-panel-title">
+                  <Newspaper size={17} /> Latest News
+                </h2>
+                <Link to="/news" className="h-more-link">View all <ChevronRight size={13} /></Link>
+              </div>
+              {news.length === 0
+                ? <p className="h-empty-msg">No news yet.</p>
+                : <div className="h-news-list">
+                    {news.slice(0, 4).map(n => (
+                      <Link key={n.id} to={`/news/${n.id}`} className="h-news-row">
+                        <div className="h-news-img">
+                          {n.image_url
+                            ? <img src={n.image_url} alt={n.title} />
+                            : <Newspaper size={18} color="#cbd5e1" />
+                          }
+                        </div>
+                        <div className="h-news-body">
+                          <span className="h-news-cat">{n.category || 'News'}</span>
+                          <p className="h-news-ttl">{n.title.length > 65 ? n.title.slice(0, 65) + '…' : n.title}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+              }
             </div>
-            {news.length === 0
-              ? <p style={{ fontSize: '0.78rem', color: '#9ca3af', padding: '0.75rem 0' }}>No news yet.</p>
-              : <div className="b-news-list">
-                  {news.slice(0, 6).map(n => (
-                    <Link key={n.id} to={`/news/${n.id}`} className="b-news-item">
-                      <div className="b-news-thumb">
-                        {n.image_url
-                          ? <img src={n.image_url} alt={n.title} />
-                          : <Newspaper size={16} color="#cbd5e1" />
-                        }
-                      </div>
-                      <div>
-                        <div className="b-news-cat">{n.category || 'News'}</div>
-                        <p className="b-news-headline">
-                          {n.title.length > 50 ? n.title.slice(0, 50) + '…' : n.title}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-            }
-          </div>
 
-          {/* Upcoming Events */}
-          <div className="b-card b-events">
-            <div className="b-section-title">
-              Upcoming Events
-              <Link to="/events">View all →</Link>
+            {/* Events */}
+            <div className="h-panel">
+              <div className="h-panel-hdr">
+                <h2 className="h-panel-title">
+                  <Calendar size={17} /> Upcoming Events
+                </h2>
+                <Link to="/events" className="h-more-link">View all <ChevronRight size={13} /></Link>
+              </div>
+              {events.length === 0
+                ? <p className="h-empty-msg">No upcoming events.</p>
+                : events.map(ev => {
+                    const d = new Date(ev.event_date);
+                    return (
+                      <Link key={ev.id} to={`/events/${ev.id}`} className="h-ev-row">
+                        <div className="h-ev-badge">
+                          <span className="h-ev-day">{d.getDate()}</span>
+                          <span className="h-ev-mon">{d.toLocaleString('en-IN', { month: 'short' }).toUpperCase()}</span>
+                        </div>
+                        <div className="h-ev-body">
+                          <p className="h-ev-name">{ev.title}</p>
+                          {ev.venue && <p className="h-ev-venue"><MapPin size={10} />{ev.venue}</p>}
+                        </div>
+                      </Link>
+                    );
+                  })
+              }
             </div>
-            {events.length === 0
-              ? <p style={{ fontSize: '0.78rem', color: '#9ca3af', padding: '0.75rem 0' }}>No upcoming events.</p>
-              : events.map(ev => {
-                const d = new Date(ev.event_date);
-                return (
-                  <Link key={ev.id} to={`/events/${ev.id}`} className="b-event-item">
-                    <div className="b-event-date">
-                      <span className="day">{d.getDate()}</span>
-                      <span>{d.toLocaleString('en-IN', { month: 'short' }).toUpperCase()}</span>
-                    </div>
-                    <div>
-                      <p className="b-event-name">{ev.title}</p>
-                      <p className="b-event-venue">
-                        {ev.venue && <><MapPin size={10} style={{ marginRight: 3 }} />{ev.venue}</>}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })
-            }
           </div>
+        </div>
+      </div>
 
-          {/* Filler cards */}
-          <div className="b-fillers">
+      {/* ══════════════ PILLARS / VALUES ══════════════ */}
+      <div className="h-pillars-section">
+        <div className="h-container">
+          <div className="h-pillars-grid">
             {FILLERS.map(f => (
-              <div key={f.title} className="b-filler">
-                <div className="b-filler-icon" style={{ background: f.bg, color: f.color }}>
-                  <f.Icon size={18} strokeWidth={1.75} />
+              <div key={f.title} className="h-pillar">
+                <div className="h-pillar-icon" style={{ background: f.bg, color: f.color }}>
+                  <f.Icon size={24} strokeWidth={1.5} />
                 </div>
-                <div className="b-filler-title">{f.title}</div>
-                <p className="b-filler-text">{f.text}</p>
+                <h3 className="h-pillar-title">{f.title}</h3>
+                <p className="h-pillar-text">{f.text}</p>
               </div>
             ))}
           </div>
-
-          {/* Join — full-width horizontal CTA */}
-          <div className="b-join">
-            <div className="b-join-left">
-              <div className="b-join-avatar">
-                <UserPlus size={24} strokeWidth={1.5} color="rgba(255,255,255,0.9)" />
-              </div>
-              <div className="b-join-title">
-                <h3>Join Our Community</h3>
-                <p>Connect, celebrate &amp; collaborate with Sourashtra families</p>
-              </div>
-            </div>
-
-            {liveStats && (
-              <div className="b-join-stats">
-                <div className="b-join-stat-item">
-                  <div className="b-join-stat-num">{liveStats.totalMembers}+</div>
-                  <div className="b-join-stat-label">Members</div>
-                </div>
-                <div className="b-join-stat-item">
-                  <div className="b-join-stat-num">{liveStats.totalEvents}+</div>
-                  <div className="b-join-stat-label">Events</div>
-                </div>
-                <div className="b-join-stat-item">
-                  <div className="b-join-stat-num">{liveStats.totalDistricts}</div>
-                  <div className="b-join-stat-label">Districts</div>
-                </div>
-              </div>
-            )}
-
-            <div className="b-join-actions">
-              <Link to="/register" className="b-join-btn-primary">Register Now</Link>
-              <Link to="/login" className="b-join-btn-secondary">Sign In</Link>
-            </div>
-          </div>
-
         </div>
-        {/* ══════════════ END BENTO GRID ══════════════ */}
-
       </div>
 
-      {/* ══════════════ BELOW-FOLD CONTENT ══════════════ */}
+      {/* ══════════════ JOIN CTA ══════════════ */}
+      <div className="h-join-wrap">
+        <div className="h-container">
+          <div className="h-join-card">
+            <div className="h-join-left">
+              <span className="h-join-eyebrow">Join Us Today</span>
+              <h2 className="h-join-heading">Become Part of Our Community</h2>
+              <p className="h-join-sub">Connect, celebrate &amp; collaborate with Sourashtra families across Tamil Nadu</p>
+              <div className="h-join-actions">
+                <Link to="/register" className="h-btn-gold">Register Now</Link>
+                <Link to="/login" className="h-btn-ghost">Sign In</Link>
+              </div>
+            </div>
+            {liveStats && (
+              <div className="h-join-stats">
+                {[
+                  { n: liveStats.totalMembers    + '+', l: 'Members'    },
+                  { n: liveStats.totalEvents     + '+', l: 'Events'     },
+                  { n: liveStats.totalBusinesses + '+', l: 'Businesses' },
+                  { n: liveStats.totalDistricts,        l: 'Districts'  },
+                ].map(s => (
+                  <div key={s.l} className="h-join-stat">
+                    <span className="h-join-snum">{s.n}</span>
+                    <span className="h-join-slbl">{s.l}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════ BELOW-FOLD ══════════════ */}
       <div className="home-sections">
 
-        {/* ── About ─── */}
+        {/* About */}
         <div className="about-strip">
           <div className="about-strip-text">
             <h2>About the Sourashtra Community</h2>
@@ -343,9 +347,7 @@ export default function Home() {
               Our portal brings together members, businesses, events and cultural resources in one
               unified digital home — making it easier than ever to stay connected and engaged.
             </p>
-            <Link to="/about" className="learn-link">
-              Discover Our History <ArrowRight size={14} />
-            </Link>
+            <Link to="/about" className="learn-link">Discover Our History <ArrowRight size={14} /></Link>
           </div>
           <div className="about-strip-cards">
             {ABOUT_CARDS.map(c => (
@@ -360,16 +362,14 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ── Patrons & Inspiration ─── */}
+        {/* Patrons */}
         {patrons.length > 0 && (
           <div className="patrons-section">
             <div className="patrons-section-inner">
               <div className="patrons-header">
                 <div className="patrons-header-badge">Honoured Leaders</div>
                 <h2 className="patrons-heading">Our Patrons &amp; Inspiration</h2>
-                <p className="patrons-subheading">
-                  Distinguished personalities whose vision and service inspire the Sourashtra community
-                </p>
+                <p className="patrons-subheading">Distinguished personalities whose vision and service inspire the Sourashtra community</p>
               </div>
               <div className="patrons-grid">
                 {patrons.map((p, i) => (
@@ -387,9 +387,7 @@ export default function Home() {
                       {p.designation && <p className="patron-designation">{p.designation}</p>}
                       {p.quote && (
                         <blockquote className="patron-quote">
-                          <span className="patron-quote-mark">"</span>
-                          {p.quote}
-                          <span className="patron-quote-mark">"</span>
+                          <span className="patron-quote-mark">"</span>{p.quote}<span className="patron-quote-mark">"</span>
                         </blockquote>
                       )}
                     </div>
@@ -401,20 +399,15 @@ export default function Home() {
           </div>
         )}
 
-        {/* ── Team / Coordinators ─── */}
+        {/* Team */}
         {team.length > 0 && (() => {
           const divisions = [...new Set(team.map(m => m.division).filter(Boolean))];
           return (
             <div className="team-section">
-              <div className="section-header">
-                <h2>Our Team &amp; Coordinators</h2>
-              </div>
+              <div className="section-header"><h2>Our Team &amp; Coordinators</h2></div>
               {divisions.map(div => (
                 <div key={div} className="team-division">
-                  <div className="team-div-label">
-                    <MapPin size={13} style={{ marginRight: 5 }} />
-                    {div}
-                  </div>
+                  <div className="team-div-label"><MapPin size={13} style={{ marginRight: 5 }} />{div}</div>
                   <div className="team-grid">
                     {team.filter(m => m.division === div).map(m => (
                       <div key={m.id} className="team-card">
@@ -438,7 +431,7 @@ export default function Home() {
           );
         })()}
 
-        {/* ── Initiatives ─── */}
+        {/* Initiatives */}
         <div className="initiatives-section">
           <div className="section-header">
             <h2>Community Initiatives</h2>
@@ -460,7 +453,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ── Gallery Preview ─── */}
+        {/* Gallery */}
         {gallery.length > 0 && (
           <div className="gallery-section">
             <div className="section-header">
@@ -475,19 +468,15 @@ export default function Home() {
                   className={`gallery-cell${i === 0 ? ' big' : ''}`}
                   style={album.cover_image_url ? { backgroundImage: `url(${album.cover_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
                 >
-                  {!album.cover_image_url && (
-                    <Images size={i === 0 ? 52 : 36} color="#D4AF37" strokeWidth={1.25} />
-                  )}
-                  <div className="gallery-overlay">
-                    <span>{album.title}</span>
-                  </div>
+                  {!album.cover_image_url && <Images size={i === 0 ? 52 : 36} color="#D4AF37" strokeWidth={1.25} />}
+                  <div className="gallery-overlay"><span>{album.title}</span></div>
                 </Link>
               ))}
             </div>
           </div>
         )}
 
-        {/* ── Cultural Heritage Posts ─── */}
+        {/* Cultural Heritage */}
         <div className="initiatives-section">
           <div className="section-header">
             <h2>Cultural Heritage</h2>
@@ -519,7 +508,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* ── Partners ─── */}
+        {/* Partners */}
         <div className="sponsors-section">
           <h3>Our Affiliates &amp; Partners</h3>
           <div className="sponsors-row">
