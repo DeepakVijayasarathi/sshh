@@ -24,7 +24,7 @@ const Login = () => {
       if (['SuperAdmin', 'Admin'].includes(user.role)) {
         navigate('/admin');
       } else {
-        window.location.href = 'https://sshtn.com/';
+        navigate('/profile');
       }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Invalid email or password');
