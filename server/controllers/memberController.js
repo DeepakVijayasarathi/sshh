@@ -185,11 +185,16 @@ exports.approve = async (req, res) => {
     await client.query("SELECT pg_advisory_xact_lock(hashtext('membership_number_seq'))");
 
     const year = new Date().getFullYear();
-    const countResult = await client.query(
-      "SELECT COUNT(*) FROM members WHERE membership_number LIKE $1",
-      [`SCP${year}%`]
+    // Use MAX of existing numeric suffixes rather than COUNT(*): COUNT breaks
+    // as soon as the sequence has a gap (e.g. imported/migrated members with
+    // non-consecutive numbers), producing a suffix that already exists.
+    const maxResult = await client.query(
+      `SELECT MAX(CAST(SUBSTRING(membership_number FROM '^SCP${year}(\\d+)$') AS INTEGER)) AS max_seq
+       FROM members WHERE membership_number ~ $1`,
+      [`^SCP${year}\\d+$`]
     );
-    const membershipNumber = `SCP${year}${String(parseInt(countResult.rows[0].count) + 1).padStart(4, '0')}`;
+    const nextSeq = (maxResult.rows[0].max_seq || 0) + 1;
+    const membershipNumber = `SCP${year}${String(nextSeq).padStart(4, '0')}`;
 
     const result = await client.query(
       `UPDATE members SET status='Active', membership_number=$2, approved_by=$3, approved_at=NOW(), updated_at=NOW()
